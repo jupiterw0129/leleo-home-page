@@ -96,8 +96,8 @@ const config = {
 	wallpaper: {
 		pic: [
 			{ "title": "时代", "preview": "/img/wallpaper/static/时代/image-pre.webp", "url": "/img/wallpaper/static/时代/image.png" },
-			{ "title": "书房夜晚", "preview": "/img/wallpaper/static/书房夜晚/image-pre.webp", "url": "/img/wallpaper/static/书房夜晚/image.png" },
-			{ "title": "安逸舒适", "preview": "/img/wallpaper/static/安逸舒适/image-pre.webp", "url": "/img/wallpaper/static/安逸舒适/image.png" },
+			{ "title": "光", "preview": "/img/wallpaper/static/光/image-pre.webp", "url": "/img/wallpaper/static/光/image.png" },
+			{ "title": "赛维亚菊", "preview": "/img/wallpaper/static/赛维亚菊/image-pre.webp", "url": "/img/wallpaper/static/赛维亚菊/image.png" },
 			{ "title": "jswcMaMj", "preview": "https://s21.ax1x.com/2025/07/23/pVGli59.md.jpg", "url": "https://s21.ax1x.com/2025/07/23/pVGli59.jpg" },
 			{ "title": "pgtTqoqq", "preview": "https://s21.ax1x.com/2025/07/23/pVGlmDO.md.jpg", "url": "https://s21.ax1x.com/2025/07/23/pVGlmDO.jpg" },
 			{ "title": "cvKMKhue", "preview": "https://s21.ax1x.com/2025/07/23/pVGlNqS.md.jpg", "url": "https://s21.ax1x.com/2025/07/23/pVGlNqS.jpg" },
