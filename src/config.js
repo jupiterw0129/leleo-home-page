@@ -97,7 +97,7 @@ const config = {
 		pic: [
 			{ "title": "时代", "preview": "/img/wallpaper/static/时代/image-pre.webp", "url": "/img/wallpaper/static/时代/image.png" },
 			{ "title": "光", "preview": "/img/wallpaper/static/光/image-pre.webp", "url": "/img/wallpaper/static/光/image.png" },
-			{ "title": "赛维亚菊", "preview": "/img/wallpaper/static/赛维亚菊/image-pre.webp", "url": "/img/wallpaper/static/赛维亚菊/image.png" },
+			{ "title": "塞维亚菊", "preview": "/img/wallpaper/static/塞维亚菊/image-pre.webp", "url": "/img/wallpaper/static/塞维亚菊/image.png" },
 			{ "title": "jswcMaMj", "preview": "https://s21.ax1x.com/2025/07/23/pVGli59.md.jpg", "url": "https://s21.ax1x.com/2025/07/23/pVGli59.jpg" },
 			{ "title": "pgtTqoqq", "preview": "https://s21.ax1x.com/2025/07/23/pVGlmDO.md.jpg", "url": "https://s21.ax1x.com/2025/07/23/pVGlmDO.jpg" },
 			{ "title": "cvKMKhue", "preview": "https://s21.ax1x.com/2025/07/23/pVGlNqS.md.jpg", "url": "https://s21.ax1x.com/2025/07/23/pVGlNqS.jpg" },
@@ -154,10 +154,10 @@ const config = {
 
 	//项目卡片 其中 字段"show"控制初始卡片的text是否展开
 	projectcards: [
-		{ go: "🚀 前往", img: "/img/sunshine.jpg", title: "Project 1", subtitle: "1,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://leleo.top", show: false },
-		{ go: "🗂️ 前往", img: "/img/sunshine.jpg", title: "Project 2", subtitle: "2,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://leleo.top", show: false },
-		{ go: "📝 前往", img: "/img/sunshine.jpg", title: "Project 3", subtitle: "3,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://leleo.top", show: false },
-		{ go: "👍 前往", img: "/img/sunshine.jpg", title: "Project 4", subtitle: "4,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://leleo.top", show: false },
+		{ go: "🚀 前往", img: "/img/sunshine.jpg", title: "抖音", subtitle: "1,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://www.douyin.com/jingxuan", show: false },
+		{ go: "🗂️ 前往", img: "/img/sunshine.jpg", title: "哔哩哔哩", subtitle: "2,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://www.bilibili.com/", show: false },
+		{ go: "📝 前往", img: "/img/sunshine.jpg", title: "微博", subtitle: "3,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://weibo.com/", show: false },
+		{ go: "👍 前往", img: "/img/sunshine.jpg", title: "京东", subtitle: "4,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://www.jd.com/", show: false },
 		{ go: "🗃 前往", img: "/img/sunshine.jpg", title: "Project 5", subtitle: "5,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://leleo.top", show: false },
 		{ go: "🎨 前往", img: "/img/sunshine.jpg", title: "Project 6", subtitle: "6,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://leleo.top", show: false },
 		{ go: "💍 前往", img: "/img/sunshine.jpg", title: "Project 7", subtitle: "7,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://leleo.top", show: false },
