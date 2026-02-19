@@ -53,8 +53,8 @@ const config = {
 
 	//社交按钮
 	socialPlatformIcons: [
-		{ icon: "mdi-github", link: "https://www.github.com/leleo886" },
-		{ icon: "mdi-email", link: "mailto:leleo886@foxmail.com" },
+		{ icon: "mdi-github", link: "https://www.github.com/jupiterw0129" },
+		{ icon: "mdi-email", link: "https://wx.mail.qq.com/" },
 		{ icon: "mdi-qqchat", link: "https://im.qq.com/" },
 		{ icon: "mdi-wechat", link: "https://wx.qq.com/" },
 		{ icon: "mdi-youtube", link: "https://www.youtube.com" },
@@ -63,10 +63,26 @@ const config = {
 
 	//打字机
 	typeWriterStrings: [
-		"如果你看到了这行字，说明我已经成功吸引到了你的注意力。",
-		"顶峰的少年，给了你所有细节，你却说我不是迪迦，给不了你想要的光。",
-		"心简单，世界就简单，幸福才会生长；心自由，生活就自由，到哪都有快乐。",
-		"生命太短，没有时间留给遗憾，若不是终点，请微笑一直向前。"
+		"这位先生，能占用一下您的时间吗？",
+		"我想给您讲一讲我们的道标和救主，‘愚者’先生。",
+		"我主自称‘愚者’，",
+		"在过去，在现在，也在未来，",
+		"他是支配灵界的伟大主宰，",
+		"也是执掌好运的黄黑之王，",
+		"更是每个生灵追求永恒的道标。",
+		"我主居于现实和灵界之上，仁慈洒满了天国和大地，",
+		"祂的座旁共有六位天使侍立，",
+		"‘水银天使’是命运的化身，是我主最宠爱的天使；",
+		"‘死亡天使’是跟随我主最久的存在，是冥界的执政官；",
+		"‘救赎天使’是我主的号角，是祂神谕的传达者；",
+		"‘生命天使’是智慧的结晶，是每个人体内永不磨灭的灵性。",
+		"主的神座旁边还有‘惩戒天使’，",
+		"祂是主的雷霆，主的怒火，主的手掌，",
+		"是所有堕落者和不洁者的审判官及处刑人。",
+		"和‘惩戒天使’相对的是‘时之天使’，",
+		"他是古老年代里的‘王’，",
+		"最终臣服于我主，",
+		"为祂敲击天国之钟。"
 	],
 
 	//音乐播放配置，采用MetingJS Api(https://github.com/metowolf/MetingJS)
@@ -79,7 +95,7 @@ const config = {
 	//壁纸数据 -----可以将壁纸文件上传到图床获取网络直链。若想调用api，请前往脚本自行修改逻辑
 	wallpaper: {
 		pic: [
-			{ "title": "海洋女孩", "preview": "/img/wallpaper/static/海洋女孩/image-pre.webp", "url": "/img/wallpaper/static/海洋女孩/image.png" },
+			{ "title": "时代", "preview": "/img/wallpaper/static/时代/image-pre.webp", "url": "/img/wallpaper/static/时代/image.png" },
 			{ "title": "书房夜晚", "preview": "/img/wallpaper/static/书房夜晚/image-pre.webp", "url": "/img/wallpaper/static/书房夜晚/image.png" },
 			{ "title": "安逸舒适", "preview": "/img/wallpaper/static/安逸舒适/image-pre.webp", "url": "/img/wallpaper/static/安逸舒适/image.png" },
 			{ "title": "jswcMaMj", "preview": "https://s21.ax1x.com/2025/07/23/pVGli59.md.jpg", "url": "https://s21.ax1x.com/2025/07/23/pVGli59.jpg" },
