@@ -150,11 +150,6 @@ const config = {
 				"preview": "/img/wallpaper/dynamic-mobile/chuva/chuva-pre.mp4",
 				"url": "/img/wallpaper/dynamic-mobile/chuva/chuva.mp4"
 			},
-			{
-				"title": "Doodle-小猫女仆降临",
-				"preview": "/img/wallpaper/dynamic-mobile/Doodle-小猫女仆降临/d12-pre.mp4",
-				"url": "/img/wallpaper/dynamic-mobile/Doodle-小猫女仆降临/d12.mp4"
-			},
 		],
 	},
 
@@ -164,9 +159,9 @@ const config = {
 		{ go: "🗂️ 前往", img: "/img/sunshine.jpg", title: "哔哩哔哩", subtitle: "2,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://www.bilibili.com/", show: false },
 		{ go: "📝 前往", img: "/img/sunshine.jpg", title: "微博", subtitle: "3,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://weibo.com/", show: false },
 		{ go: "👍 前往", img: "/img/sunshine.jpg", title: "京东", subtitle: "4,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://www.jd.com/", show: false },
-		{ go: "🗃 前往", img: "/img/sunshine.jpg", title: "Project 5", subtitle: "5,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://leleo.top", show: false },
-		{ go: "🎨 前往", img: "/img/sunshine.jpg", title: "Project 6", subtitle: "6,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://leleo.top", show: false },
-		{ go: "💍 前往", img: "/img/sunshine.jpg", title: "Project 7", subtitle: "7,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://leleo.top", show: false },
+		{ go: "🗃 前往", img: "/img/sunshine.jpg", title: "Google", subtitle: "5,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://www.google.com/", show: false },
+		{ go: "🎨 前往", img: "/img/sunshine.jpg", title: "Cloudflare", subtitle: "6,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://dash.cloudflare.com/", show: false },
+		{ go: "💍 前往", img: "/img/sunshine.jpg", title: "奈飞工厂", subtitle: "7,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://www.netflixgc.com/", show: false },
 		{ go: "🔍 前往", img: "/img/sunshine.jpg", title: "Project 8", subtitle: "8,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://leleo.top", show: false },
 	],
 
