@@ -118,20 +118,26 @@ const config = {
 		],
 		video: [
 			{
-				"title": "尼尔：机械纪元 团队",
-				"preview": "/img/wallpaper/dynamic/尼尔：机械纪元 团队/Nier-Automata-Team-pre.webm",
-				"url": "/img/wallpaper/dynamic/尼尔：机械纪元 团队/Nier-Automata-Team.webm"
-			},
-			{
 				"title": "克莱恩的葬礼",
 				"preview": "/img/wallpaper/dynamic/克莱恩的葬礼/Klein-pre.webm",
 				"url": "/img/wallpaper/dynamic/克莱恩的葬礼/Klein.webm"
 			},
 			{
-				"title": "86-不存在的战区",
-				"preview": "https://free.picui.cn/free/2026/02/19/699668aa32bd3.jpg",
-				"url": "https://steamcommunity.com/sharedfiles/filedetails/?id=2996647196"
+				"title": "不存在的战区",
+				"preview": "/img/wallpaper/dynamic/不存在的战区/86-pre.webm",
+				"url": "/img/wallpaper/dynamic/不存在的战区/86.webm"
 			},
+			{
+				"title": "薇尔莉特",
+				"preview": "/img/wallpaper/dynamic/薇尔莉特/Violet-pre.webm",
+				"url": "/img/wallpaper/dynamic/薇尔莉特/Violet.webm"
+			},
+			{
+				"title": "尼尔：机械纪元 团队",
+				"preview": "/img/wallpaper/dynamic/尼尔：机械纪元 团队/Nier-Automata-Team-pre.webm",
+				"url": "/img/wallpaper/dynamic/尼尔：机械纪元 团队/Nier-Automata-Team.webm"
+			},
+			
 		],
 		videoMobile: [
 			{
