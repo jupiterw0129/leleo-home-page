@@ -4,7 +4,7 @@ const config = {
 		title: 'JupiterW的个人主页🎉',
 		description: '欢迎来到JupiterW的奇妙世界！',
 		keywords: 'JupiterW,jupiterW,个人主页,个人网站',
-		icon: '/favicon.ico'   //网页图标，支持外链
+		icon: '/favicon.png'   //网页图标，支持外链
 	},
 
 	avatar: "/img/avatar.jpg", // 头像
