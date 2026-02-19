@@ -123,9 +123,9 @@ const config = {
 				"url": "/img/wallpaper/dynamic/尼尔：机械纪元 团队/Nier-Automata-Team.webm"
 			},
 			{
-				"title": "向往航天的女孩",
-				"preview": "/img/wallpaper/dynamic/向往航天的女孩/Toy-Aeroplane-pre.webm",
-				"url": "/img/wallpaper/dynamic/向往航天的女孩/Toy-Aeroplane.webm"
+				"title": "克莱恩的葬礼",
+				"preview": "/img/wallpaper/dynamic/克莱恩的葬礼/Klein-pre.webm",
+				"url": "/img/wallpaper/dynamic/克莱恩的葬礼/Klein.webm"
 			},
 			{
 				"title": "86-不存在的战区",
