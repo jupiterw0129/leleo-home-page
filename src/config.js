@@ -47,7 +47,7 @@ const config = {
 
 	//极坐标图数据
 	polarChart: {
-		skills: ['Vue.js', 'React', 'JavaScript', 'Node', 'Java', 'Python', 'linux', 'Docker', 'MySQL', 'MongoDB', 'AWS'],
+		skills: ['龙威', '心理暗示', '昨日重现', '愚弄', '嫁接', '隐秘', '灵界穿梭', '偷盗', '光', '扭曲', '空想'],
 		skillPoints: [85, 78, 88, 90, 80, 78, 85, 65, 82, 78, 70],
 	},
 
