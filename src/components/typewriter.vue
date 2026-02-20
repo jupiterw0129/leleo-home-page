@@ -3,11 +3,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import TypeIt from 'typeit'
 import config from '../config.js';
 
 const text = ref(null)
+let typeitInstance = null; // 保存实例
+    
 onMounted(() => {
     let configdata = null;
     if(import.meta.env.VITE_CONFIG){
@@ -17,15 +19,20 @@ onMounted(() => {
     }
     new (TypeIt)(text.value, {
         strings: configdata.typeWriterStrings,
-        cursorChar: "<span class='cursorChar' style='font-size: 26px;color: var(--leleo-vcard-color);'>|<span>",//用于光标的字符。HTML也可以
+        cursorChar: "<span class='cursorChar' style='font-size: 26px;color: var(--leleo-vcard-color);'>|</span>",//用于光标的字符。HTML也可以
         speed: 150,
         lifeLike: true,// 使打字速度不规则
         cursor: true,//在字符串末尾显示闪烁的光标
         breakLines: false,// 控制是将多个字符串打印在彼此之上，还是删除这些字符串并相互替换
         loop: true,//是否循环
-    }).go()
-})
-
+    }).go();
+});
+    
+onUnmounted(() => {
+    if (typeitInstance) {
+        typeitInstance.destroy(); // 销毁实例
+    }
+});
 </script>
  
 <style scoped>
@@ -38,7 +45,7 @@ onMounted(() => {
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
  
-.msg ::v-deep.cursorChar {
+.msg :deep(.cursorChar) {
     display: inline-block;
     margin-left: 2px;
 }
