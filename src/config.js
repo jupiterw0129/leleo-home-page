@@ -145,6 +145,11 @@ const config = {
 				"preview": "/img/wallpaper/dynamic-mobile/chuva/chuva-pre.mp4",
 				"url": "/img/wallpaper/dynamic-mobile/chuva/chuva.mp4"
 			},
+			{
+				"title": "女孩",
+				"preview": "/img/wallpaper/dynamic-mobile/女孩/girl-pre.mp4",
+				"url": "/img/wallpaper/dynamic-mobile/女孩/girl.mp4"
+			},
 		],
 	},
 
