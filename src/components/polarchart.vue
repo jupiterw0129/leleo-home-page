@@ -16,9 +16,6 @@ export default {
       skills: null,
       skillPoints: null,
       chartInstance: null, // 新增：存储 Chart 实例
-      pulseFactor: 1,          // 脉冲因子，用于动态透明度
-      pulseDirection: 1,       // 脉冲方向（1递增，-1递减）
-      pulseAnimationId: null,  // requestAnimationFrame ID
     };
   },
   mounted() {
@@ -28,15 +25,11 @@ export default {
     this.skills = this.configdata.polarChart.skills;
     this.skillPoints = this.configdata.polarChart.skillPoints;
     this.renderChart();
-    this.startPulseEffect();   // 启动脉冲效果
   },
   beforeDestroy() { // 组件销毁前钩子（Vue 3 选项式 API 中也可用 beforeUnmount）
     if (this.chartInstance) {
       this.chartInstance.destroy(); // 销毁 Chart 实例
       this.chartInstance = null;
-    }
-    if (this.pulseAnimationId) {
-      cancelAnimationFrame(this.pulseAnimationId); // 清理动画
     }
   },
   methods: {
@@ -57,7 +50,6 @@ export default {
       if (this.chartInstance) {
         this.chartInstance.destroy();
       }
-      this.originalColors = colors; // 存储原始颜色用于脉冲
 
       this.chartInstance = new Chart(ctx, { // 保存实例
         type: 'polarArea',
@@ -132,43 +124,6 @@ export default {
           },
         },
       });
-    },
-    startPulseEffect() {
-      // 定义脉冲动画函数
-      const pulse = () => {
-        // 如果图表实例不存在或已被销毁，停止动画
-        if (!this.chartInstance) return;
-    
-        // 更新脉冲因子：范围 0.6 ~ 1.0，步长 0.01
-        this.pulseFactor += 0.01 * this.pulseDirection;
-        
-        // 边界检测并反转方向
-        if (this.pulseFactor >= 1.0) {
-          this.pulseFactor = 1.0;
-          this.pulseDirection = -1;
-        } else if (this.pulseFactor <= 0.6) {
-          this.pulseFactor = 0.6;
-          this.pulseDirection = 1;
-        }
-    
-        // 基于原始颜色生成新的颜色数组，将透明度替换为当前脉冲因子
-        const newColors = this.originalColors.map(color => {
-          // 正则匹配 rgba 中的最后一个数字（透明度），替换为脉冲因子
-          return color.replace(/[\d.]+\)$/, this.pulseFactor.toFixed(2) + ')');
-        });
-    
-        // 更新图表数据集的背景色
-        this.chartInstance.data.datasets[0].backgroundColor = newColors;
-        
-        // 调用 update 使图表重绘（使用无动画更新，避免与内置动画冲突）
-        this.chartInstance.update();
-    
-        // 请求下一帧继续循环
-        this.pulseAnimationId = requestAnimationFrame(pulse);
-      };
-    
-      // 启动动画循环
-      this.pulseAnimationId = requestAnimationFrame(pulse);
     },
   },
 };
