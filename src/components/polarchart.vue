@@ -1,5 +1,5 @@
 <template>
-  <canvas id="polarChart"></canvas>
+  <canvas id="polarChart" class="rotate-chart"></canvas>
 </template>
 
 <script>
@@ -123,4 +123,17 @@ export default {
 </script>
 
 <style scoped>
+/* 新增旋转动画 */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rotate-chart {
+  animation: spin 10s linear infinite;
+}
 </style>
