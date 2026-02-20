@@ -24,6 +24,7 @@ onMounted(() => {
         lifeLike: true,// 使打字速度不规则
         cursor: true,//在字符串末尾显示闪烁的光标
         breakLines: false,// 控制是将多个字符串打印在彼此之上，还是删除这些字符串并相互替换
+        nextStringDelay: 1500,
         loop: true,//是否循环
     }).go();
 });
