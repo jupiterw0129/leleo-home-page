@@ -98,6 +98,10 @@ const config = {
 			{ "title": "时代", "preview": "/img/wallpaper/static/时代/image-pre.webp", "url": "/img/wallpaper/static/时代/image.png" },
 			{ "title": "光", "preview": "/img/wallpaper/static/光/image-pre.webp", "url": "/img/wallpaper/static/光/image.png" },
 			{ "title": "塞维亚菊", "preview": "/img/wallpaper/static/塞维亚菊/image-pre.webp", "url": "/img/wallpaper/static/塞维亚菊/image.png" },
+			{ "title": "奇迹", "preview": "/img/wallpaper/static/奇迹/image-pre.webp", "url": "/img/wallpaper/static/奇迹/image.png" },
+			{ "title": "奥黛丽", "preview": "/img/wallpaper/static/奥黛丽/image-pre.webp", "url": "/img/wallpaper/static/奥黛丽/image.png" },
+			{ "title": "节制", "preview": "/img/wallpaper/static/节制/image-pre.webp", "url": "/img/wallpaper/static/节制/image.png" },
+			{ "title": "观众", "preview": "/img/wallpaper/static/观众/image-pre.webp", "url": "/img/wallpaper/static/观众/image.png" },
 		],
 		picMobile: [
 			{ "title": "0001", "preview": "/img/wallpaper/static-mobile/0001/image-pre.webp", "url": "/img/wallpaper/static-mobile/0001/image.png" },
