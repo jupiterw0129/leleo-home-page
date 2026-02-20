@@ -15,6 +15,7 @@ export default {
       configdata:config,
       skills: null,
       skillPoints: null,
+      chartInstance: null, // 新增：存储 Chart 实例
     };
   },
   mounted() {
@@ -24,6 +25,12 @@ export default {
     this.skills = this.configdata.polarChart.skills;
     this.skillPoints = this.configdata.polarChart.skillPoints;
     this.renderChart();
+  },
+  beforeDestroy() { // 组件销毁前钩子（Vue 3 选项式 API 中也可用 beforeUnmount）
+    if (this.chartInstance) {
+      this.chartInstance.destroy(); // 销毁 Chart 实例
+      this.chartInstance = null;
+    }
   },
   methods: {
     generateColors(count) {
@@ -39,7 +46,11 @@ export default {
     renderChart() {
       const ctx = document.getElementById('polarChart').getContext('2d');
       const colors = this.generateColors(this.skills.length);
-      new Chart(ctx, {
+      // 如果已有旧实例，先销毁（防止重复创建导致的内存泄漏）
+      if (this.chartInstance) {
+        this.chartInstance.destroy();
+      }
+      this.chartInstance = new Chart(ctx, { // 保存实例
         type: 'polarArea',
         data: {
           labels: this.skills,
