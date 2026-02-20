@@ -26,6 +26,7 @@ onMounted(() => {
         breakLines: false,// 控制是将多个字符串打印在彼此之上，还是删除这些字符串并相互替换
         nextStringDelay: 1500,
         loop: true,//是否循环
+        startDelay: 100
     }).go();
 });
     
