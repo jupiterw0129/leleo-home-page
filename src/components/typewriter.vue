@@ -23,7 +23,7 @@ onMounted(() => {
         speed: () => Math.floor(Math.random() * 200 + 50), // 随机速度
         startDelay: 1000,// 开始延迟1秒
         lifeLike: true,// 使打字速度不规则
-        breakLines: true,// 控制是将多个字符串打印在彼此之上，还是删除这些字符串并相互替换
+        breakLines: false,// 控制是将多个字符串打印在彼此之上，还是删除这些字符串并相互替换
         deleteSpeed: 60,// 删除速度
         nextStringDelay: 2000,// 下一句延迟2秒
         loop: true,//是否循环
