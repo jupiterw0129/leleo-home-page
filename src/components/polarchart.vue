@@ -66,7 +66,7 @@ export default {
             hoverOffset: 15,                      // 扇形向外偏移15像素
             hoverBackgroundColor: colors.map(color => color.replace('0.6', '0.8')), // 悬停时更亮
             hoverBorderColor: '#ffffff',           // 边框变白
-            hoverBorderWidth: 4                    // 边框加粗
+            hoverBorderWidth: 3                    // 边框加粗
           }],
         },
         options: {
