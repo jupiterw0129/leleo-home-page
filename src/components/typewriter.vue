@@ -18,14 +18,16 @@ onMounted(() => {
     new (TypeIt)(text.value, {
         strings: configdata.typeWriterStrings,
         cursorChar: "<span class='cursorChar' style='font-size: 26px;color: var(--leleo-vcard-color);'>|<span>",//用于光标的字符。HTML也可以
-        speed: () => Math.floor(Math.random() * 130 + 30), // 随机速度
-        deleteSpeed: 60,
-        lifeLike: true,// 使打字速度不规则
         cursor: true,//在字符串末尾显示闪烁的光标
-        breakLines: false,// 控制是将多个字符串打印在彼此之上，还是删除这些字符串并相互替换
-        nextStringDelay: 1200,
-        loopDelay: 2000,
+        cursorSpeed: 500, // 光标闪烁速度加快
+        speed: () => Math.floor(Math.random() * 200 + 50), // 随机速度
+        startDelay: 1000,// 开始延迟1秒
+        lifeLike: true,// 使打字速度不规则
+        breakLines: true,// 控制是将多个字符串打印在彼此之上，还是删除这些字符串并相互替换
+        deleteSpeed: 60,// 删除速度
+        nextStringDelay: 2000,// 下一句延迟2秒
         loop: true,//是否循环
+        loopDelay: 2000
     }).go()
 })
 
