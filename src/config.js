@@ -89,7 +89,7 @@ const config = {
 	musicPlayer: {
 		server: 'netease',  //服务提供商 --网易云音乐
 		type: 'playlist',   //歌单类型
-		id: '2028178887'  //歌单id ---> music.163.com/#/playlist?id=2028178887
+		id: '2056960641'  //歌单id ---> music.163.com/#/playlist?id=2056960641
 	},
 
 	//壁纸数据 -----可以将壁纸文件上传到图床获取网络直链。若想调用api，请前往脚本自行修改逻辑
