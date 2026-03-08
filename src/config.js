@@ -128,6 +128,11 @@ const config = {
 				"url": "/img/wallpaper/dynamic/薇尔莉特/Violet.webm"
 			},
 			{
+				"title": "阿尓托莉雅",
+				"preview": "/img/wallpaper/dynamic/阿尓托莉雅/Saber-pre.webm",
+				"url": "/img/wallpaper/dynamic/阿尓托莉雅/Saber.webm"
+			},
+			{
 				"title": "尼尔：机械纪元 团队",
 				"preview": "/img/wallpaper/dynamic/尼尔：机械纪元 团队/Nier-Automata-Team-pre.webm",
 				"url": "/img/wallpaper/dynamic/尼尔：机械纪元 团队/Nier-Automata-Team.webm"
