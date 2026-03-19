@@ -210,13 +210,13 @@ const config = {
 	//项目卡片
 	projectcards: [
 		{ go: "🎬 前往", img: "/img/hero.jpg", title: "抖音", subtitle: "短视频与热点", text: "看看今天有什么新鲜内容。", url: "https://www.douyin.com/jingxuan", show: false },
-		{ go: "📺 前往", img: "/img/hero.jpg", title: "哔哩哔哩", subtitle: "动画 / 音乐 / 知识", text: "适合放松，也适合补充一点灵感。", url: "https://www.bilibili.com/", show: false },
-		{ go: "📰 前往", img: "/img/hero.jpg", title: "微博", subtitle: "热搜与舆论场", text: "快速浏览热点，但别停留太久。", url: "https://weibo.com/", show: false },
-		{ go: "👍 前往", img: "/img/hero.jpg", title: "京东", subtitle: "4,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://www.jd.com/", show: false },
-		{ go: "🗃 前往", img: "/img/hero.jpg", title: "Google", subtitle: "5,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://www.google.com/", show: false },
-		{ go: "🎨 前往", img: "/img/hero.jpg", title: "Cloudflare", subtitle: "6,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://dash.cloudflare.com/", show: false },
-		{ go: "💍 前往", img: "/img/hero.jpg", title: "奈飞工厂", subtitle: "7,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://www.netflixgc.com/", show: false },
-		{ go: "🔍 前往", img: "/img/hero.jpg", title: "作者", subtitle: "8,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://leleo.top", show: false },
+		{ go: "📺 前往", img: "/img/wallpaper/static/时代/image-pre.webp", title: "哔哩哔哩", subtitle: "动画 / 音乐 / 知识", text: "适合放松，也适合补充一点灵感。", url: "https://www.bilibili.com/", show: false },
+		{ go: "📰 前往", img: "/img/wallpaper/static/光/image-pre.webp", title: "微博", subtitle: "热搜与舆论场", text: "快速浏览热点，但别停留太久。", url: "https://weibo.com/", show: false },
+		{ go: "👍 前往", img: "/img/wallpaper/static/塞维亚菊/image-pre.webp", title: "京东", subtitle: "4,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://www.jd.com/", show: false },
+		{ go: "🗃 前往", img: "/img/wallpaper/static/奇迹/image-pre.webp", title: "Google", subtitle: "5,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://www.google.com/", show: false },
+		{ go: "🎨 前往", img: "/img/wallpaper/static/奥黛丽/image-pre.webp", title: "Cloudflare", subtitle: "6,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://dash.cloudflare.com/", show: false },
+		{ go: "💍 前往", img: "/img/wallpaper/static/节制/image-pre.webp", title: "奈飞工厂", subtitle: "7,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://www.netflixgc.com/", show: false },
+		{ go: "🔍 前往", img: "/img/wallpaper/static/观众/image-pre.webp", title: "作者", subtitle: "8,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://leleo.top", show: false },
 	],
 
 	statement: ["备案号：XXICP备123456789号", "Copyright © 2025 Leleo"],
