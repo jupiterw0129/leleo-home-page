@@ -66,7 +66,7 @@ onUnmounted(() => {
   color: var(--leleo-vcard-color);
   letter-spacing: 1px;
   font-family: "WQYBitmapSong", "SimSun", serif;
-  font-size: 18px;
+  font-size: 25px;
   font-weight: normal;
   text-shadow: none;
 }
