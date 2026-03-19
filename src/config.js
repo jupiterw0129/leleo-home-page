@@ -1,10 +1,53 @@
 const randomItem = (arr) => arr[Math.floor(Math.random() * arr.length)]
 
-const getRandomBackground = (pics, videos = [], videoRate = 0) => {
-	const useVideo = videos.length > 0 && Math.random() < videoRate
-	return useVideo
-		? { type: "video", datainfo: randomItem(videos) }
-		: { type: "pic", datainfo: randomItem(pics) }
+const safeGetStorage = (key) => {
+	try {
+		if (typeof window !== "undefined") {
+			return localStorage.getItem(key)
+		}
+	} catch (e) {}
+	return null
+}
+
+const safeSetStorage = (key, value) => {
+	try {
+		if (typeof window !== "undefined") {
+			localStorage.setItem(key, value)
+		}
+	} catch (e) {}
+}
+
+const getRandomBackground = (pics, videos = [], videoRate = 0, storageKey = "bg-last") => {
+	const allItems = [
+		...pics.map(item => ({ type: "pic", datainfo: item })),
+		...videos.map(item => ({ type: "video", datainfo: item })),
+	]
+
+	if (!allItems.length) {
+		return { type: "pic", datainfo: null }
+	}
+
+	if (allItems.length === 1) {
+		return allItems[0]
+	}
+
+	const lastUrl = safeGetStorage(storageKey)
+	const preferVideo = videos.length > 0 && Math.random() < videoRate
+
+	const preferredItems = preferVideo
+		? allItems.filter(item => item.type === "video")
+		: allItems.filter(item => item.type === "pic")
+
+	let candidates = preferredItems.filter(item => item.datainfo.url !== lastUrl)
+
+	if (!candidates.length) {
+		candidates = allItems.filter(item => item.datainfo.url !== lastUrl)
+	}
+
+	const next = candidates.length ? randomItem(candidates) : randomItem(allItems)
+
+	safeSetStorage(storageKey, next.datainfo.url)
+	return next
 }
 
 // PC 静态壁纸
@@ -104,9 +147,10 @@ const config = {
 
 	// 默认背景壁纸
 	background: {
-		pc: getRandomBackground(pcPicWallpapers, pcVideoWallpapers, 0.5), // 50% 概率动态壁纸
-		mobile: getRandomBackground(mobilePicWallpapers, [], 0), // 移动端默认只随机静态
+		pc: getRandomBackground(pcPicWallpapers, pcVideoWallpapers, 0.5, "pc-bg"),
+		mobile: getRandomBackground(mobilePicWallpapers, [], 0, "mobile-bg"),
 	},
+
 
 	//极坐标图数据
 	polarChart: {
