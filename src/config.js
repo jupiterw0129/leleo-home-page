@@ -104,7 +104,7 @@ const config = {
 
 	// 默认背景壁纸
 	background: {
-		pc: getRandomBackground(pcPicWallpapers, pcVideoWallpapers, 0.3), // 30% 概率动态壁纸
+		pc: getRandomBackground(pcPicWallpapers, pcVideoWallpapers, 0.5), // 50% 概率动态壁纸
 		mobile: getRandomBackground(mobilePicWallpapers, [], 0), // 移动端默认只随机静态
 	},
 
