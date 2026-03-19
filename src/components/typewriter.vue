@@ -1,67 +1,102 @@
 <template>
-    <div class="leleo-typewriter" style="text-align: center;"><span class="qm">“ </span><span ref="text" class="msg"></span><span class="qm"> ”</span></div>
+  <div class="leleo-typewriter">
+    <span class="qm">“</span>
+    <span ref="text" class="msg"></span>
+    <span class="qm">”</span>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
-import TypeIt from 'typeit'
-import config from '../config.js';
+import { ref, onMounted, onUnmounted } from "vue"
+import TypeIt from "typeit"
+import config from "../config.js"
 
 const text = ref(null)
-let typeitInstance = null; // 保存实例
-    
+let typeitInstance = null
+
+const getConfigData = () => {
+  try {
+    if (import.meta.env.VITE_CONFIG) {
+      return JSON.parse(import.meta.env.VITE_CONFIG)
+    }
+  } catch (error) {
+    console.warn("VITE_CONFIG 解析失败，已回退到本地 config：", error)
+  }
+  return config
+}
+
 onMounted(() => {
-    let configdata = null;
-    if(import.meta.env.VITE_CONFIG){
-        configdata = JSON.parse(import.meta.env.VITE_CONFIG);
-    }else{
-        configdata = config;
-    }
-    new (TypeIt)(text.value, {
-        strings: configdata.typeWriterStrings,
-        cursorChar: "<span class='cursorChar' style='font-size: 26px;color: var(--leleo-vcard-color);'>|</span>",//用于光标的字符。HTML也可以
-        speed: 150,
-        lifeLike: true,// 使打字速度不规则
-        cursor: true,//在字符串末尾显示闪烁的光标
-        breakLines: false,// 控制是将多个字符串打印在彼此之上，还是删除这些字符串并相互替换
-        nextStringDelay: 2000,
-        loop: true,//是否循环
-        startDelay: 10
-    }).go();
-});
-    
+  const configdata = getConfigData()
+  const strings = Array.isArray(configdata?.typeWriterStrings) && configdata.typeWriterStrings.length
+    ? configdata.typeWriterStrings
+    : ["欢迎来到我的主页"]
+
+  if (!text.value) return
+
+  typeitInstance = new TypeIt(text.value, {
+    strings,
+    cursorChar: "<span class='cursorChar'>|</span>",
+    speed: 150,
+    lifeLike: true,
+    cursor: true,
+    breakLines: false,
+    nextStringDelay: 2000,
+    loop: true,
+    startDelay: 10,
+  })
+
+  typeitInstance.go()
+})
+
 onUnmounted(() => {
-    if (typeitInstance) {
-        typeitInstance.destroy(); // 销毁实例
-    }
-});
+  if (typeitInstance) {
+    typeitInstance.destroy()
+    typeitInstance = null
+  }
+})
 </script>
- 
+
 <style scoped>
-.msg, .qm{
-    color: var(--leleo-vcard-color);
-    letter-spacing: 2px;
-    font-family: Arial, sans-serif;
-    font-size: 25px;
-    font-weight: bold;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+.leleo-typewriter {
+  text-align: center;
 }
- 
+
+.msg,
+.qm {
+  color: var(--leleo-vcard-color);
+  letter-spacing: 2px;
+  font-family: Arial, sans-serif;
+  font-size: 25px;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
 .msg :deep(.cursorChar) {
-    display: inline-block;
-    margin-left: 2px;
+  display: inline-block;
+  margin-left: 2px;
+  font-size: 26px;
+  color: var(--leleo-vcard-color);
 }
-@media screen and (min-width: 960px) and (max-width: 1200px)  {
-    .msg, .qm{
-        font-size: 20px;
-    }
+
+@media screen and (min-width: 960px) and (max-width: 1200px) {
+  .msg,
+  .qm {
+    font-size: 20px;
+  }
 }
-@media (max-width: 960px){
-    .leleo-typewriter{
-        min-height: 76px;   
-    }
-    .msg, .qm{
-        font-size: 16px;
-    }
+
+@media (max-width: 960px) {
+  .leleo-typewriter {
+    min-height: 76px;
+  }
+
+  .msg,
+  .qm {
+    font-size: 16px;
+  }
+
+  .msg :deep(.cursorChar) {
+    font-size: 18px;
+  }
 }
 </style>
