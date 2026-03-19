@@ -65,7 +65,7 @@ onUnmounted(() => {
 .qm {
   color: var(--leleo-vcard-color);
   letter-spacing: 1px;
-  font-family: "xy-z", "SimSun", serif;
+  font-family: "xyz", serif;
   font-size: 25px;
   font-weight: normal;
   text-shadow: none;
