@@ -65,10 +65,10 @@ onUnmounted(() => {
 .qm {
   color: var(--leleo-vcard-color);
   letter-spacing: 1px;
-  font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
-  font-size: 25px;
-  font-weight: 600;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  font-family: "WQYBitmapSong", "SimSun", serif;
+  font-size: 18px;
+  font-weight: normal;
+  text-shadow: none;
 }
 
 .msg :deep(.cursorChar) {
