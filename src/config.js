@@ -1,48 +1,111 @@
+const randomItem = (arr) => arr[Math.floor(Math.random() * arr.length)]
+
+const getRandomBackground = (pics, videos = [], videoRate = 0) => {
+	const useVideo = videos.length > 0 && Math.random() < videoRate
+	return useVideo
+		? { type: "video", datainfo: randomItem(videos) }
+		: { type: "pic", datainfo: randomItem(pics) }
+}
+
+// PC 静态壁纸
+const pcPicWallpapers = [
+	{ "title": "时代", "preview": "/img/wallpaper/static/时代/image-pre.webp", "url": "/img/wallpaper/static/时代/image.png" },
+	{ "title": "光", "preview": "/img/wallpaper/static/光/image-pre.webp", "url": "/img/wallpaper/static/光/image.png" },
+	{ "title": "塞维亚菊", "preview": "/img/wallpaper/static/塞维亚菊/image-pre.webp", "url": "/img/wallpaper/static/塞维亚菊/image.png" },
+	{ "title": "奇迹", "preview": "/img/wallpaper/static/奇迹/image-pre.webp", "url": "/img/wallpaper/static/奇迹/image.png" },
+	{ "title": "奥黛丽", "preview": "/img/wallpaper/static/奥黛丽/image-pre.webp", "url": "/img/wallpaper/static/奥黛丽/image.png" },
+	{ "title": "节制", "preview": "/img/wallpaper/static/节制/image-pre.webp", "url": "/img/wallpaper/static/节制/image.png" },
+	{ "title": "观众", "preview": "/img/wallpaper/static/观众/image-pre.webp", "url": "/img/wallpaper/static/观众/image.png" },
+]
+
+// 移动端静态壁纸
+const mobilePicWallpapers = [
+	{ "title": "0001", "preview": "/img/wallpaper/static-mobile/0001/image-pre.webp", "url": "/img/wallpaper/static-mobile/0001/image.png" },
+	{ "title": "0002", "preview": "/img/wallpaper/static-mobile/0002/image-pre.webp", "url": "/img/wallpaper/static-mobile/0002/image.png" },
+	{ "title": "0003", "preview": "/img/wallpaper/static-mobile/0003/image-pre.webp", "url": "/img/wallpaper/static-mobile/0003/image.png" },
+	{ "title": "0004", "preview": "/img/wallpaper/static-mobile/0004/image-pre.webp", "url": "/img/wallpaper/static-mobile/0004/image.png" },
+	{ "title": "0005", "preview": "/img/wallpaper/static-mobile/0005/image-pre.webp", "url": "/img/wallpaper/static-mobile/0005/image.png" },
+	{ "title": "0006", "preview": "/img/wallpaper/static-mobile/0006/image-pre.webp", "url": "/img/wallpaper/static-mobile/0006/image.png" },
+]
+
+// PC 动态壁纸
+const pcVideoWallpapers = [
+	{
+		"title": "克莱恩的葬礼",
+		"preview": "/img/wallpaper/dynamic/克莱恩的葬礼/Klein-pre.webm",
+		"url": "/img/wallpaper/dynamic/克莱恩的葬礼/Klein.webm"
+	},
+	{
+		"title": "不存在的战区",
+		"preview": "/img/wallpaper/dynamic/不存在的战区/86-pre.webm",
+		"url": "/img/wallpaper/dynamic/不存在的战区/86.webm"
+	},
+	{
+		"title": "薇尔莉特",
+		"preview": "/img/wallpaper/dynamic/薇尔莉特/Violet-pre.webm",
+		"url": "/img/wallpaper/dynamic/薇尔莉特/Violet.webm"
+	},
+	{
+		"title": "阿尓托莉雅",
+		"preview": "/img/wallpaper/dynamic/阿尓托莉雅/Saber-pre.webm",
+		"url": "/img/wallpaper/dynamic/阿尓托莉雅/Saber.webm"
+	},
+	{
+		"title": "尼尔：机械纪元 团队",
+		"preview": "/img/wallpaper/dynamic/尼尔：机械纪元 团队/Nier-Automata-Team-pre.webm",
+		"url": "/img/wallpaper/dynamic/尼尔：机械纪元 团队/Nier-Automata-Team.webm"
+	},
+]
+
+// 移动端动态壁纸（先保留列表，默认背景暂不随机用它）
+const mobileVideoWallpapers = [
+	{
+		"title": "幻觉镇-gaako_illust",
+		"preview": "/img/wallpaper/dynamic-mobile/幻觉镇-gaako_illust/Hallucination_town-pre.mp4",
+		"url": "/img/wallpaper/dynamic-mobile/幻觉镇-gaako_illust/Hallucination_town.mp4"
+	},
+	{
+		"title": "chuva",
+		"preview": "/img/wallpaper/dynamic-mobile/chuva/chuva-pre.mp4",
+		"url": "/img/wallpaper/dynamic-mobile/chuva/chuva.mp4"
+	},
+	{
+		"title": "女孩",
+		"preview": "/img/wallpaper/dynamic-mobile/女孩/girl-pre.mp4",
+		"url": "/img/wallpaper/dynamic-mobile/女孩/girl.mp4"
+	},
+]
+
 const config = {
 	//网页元数据
 	metaData: {
 		title: 'JupiterW的个人主页🎉',
 		description: '欢迎来到JupiterW的奇妙世界！',
 		keywords: 'JupiterW,jupiterW,个人主页,个人网站',
-		icon: '/favicon.ico'   //网页图标，支持外链
+		icon: '/favicon.ico'
 	},
 
-	avatar: "/img/avatar.jpg", // 头像
-	welcometitle: "Hi, I'm JupiterW", // 标题
+	avatar: "/img/avatar.jpg",
+	welcometitle: "Hi, I'm JupiterW",
 
 	// 颜色配置
 	color: {
-		themecolor: "#FFFFFF", // 主题颜色，推荐趋于亮白可带有轻微色调，例： #D1FFEC
-		welcometitlecolor: "#FFFFFF", // 标题颜色 例： #7BFFC9
-		turntablecolor1: "#FFFF00",  // 转盘渐变色一
-		turntablecolor2: "#00FFFF"   // 转盘渐变色二
+		themecolor: "#FFFFFF",
+		welcometitlecolor: "#FFFFFF",
+		turntablecolor1: "#FFFF00",
+		turntablecolor2: "#00FFFF"
 	},
 
-	brightness: 85, // 背景亮度 --%
-	blur: 5, // 毛玻璃模糊效果
+	brightness: 85,
+	blur: 5,
 
 	// 我的标签
 	tags: ['奇迹师', '通识者'],
 
 	// 默认背景壁纸
 	background: {
-		"pc": {   //pc端
-			"type": "pic",   //"pic":静态壁纸;"video":动态壁纸
-			"datainfo": {
-				"title": "时代",
-				"preview": "/img/wallpaper/static/时代/image-pre.webp",
-				"url": "/img/wallpaper/static/时代/image.png",     //当然，也可填写网络地址或壁纸api，如随机PC壁纸api："url":"https://t.mwm.moe/pc"
-			},
-		},
-		"mobile": {   //移动端
-			"type": "pic",
-			"datainfo": {
-				"title": "0001",
-				"preview": "/img/wallpaper/static-mobile/0001/image-pre.webp",
-				"url": "/img/wallpaper/static-mobile/0001/image.png"  //同理，随机移动端壁纸："url":"https://t.mwm.moe/mp"
-			}
-		}
-
+		pc: getRandomBackground(pcPicWallpapers, pcVideoWallpapers, 0.3), // 30% 概率动态壁纸
+		mobile: getRandomBackground(mobilePicWallpapers, [], 0), // 移动端默认只随机静态
 	},
 
 	//极坐标图数据
@@ -85,80 +148,22 @@ const config = {
 		"为祂敲击天国之钟。"
 	],
 
-	//音乐播放配置，采用MetingJS Api(https://github.com/metowolf/MetingJS)
+	//音乐播放配置
 	musicPlayer: {
-		server: 'netease',  //服务提供商 --网易云音乐
-		type: 'playlist',   //歌单类型
-		id: '2056960641'  //歌单id ---> music.163.com/#/playlist?id=2056960641
+		server: 'netease',
+		type: 'playlist',
+		id: '2056960641'
 	},
 
-	//壁纸数据 -----可以将壁纸文件上传到图床获取网络直链。若想调用api，请前往脚本自行修改逻辑
+	//壁纸数据
 	wallpaper: {
-		pic: [
-			{ "title": "时代", "preview": "/img/wallpaper/static/时代/image-pre.webp", "url": "/img/wallpaper/static/时代/image.png" },
-			{ "title": "光", "preview": "/img/wallpaper/static/光/image-pre.webp", "url": "/img/wallpaper/static/光/image.png" },
-			{ "title": "塞维亚菊", "preview": "/img/wallpaper/static/塞维亚菊/image-pre.webp", "url": "/img/wallpaper/static/塞维亚菊/image.png" },
-			{ "title": "奇迹", "preview": "/img/wallpaper/static/奇迹/image-pre.webp", "url": "/img/wallpaper/static/奇迹/image.png" },
-			{ "title": "奥黛丽", "preview": "/img/wallpaper/static/奥黛丽/image-pre.webp", "url": "/img/wallpaper/static/奥黛丽/image.png" },
-			{ "title": "节制", "preview": "/img/wallpaper/static/节制/image-pre.webp", "url": "/img/wallpaper/static/节制/image.png" },
-			{ "title": "观众", "preview": "/img/wallpaper/static/观众/image-pre.webp", "url": "/img/wallpaper/static/观众/image.png" },
-		],
-		picMobile: [
-			{ "title": "0001", "preview": "/img/wallpaper/static-mobile/0001/image-pre.webp", "url": "/img/wallpaper/static-mobile/0001/image.png" },
-			{ "title": "0002", "preview": "/img/wallpaper/static-mobile/0002/image-pre.webp", "url": "/img/wallpaper/static-mobile/0002/image.png" },
-			{ "title": "0003", "preview": "/img/wallpaper/static-mobile/0003/image-pre.webp", "url": "/img/wallpaper/static-mobile/0003/image.png" },
-			{ "title": "0004", "preview": "/img/wallpaper/static-mobile/0004/image-pre.webp", "url": "/img/wallpaper/static-mobile/0004/image.png" },
-			{ "title": "0005", "preview": "/img/wallpaper/static-mobile/0005/image-pre.webp", "url": "/img/wallpaper/static-mobile/0005/image.png" },
-			{ "title": "0006", "preview": "/img/wallpaper/static-mobile/0006/image-pre.webp", "url": "/img/wallpaper/static-mobile/0006/image.png" },
-		],
-		video: [
-			{
-				"title": "克莱恩的葬礼",
-				"preview": "/img/wallpaper/dynamic/克莱恩的葬礼/Klein-pre.webm",
-				"url": "/img/wallpaper/dynamic/克莱恩的葬礼/Klein.webm"
-			},
-			{
-				"title": "不存在的战区",
-				"preview": "/img/wallpaper/dynamic/不存在的战区/86-pre.webm",
-				"url": "/img/wallpaper/dynamic/不存在的战区/86.webm"
-			},
-			{
-				"title": "薇尔莉特",
-				"preview": "/img/wallpaper/dynamic/薇尔莉特/Violet-pre.webm",
-				"url": "/img/wallpaper/dynamic/薇尔莉特/Violet.webm"
-			},
-			{
-				"title": "阿尓托莉雅",
-				"preview": "/img/wallpaper/dynamic/阿尓托莉雅/Saber-pre.webm",
-				"url": "/img/wallpaper/dynamic/阿尓托莉雅/Saber.webm"
-			},
-			{
-				"title": "尼尔：机械纪元 团队",
-				"preview": "/img/wallpaper/dynamic/尼尔：机械纪元 团队/Nier-Automata-Team-pre.webm",
-				"url": "/img/wallpaper/dynamic/尼尔：机械纪元 团队/Nier-Automata-Team.webm"
-			},
-			
-		],
-		videoMobile: [
-			{
-				"title": "幻觉镇-gaako_illust",
-				"preview": "/img/wallpaper/dynamic-mobile/幻觉镇-gaako_illust/Hallucination_town-pre.mp4",
-				"url": "/img/wallpaper/dynamic-mobile/幻觉镇-gaako_illust/Hallucination_town.mp4"
-			},
-			{
-				"title": "chuva",
-				"preview": "/img/wallpaper/dynamic-mobile/chuva/chuva-pre.mp4",
-				"url": "/img/wallpaper/dynamic-mobile/chuva/chuva.mp4"
-			},
-			{
-				"title": "女孩",
-				"preview": "/img/wallpaper/dynamic-mobile/女孩/girl-pre.mp4",
-				"url": "/img/wallpaper/dynamic-mobile/女孩/girl.mp4"
-			},
-		],
+		pic: pcPicWallpapers,
+		picMobile: mobilePicWallpapers,
+		video: pcVideoWallpapers,
+		videoMobile: mobileVideoWallpapers,
 	},
 
-	//项目卡片 其中 字段"show"控制初始卡片的text是否展开
+	//项目卡片
 	projectcards: [
 		{ go: "🚀 前往", img: "/img/hero.jpg", title: "抖音", subtitle: "1,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://www.douyin.com/jingxuan", show: false },
 		{ go: "🗂️ 前往", img: "/img/hero.jpg", title: "哔哩哔哩", subtitle: "2,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://www.bilibili.com/", show: false },
