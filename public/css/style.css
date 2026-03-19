@@ -10,9 +10,7 @@
 }
 @font-face {
   font-family: "xy-z";
-  src: url("/fonts/xy_z.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
+  src: url("../fonts/xy_z.ttf");
   font-display: swap;
 }
 
