@@ -108,148 +108,149 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  filter: saturate(1.15) brightness(1.05);
 }
 
+/* 中心发光底盘：更亮、更集中 */
 .svg-frame::before {
   content: "";
   position: absolute;
-  width: 96px;
-  height: 96px;
+  width: 92px;
+  height: 92px;
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(120, 220, 255, 0.26) 0%,
-    rgba(120, 220, 255, 0.12) 35%,
-    transparent 72%
+    rgba(255, 255, 255, 0.28) 0%,
+    rgba(120, 220, 255, 0.32) 22%,
+    rgba(56, 189, 248, 0.18) 42%,
+    rgba(56, 189, 248, 0.08) 58%,
+    transparent 74%
   );
-  filter: blur(10px);
-  animation: coreGlow 2.8s ease-in-out infinite;
+  filter: blur(8px);
+  animation: coreGlow 2.4s ease-in-out infinite;
   pointer-events: none;
 }
 
 .svg-frame svg {
   position: absolute;
-  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s ease, filter 0.45s ease;
-  z-index: calc(1 - (0.2 * var(--j)));
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), filter 0.45s ease;
+  z-index: calc(10 - var(--j));
   transform-origin: center;
   width: 344px;
   height: 344px;
   fill: none;
   will-change: transform;
+  opacity: 1;
 }
 
-/* 保留你的 hover 分层展开 */
+/* 保留原 hover */
 .svg-frame:hover svg {
   transform: rotate(-80deg) skew(30deg)
     translateX(calc(45px * var(--i)))
     translateY(calc(-35px * var(--i)));
 }
 
-/* 中心点 hover 位移保留 */
 .svg-frame svg #center {
   transition: transform 0.5s ease, filter 0.5s ease;
   transform-origin: center;
 }
 
 .svg-frame:hover svg #center {
-  transform: rotate(-30deg) translateX(45px) translateY(-3px) scale(1.08);
+  transform: rotate(-30deg) translateX(45px) translateY(-3px) scale(1.12);
 }
 
-/* 发光 */
+/* 更实的主体 + 更明显发光 */
 .svg-frame svg path {
   filter:
-    drop-shadow(0 0 4px rgba(255, 255, 255, 0.05))
-    drop-shadow(0 0 10px rgba(80, 180, 255, 0.16))
-    drop-shadow(0 0 18px rgba(80, 180, 255, 0.08));
+    drop-shadow(0 0 2px rgba(255, 255, 255, 0.18))
+    drop-shadow(0 0 8px rgba(125, 211, 252, 0.28))
+    drop-shadow(0 0 16px rgba(56, 189, 248, 0.22))
+    drop-shadow(0 0 28px rgba(56, 189, 248, 0.12));
 }
 
+/* 核心更亮 */
 #center,
 #center1 {
   filter:
-    drop-shadow(0 0 8px rgba(140, 220, 255, 0.4))
-    drop-shadow(0 0 18px rgba(120, 200, 255, 0.22));
+    drop-shadow(0 0 4px rgba(255, 255, 255, 0.35))
+    drop-shadow(0 0 10px rgba(160, 235, 255, 0.55))
+    drop-shadow(0 0 22px rgba(56, 189, 248, 0.38))
+    drop-shadow(0 0 34px rgba(56, 189, 248, 0.18));
 }
 
-/* 不同层级透明度，增加质感 */
-.svg-frame svg:nth-child(1) { opacity: 0.32; }
-.svg-frame svg:nth-child(2) { opacity: 0.52; }
-.svg-frame svg:nth-child(3) { opacity: 0.72; }
-.svg-frame svg:nth-child(4) { opacity: 0.9; }
-.svg-frame svg:nth-child(5) { opacity: 1; }
-
-/* 动效：旋转 + 缩放呼吸 */
+/* 呼吸：缩放，不做透明化 */
 #out1 {
-  animation: ringBreath1 4.8s ease-in-out infinite;
+  animation: ringBreath1 4s ease-in-out infinite;
   transform-origin: center;
 }
 
 #out2 {
-  animation: rotateBreath2 7s linear infinite, ringBreath2 3.6s ease-in-out infinite;
+  animation: rotateLayerA 7s linear infinite, ringBreath2 3.2s ease-in-out infinite;
   transform-origin: center;
 }
 
 #out3 {
-  animation: rotateBreath3 4.6s linear infinite reverse, ringBreath3 3.2s ease-in-out infinite;
+  animation: rotateLayerB 4.5s linear infinite reverse, ringBreath3 2.8s ease-in-out infinite;
   transform-origin: center;
 }
 
 #inner3,
 #inner1 {
-  animation: rotateBreath4 5s linear infinite, ringBreath4 2.8s ease-in-out infinite;
+  animation: rotateLayerC 5s linear infinite, ringBreath4 2.6s ease-in-out infinite;
   transform-origin: center;
 }
 
 #center1 {
-  animation: centerBreath 2.2s ease-in-out infinite;
+  animation: centerBreath 2.1s ease-in-out infinite;
   transform-origin: center;
 }
 
 #center {
-  animation: centerCoreBreath 1.8s ease-in-out infinite;
+  animation: centerCoreBreath 1.7s ease-in-out infinite;
   transform-origin: center;
 }
 
-/* hover 时发光增强 */
+/* hover 发光增强 */
 .svg-frame:hover::before {
-  filter: blur(14px);
-  opacity: 1;
+  filter: blur(12px);
+  transform: scale(1.15);
 }
 
 .svg-frame:hover svg path {
   filter:
-    drop-shadow(0 0 6px rgba(255, 255, 255, 0.08))
-    drop-shadow(0 0 14px rgba(80, 180, 255, 0.24))
-    drop-shadow(0 0 24px rgba(80, 180, 255, 0.14));
+    drop-shadow(0 0 3px rgba(255, 255, 255, 0.24))
+    drop-shadow(0 0 10px rgba(125, 211, 252, 0.34))
+    drop-shadow(0 0 20px rgba(56, 189, 248, 0.30))
+    drop-shadow(0 0 36px rgba(56, 189, 248, 0.18));
 }
 
 .svg-frame:hover #center,
 .svg-frame:hover #center1 {
   filter:
-    drop-shadow(0 0 10px rgba(160, 235, 255, 0.58))
-    drop-shadow(0 0 22px rgba(120, 200, 255, 0.32));
+    drop-shadow(0 0 4px rgba(255, 255, 255, 0.45))
+    drop-shadow(0 0 12px rgba(180, 245, 255, 0.75))
+    drop-shadow(0 0 26px rgba(56, 189, 248, 0.5))
+    drop-shadow(0 0 42px rgba(56, 189, 248, 0.24));
 }
 
-/* 发光呼吸 */
+/* 动画 */
 @keyframes coreGlow {
   0%, 100% {
-    transform: scale(0.92);
-    opacity: 0.65;
+    transform: scale(0.96);
+    opacity: 0.82;
   }
   50% {
-    transform: scale(1.12);
+    transform: scale(1.14);
     opacity: 1;
   }
 }
 
-/* 圆环呼吸 */
 @keyframes ringBreath1 {
   0%, 100% {
-    transform: scale(0.985);
-    opacity: 0.3;
+    transform: scale(0.99);
   }
   50% {
-    transform: scale(1.02);
-    opacity: 0.42;
+    transform: scale(1.018);
   }
 }
 
@@ -258,54 +259,47 @@ export default {
     transform: scale(0.992);
   }
   50% {
-    transform: scale(1.028);
+    transform: scale(1.024);
   }
 }
 
 @keyframes ringBreath3 {
   0%, 100% {
-    transform: scale(0.99);
+    transform: scale(0.994);
   }
   50% {
-    transform: scale(1.022);
+    transform: scale(1.02);
   }
 }
 
 @keyframes ringBreath4 {
   0%, 100% {
     transform: scale(0.996);
-    opacity: 0.88;
   }
   50% {
-    transform: scale(1.035);
-    opacity: 1;
+    transform: scale(1.03);
   }
 }
 
 @keyframes centerBreath {
   0%, 100% {
-    transform: scale(0.96);
-    opacity: 0.9;
+    transform: scale(0.97);
   }
   50% {
     transform: scale(1.08);
-    opacity: 1;
   }
 }
 
 @keyframes centerCoreBreath {
   0%, 100% {
-    transform: scale(0.92);
-    opacity: 0.9;
+    transform: scale(0.94);
   }
   50% {
     transform: scale(1.16);
-    opacity: 1;
   }
 }
 
-/* 旋转 */
-@keyframes rotateBreath2 {
+@keyframes rotateLayerA {
   from {
     rotate: 0deg;
   }
@@ -314,7 +308,7 @@ export default {
   }
 }
 
-@keyframes rotateBreath3 {
+@keyframes rotateLayerB {
   from {
     rotate: 360deg;
   }
@@ -323,7 +317,7 @@ export default {
   }
 }
 
-@keyframes rotateBreath4 {
+@keyframes rotateLayerC {
   from {
     rotate: 0deg;
   }
