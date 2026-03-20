@@ -37,49 +37,50 @@
   transform: rotate(-30deg) translateX(45px) translateY(-3px);
 }
 
+/* 由内向外扩散 */
 .svg-frame svg:nth-of-type(1) {
-  animation-delay: 0s;
+  animation-delay: 2.4s;
 }
 
 .svg-frame svg:nth-of-type(2) {
-  animation-delay: 0.35s;
+  animation-delay: 1.8s;
 }
 
 .svg-frame svg:nth-of-type(3) {
-  animation-delay: 0.7s;
+  animation-delay: 1.2s;
 }
 
 .svg-frame svg:nth-of-type(4) {
-  animation-delay: 1.05s;
+  animation-delay: 0.6s;
 }
 
 .svg-frame svg:nth-of-type(5) {
-  animation-delay: 1.4s;
+  animation-delay: 0s;
 }
 
 #out2 {
   animation: rotate16 7s ease-in-out infinite alternate, waveGlow 5.2s ease-in-out infinite;
   transform-origin: center;
-  animation-delay: 0s, 0.35s;
+  animation-delay: 0s, 2.4s;
 }
 
 #out3 {
   animation: rotate16 3s ease-in-out infinite alternate, waveGlow 4.2s ease-in-out infinite;
   transform-origin: center;
-  animation-delay: 0s, 0.7s;
+  animation-delay: 0s, 1.8s;
 }
 
 #inner3,
 #inner1 {
   animation: rotate16 4s ease-in-out infinite alternate, waveGlow 4.8s ease-in-out infinite;
   transform-origin: center;
-  animation-delay: 0s, 1.05s;
+  animation-delay: 0s, 0.6s;
 }
 
 #center1 {
   animation: rotate16 2s ease-in-out infinite alternate, waveGlowCenter 3.2s ease-in-out infinite;
   transform-origin: center;
-  animation-delay: 0s, 1.4s;
+  animation-delay: 0s, 0s;
 }
 
 @keyframes rotate16 {
@@ -134,6 +135,7 @@
   }
 }
 </style>
+
 
 <template> 
     <!-- From Uiverse.io by Nawsome -->
