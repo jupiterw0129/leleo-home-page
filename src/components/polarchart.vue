@@ -16,8 +16,6 @@ export default {
       skills: null,
       skillPoints: null,
       baseSkillPoints: null, 
-      // ⚠️ 关键修改：千万别把 chartInstance 和 animationFrameId 放在 data 里！
-      // 这会导致 Vue 的 Proxy 破坏 Chart.js 的内部更新机制。
     };
   },
   mounted() {
@@ -31,11 +29,11 @@ export default {
     // 初始化非响应式变量
     this.chartInstance = null;
     this.animationFrameId = null;
+    this.pistonStarted = false; // 新增：动画锁，防止动画被重复触发
 
     this.renderChart();
   },
   beforeDestroy() { 
-    // Vue 3 中如果你使用的是选项式 API，这里可能需要改成 beforeUnmount
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
     }
@@ -56,27 +54,28 @@ export default {
       return colors;
     },
     
-    // 活塞跳动动画引擎
     startPistonAnimation() {
-      // 确保之前的动画被清理
-      if (this.animationFrameId) {
-        cancelAnimationFrame(this.animationFrameId);
-      }
+      // 如果已经在运行，直接跳过，防止动画打架
+      if (this.animationFrameId) return;
+
+      // 获取当前图表数据集的引用，直接在原数组上修改（极大提升性能，避免 GC 顿挫）
+      const datasetData = this.chartInstance.data.datasets[0].data;
 
       const animate = () => {
         if (!this.chartInstance) return;
 
-        // ⚠️ 关键修改：使用 Date.now() 作为绝对时间，防止 requestAnimationFrame 时间戳在某些情况下异常
         const time = Date.now() / 300; 
 
-        const newData = this.baseSkillPoints.map((baseVal, index) => {
-          const amplitude = baseVal * 0.10; // 10% 振幅
-          const phase = index * (Math.PI / 1.5); // 相位错开
-          return baseVal + amplitude * Math.sin(time + phase);
-        });
+        // 性能优化：使用普通的 for 循环原地更新数据，不再每次 map 产生新数组
+        for (let i = 0; i < this.baseSkillPoints.length; i++) {
+          const baseVal = this.baseSkillPoints[i];
+          const amplitude = baseVal * 0.10; 
+          const phase = i * (Math.PI / 1.5); 
+          
+          datasetData[i] = baseVal + amplitude * Math.sin(time + phase);
+        }
 
-        // 强制更新数据
-        this.chartInstance.data.datasets[0].data = newData;
+        // 无动画模式强制刷新当前帧
         this.chartInstance.update('none');
 
         this.animationFrameId = requestAnimationFrame(animate);
@@ -92,6 +91,9 @@ export default {
       if (this.chartInstance) {
         this.chartInstance.destroy();
       }
+      
+      // 重置锁
+      this.pistonStarted = false; 
 
       this.chartInstance = new Chart(ctx, {
         type: 'polarArea',
@@ -112,6 +114,12 @@ export default {
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          
+          // 悬停动画配置：保持悬停响应，但缩短时间减少与 update('none') 的冲突
+          hover: {
+            animationDuration: 150 
+          },
+          
           plugins: {
             legend: {
               display: false,
@@ -130,7 +138,6 @@ export default {
               boxHeight: 10,
               displayColors: true,
               callbacks: {
-                // 显示真实的固定数值，而不是波动中的小数
                 label: (context) => {
                   const label = context.label || '';
                   const realValue = this.baseSkillPoints[context.dataIndex];
@@ -154,9 +161,12 @@ export default {
             easing: 'easeOutQuad',
             animateRotate: true,
             animateScale: true,
-            // ⚠️ 动画加载完毕后，开始“活塞”运动
             onComplete: () => {
-              this.startPistonAnimation();
+              // ⚠️ 关键修改：只在图表第一次彻底加载完毕时触发一次活塞动画
+              if (!this.pistonStarted) {
+                this.pistonStarted = true;
+                this.startPistonAnimation();
+              }
             }
           },
         },
@@ -165,6 +175,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-</style>
