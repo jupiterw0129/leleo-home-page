@@ -1,6 +1,6 @@
 <template>
-  <div class="chart-wrap reactor-rotate">
-    <canvas ref="polarChart"></canvas>
+  <div class="chart-wrap">
+    <canvas id="polarChart"></canvas>
   </div>
 </template>
 
@@ -10,49 +10,86 @@ import config from '../config.js';
 
 Chart.register(...registerables);
 
+// 自定义插件：让 polarArea 的每个扇形周期性向外偏移再回弹
+const breathingPolarPlugin = {
+  id: 'breathingPolarPlugin',
+  afterDatasetDraw(chart, args, pluginOptions) {
+    if (args.index !== 0) return;
+
+    const meta = chart.getDatasetMeta(0);
+    const elements = meta.data || [];
+    const time = Date.now() * (pluginOptions.speed || 0.003);
+    const amplitude = pluginOptions.amplitude || 6; // 偏移幅度，建议 4~8
+    const stagger = pluginOptions.stagger || 0.6;   // 每个扇形错峰
+
+    elements.forEach((arc, index) => {
+      if (!arc) return;
+
+      const { x, y, startAngle, endAngle } = arc;
+      const angle = (startAngle + endAngle) / 2;
+
+      // 呼吸节奏：0~1
+      const pulse = (Math.sin(time + index * stagger) + 1) / 2;
+
+      // 计算向外偏移量
+      const offset = pulse * amplitude;
+
+      // 保存原始位置，避免累计偏移
+      if (!arc.$origin) {
+        arc.$origin = { x, y };
+      }
+
+      arc.x = arc.$origin.x + Math.cos(angle) * offset;
+      arc.y = arc.$origin.y + Math.sin(angle) * offset;
+    });
+  },
+
+  beforeDatasetDraw(chart, args) {
+    if (args.index !== 0) return;
+
+    // 每次绘制前先还原，防止位置不断累积漂移
+    const meta = chart.getDatasetMeta(0);
+    const elements = meta.data || [];
+
+    elements.forEach((arc) => {
+      if (arc && arc.$origin) {
+        arc.x = arc.$origin.x;
+        arc.y = arc.$origin.y;
+      }
+    });
+  }
+};
+
+Chart.register(breathingPolarPlugin);
+
 export default {
   name: 'polarChart',
   data() {
     return {
       configdata: config,
-      skills: [],
-      skillPoints: [],
-      baseSkillPoints: [],
+      skills: null,
+      skillPoints: null,
       chartInstance: null,
-      pulseTimer: null,
-      phase: 0,
+      animationFrameId: null, // 保存 requestAnimationFrame
     };
   },
   mounted() {
     if (import.meta.env.VITE_CONFIG) {
       this.configdata = JSON.parse(import.meta.env.VITE_CONFIG);
     }
-
-    this.skills = this.configdata.polarChart.skills || [];
-    this.skillPoints = [...(this.configdata.polarChart.skillPoints || [])];
-    this.baseSkillPoints = [...this.skillPoints];
-
+    this.skills = this.configdata.polarChart.skills;
+    this.skillPoints = this.configdata.polarChart.skillPoints;
     this.renderChart();
-    this.startPulseAnimation();
-  },
-  beforeDestroy() {
-    this.cleanupChart();
+    this.startBreathing();
   },
   beforeUnmount() {
-    this.cleanupChart();
+    this.stopBreathing();
+    if (this.chartInstance) {
+      this.chartInstance.destroy();
+      this.chartInstance = null;
+    }
   },
   methods: {
-    cleanupChart() {
-      if (this.pulseTimer) {
-        clearInterval(this.pulseTimer);
-        this.pulseTimer = null;
-      }
-      if (this.chartInstance) {
-        this.chartInstance.destroy();
-        this.chartInstance = null;
-      }
-    },
-
     generateColors(count) {
       const colors = [];
       for (let i = 0; i < count; i++) {
@@ -64,8 +101,29 @@ export default {
       return colors;
     },
 
+    startBreathing() {
+      const animate = () => {
+        if (this.chartInstance) {
+          // 不走默认大动画，直接轻量刷新
+          this.chartInstance.draw();
+        }
+        this.animationFrameId = requestAnimationFrame(animate);
+      };
+      animate();
+    },
+
+    stopBreathing() {
+      if (this.animationFrameId) {
+        cancelAnimationFrame(this.animationFrameId);
+        this.animationFrameId = null;
+      }
+    },
+
     renderChart() {
-      const ctx = this.$refs.polarChart.getContext('2d');
+      const canvas = document.getElementById('polarChart');
+      if (!canvas) return;
+
+      const ctx = canvas.getContext('2d');
       const colors = this.generateColors(this.skills.length);
 
       if (this.chartInstance) {
@@ -78,12 +136,12 @@ export default {
           labels: this.skills,
           datasets: [{
             label: '技能点',
-            data: [...this.skillPoints],
+            data: this.skillPoints,
             backgroundColor: colors,
             borderColor: colors.map(color => color.replace('0.6', '1')),
             borderWidth: 2,
 
-            // 保留原 hover
+            // 保留你原本的 hover 交互
             hoverOffset: 15,
             hoverBackgroundColor: colors.map(color => color.replace('0.6', '0.8')),
             hoverBorderColor: '#ffffff',
@@ -94,8 +152,10 @@ export default {
           responsive: true,
           maintainAspectRatio: false,
           animation: {
-            duration: 300,
-            easing: 'easeInOutQuad'
+            duration: 1800,
+            easing: 'easeOutQuad',
+            animateRotate: true,
+            animateScale: true,
           },
           plugins: {
             legend: {
@@ -115,20 +175,26 @@ export default {
               boxHeight: 10,
               displayColors: true,
               callbacks: {
-                label(context) {
+                label: function(context) {
                   const label = context.label || '';
                   const value = context.raw || '';
                   return `${label}: ${value} 技能点`;
                 },
-                title(context) {
+                title: function(context) {
                   return `${context[0].label}`;
                 },
               },
             },
+
+            // 这里配置“呼吸”插件参数
+            breathingPolarPlugin: {
+              amplitude: 5, // 呼吸幅度：越大越明显，建议 4~8
+              speed: 0.0035, // 呼吸速度：越大越快
+              stagger: 0.8   // 扇形错峰
+            }
           },
           scales: {
             r: {
-              beginAtZero: true,
               ticks: {
                 display: false,
               },
@@ -145,32 +211,6 @@ export default {
         },
       });
     },
-
-    startPulseAnimation() {
-      // 自动律动，不依赖 hover
-      // 每个扇形按不同相位轻微变化，像“反应堆脉冲”
-      this.pulseTimer = setInterval(() => {
-        if (!this.chartInstance) return;
-
-        this.phase += 0.18;
-
-        const pulsedData = this.baseSkillPoints.map((base, index) => {
-          // 不同扇形错峰律动
-          const wave = Math.sin(this.phase + index * 0.8);
-
-          // 律动幅度：按基础值的 4%，最小 0.8，最大 3
-          const amplitude = Math.min(Math.max(base * 0.04, 0.8), 3);
-
-          const value = base + wave * amplitude;
-
-          // 防止出现负数
-          return Number(Math.max(0, value).toFixed(2));
-        });
-
-        this.chartInstance.data.datasets[0].data = pulsedData;
-        this.chartInstance.update();
-      }, 80);
-    },
   },
 };
 </script>
@@ -179,24 +219,6 @@ export default {
 .chart-wrap {
   position: relative;
   width: 100%;
-  height: 420px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* 整体缓慢旋转，不影响 hover 命中区域 */
-.reactor-rotate {
-  animation: reactorSpin 18s linear infinite;
-  transform-origin: center center;
-}
-
-@keyframes reactorSpin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  height: 400px;
 }
 </style>
