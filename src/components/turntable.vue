@@ -8,7 +8,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  filter: drop-shadow(0 0 3px v-bind(color2)) drop-shadow(0 0 8px v-bind(color2));
 }
 
 .svg-frame svg {
@@ -19,23 +18,23 @@
   width: 344px;
   height: 344px;
   fill: none;
-  filter: drop-shadow(0 0 2px v-bind(color2)) drop-shadow(0 0 6px v-bind(color2));
+  filter: drop-shadow(0 0 1px v-bind(color2));
 }
 
 .svg-frame:hover svg {
   transform: rotate(-80deg) skew(30deg) translateX(calc(45px * var(--i))) translateY(calc(-35px * var(--i)));
-  filter: drop-shadow(0 0 4px v-bind(color2)) drop-shadow(0 0 10px v-bind(color2)) drop-shadow(0 0 14px v-bind(color1));
+  filter: drop-shadow(0 0 2px v-bind(color2));
 }
 
 .svg-frame svg #center {
   transition: .5s;
   transform-origin: center;
-  filter: drop-shadow(0 0 2px v-bind(color1)) drop-shadow(0 0 6px v-bind(color1));
+  filter: drop-shadow(0 0 1px v-bind(color1));
 }
 
 .svg-frame:hover svg #center {
   transform: rotate(-30deg) translateX(45px) translateY(-3px);
-  filter: drop-shadow(0 0 4px v-bind(color1)) drop-shadow(0 0 8px v-bind(color1));
+  filter: drop-shadow(0 0 2px v-bind(color1));
 }
 
 #out2 {
