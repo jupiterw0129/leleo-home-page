@@ -60,25 +60,39 @@ export default {
       const datasetData = this.chartInstance.data.datasets[0].data;
       const startTime = Date.now(); 
 
+      // 【核心修复 1】：添加帧率控制器，锁定 30 FPS
+      const targetFPS = 30; 
+      const frameInterval = 1000 / targetFPS; // 约 33.33ms 绘制一次
+      let lastRenderTime = startTime;
+
       const animate = () => {
-        if (!this.chartInstance) return;
+        // 先注册下一帧，保证循环继续
+        this.animationFrameId = requestAnimationFrame(animate);
 
         const now = Date.now();
-        // 稍微加快一点淡入速度 (800ms) 让过渡更果断
-        const easeFactor = Math.min(1, (now - startTime) / 800); 
+        const elapsedSinceLast = now - lastRenderTime;
+
+        // 如果距离上次绘制还没到 33 毫秒，直接跳过，什么都不做（这步省下了海量 CPU！）
+        if (elapsedSinceLast < frameInterval) {
+            return; 
+        }
+
+        // 校准下次执行的时间，防止随着时间推移产生误差
+        lastRenderTime = now - (elapsedSinceLast % frameInterval);
+
+        // --- 下面是原本的数学计算 ---
+        const totalElapsed = now - startTime;
+        const easeFactor = Math.min(1, totalElapsed / 800); 
         const time = now / 300; 
 
-        // 这里的 i < datasetData.length 比 this.baseSkillPoints.length 更安全
         for (let i = 0; i < datasetData.length; i++) {
           const baseVal = this.baseSkillPoints[i];
           const amplitude = baseVal * 0.10 * easeFactor; 
           const phase = i * (Math.PI / 1.5); 
-          
           datasetData[i] = baseVal + amplitude * Math.sin(time + phase);
         }
 
         this.chartInstance.update('none');
-        this.animationFrameId = requestAnimationFrame(animate);
       };
 
       this.animationFrameId = requestAnimationFrame(animate);
@@ -88,9 +102,7 @@ export default {
       const ctx = document.getElementById('polarChart').getContext('2d');
       const colors = this.generateColors(this.skills.length);
       
-      // 1. 计算最大值，用于锁死坐标轴
       const maxScore = Math.max(...this.skillPoints);
-      // 2. 预留 25% 的空间给活塞动画和悬停膨胀，防止撑破坐标轴
       const maxScale = maxScore * 1.25;
 
       if (this.chartInstance) {
@@ -111,16 +123,23 @@ export default {
             hoverOffset: 15,
             hoverBackgroundColor: colors.map(color => color.replace('0.6', '0.8')),
             hoverBorderColor: '#ffffff',
-            hoverBorderWidth: 3
+            hoverBorderWidth: 3,
+            
+            // 【核心修复 2】：开启纯净数据模式。
+            // 告诉 Chart.js："我的数据只是简单的一维数组，别去解析格式了！" 极大提升 update 性能。
+            normalized: true, 
           }],
         },
-                options: {
+        options: {
           responsive: true,
           maintainAspectRatio: false,
+          hover: { animationDuration: 0 }, 
+          // 【核心修复 3】：进一步关闭没必要的内部动画开销
+          transitions: { active: { animation: { duration: 0 } } }, 
           plugins: {
             legend: { display: false },
             tooltip: {
-              animation: false, // ⚠️ 关键修复：彻底关闭提示框的淡入动画，防止被高频刷新打断！
+              animation: false, // 保持之前修复的 tooltip 无动画配置
               backgroundColor: 'rgba(40, 40, 40, 0.7)',
               titleColor: '#fff',
               bodyColor: '#fff',
@@ -131,7 +150,6 @@ export default {
               callbacks: {
                 label: (context) => {
                   const label = context.label || '';
-                  // 读取真实的静态数值
                   const realValue = this.baseSkillPoints[context.dataIndex];
                   return `${label}: ${realValue} 技能点`;
                 },
@@ -144,8 +162,6 @@ export default {
               ticks: { display: false },
               grid: { color: 'rgba(0, 0, 0, 0.1)', lineWidth: 0.5 },
               angleLines: { color: 'rgba(0, 0, 0, 0.2)', lineWidth: 1 },
-              
-              // 之前修复跳动的锁死坐标轴
               suggestedMax: maxScale, 
               max: maxScale, 
               beginAtZero: true
