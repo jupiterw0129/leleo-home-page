@@ -114,13 +114,13 @@ export default {
             hoverBorderWidth: 3
           }],
         },
-        options: {
+                options: {
           responsive: true,
           maintainAspectRatio: false,
-          hover: { animationDuration: 0 }, // 禁用悬停时的过渡动画，防止打架
           plugins: {
             legend: { display: false },
             tooltip: {
+              animation: false, // ⚠️ 关键修复：彻底关闭提示框的淡入动画，防止被高频刷新打断！
               backgroundColor: 'rgba(40, 40, 40, 0.7)',
               titleColor: '#fff',
               bodyColor: '#fff',
@@ -131,6 +131,7 @@ export default {
               callbacks: {
                 label: (context) => {
                   const label = context.label || '';
+                  // 读取真实的静态数值
                   const realValue = this.baseSkillPoints[context.dataIndex];
                   return `${label}: ${realValue} 技能点`;
                 },
@@ -144,9 +145,7 @@ export default {
               grid: { color: 'rgba(0, 0, 0, 0.1)', lineWidth: 0.5 },
               angleLines: { color: 'rgba(0, 0, 0, 0.2)', lineWidth: 1 },
               
-              // 【核心修复】锁死坐标轴！
-              // 告诉 Chart.js 无论数据怎么跳，坐标轴上限永远固定，
-              // 这样只有扇形在动，背景网格绝对不会跟着抖。
+              // 之前修复跳动的锁死坐标轴
               suggestedMax: maxScale, 
               max: maxScale, 
               beginAtZero: true
@@ -160,7 +159,6 @@ export default {
             onComplete: () => {
               if (!this.pistonStarted) {
                 this.pistonStarted = true;
-                // 加一个小小的延时(100ms)，等 Chart.js 把最后的像素渲染稳了再动
                 setTimeout(() => {
                     this.startPistonAnimation();
                 }, 100);
