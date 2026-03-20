@@ -15,9 +15,9 @@ export default {
       configdata: config,
       skills: null,
       skillPoints: null,
-      baseSkillPoints: null, // 新增：保存真实的初始技能点
-      chartInstance: null,
-      animationFrameId: null, // 新增：存储动画帧 ID 用于销毁
+      baseSkillPoints: null, 
+      // ⚠️ 关键修改：千万别把 chartInstance 和 animationFrameId 放在 data 里！
+      // 这会导致 Vue 的 Proxy 破坏 Chart.js 的内部更新机制。
     };
   },
   mounted() {
@@ -26,13 +26,16 @@ export default {
     }
     this.skills = this.configdata.polarChart.skills;
     this.skillPoints = this.configdata.polarChart.skillPoints;
-    // 拷贝一份真实数据，作为活塞运动的基准线
     this.baseSkillPoints = [...this.skillPoints]; 
     
+    // 初始化非响应式变量
+    this.chartInstance = null;
+    this.animationFrameId = null;
+
     this.renderChart();
   },
   beforeDestroy() { 
-    // 组件销毁前，必须停止动画循环，防止内存泄漏
+    // Vue 3 中如果你使用的是选项式 API，这里可能需要改成 beforeUnmount
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
     }
@@ -53,34 +56,32 @@ export default {
       return colors;
     },
     
-    // 新增：活塞跳动动画引擎
+    // 活塞跳动动画引擎
     startPistonAnimation() {
-      const animate = (timestamp) => {
+      // 确保之前的动画被清理
+      if (this.animationFrameId) {
+        cancelAnimationFrame(this.animationFrameId);
+      }
+
+      const animate = () => {
         if (!this.chartInstance) return;
 
-        // 控制速度：除以的数字越大，跳动越慢 (例如 300 比较适中)
-        const time = timestamp / 300; 
+        // ⚠️ 关键修改：使用 Date.now() 作为绝对时间，防止 requestAnimationFrame 时间戳在某些情况下异常
+        const time = Date.now() / 300; 
 
         const newData = this.baseSkillPoints.map((baseVal, index) => {
-          // 控制幅度：基础值的 10% 作为振幅
-          const amplitude = baseVal * 0.10; 
-          // 控制相位差：让每个扇形的波动错开，产生此起彼伏的活塞感
-          const phase = index * (Math.PI / 1.5); 
-
-          // 核心公式：基础值 + 振幅 * sin(时间 + 相位差)
+          const amplitude = baseVal * 0.10; // 10% 振幅
+          const phase = index * (Math.PI / 1.5); // 相位错开
           return baseVal + amplitude * Math.sin(time + phase);
         });
 
-        // 将计算出的波动数据赋给图表
+        // 强制更新数据
         this.chartInstance.data.datasets[0].data = newData;
-        // 使用 'none' 模式更新，这非常重要！防止与 Chart.js 默认的过渡动画打架导致卡顿
         this.chartInstance.update('none');
 
-        // 循环调用下一帧
         this.animationFrameId = requestAnimationFrame(animate);
       };
 
-      // 启动动画
       this.animationFrameId = requestAnimationFrame(animate);
     },
 
@@ -91,9 +92,6 @@ export default {
       if (this.chartInstance) {
         this.chartInstance.destroy();
       }
-      if (this.animationFrameId) {
-        cancelAnimationFrame(this.animationFrameId);
-      }
 
       this.chartInstance = new Chart(ctx, {
         type: 'polarArea',
@@ -101,7 +99,7 @@ export default {
           labels: this.skills,
           datasets: [{
             label: '技能点',
-            data: [...this.baseSkillPoints], // 初始使用真实数据
+            data: [...this.baseSkillPoints],
             backgroundColor: colors,
             borderColor: colors.map(color => color.replace('0.6', '1')),
             borderWidth: 2,
@@ -132,10 +130,9 @@ export default {
               boxHeight: 10,
               displayColors: true,
               callbacks: {
-                // 【重要修改】让 Tooltip 显示真实的技能点，而不是波动中的小数点
+                // 显示真实的固定数值，而不是波动中的小数
                 label: (context) => {
                   const label = context.label || '';
-                  // 从 baseSkillPoints 读取真实值，而不是用 context.raw
                   const realValue = this.baseSkillPoints[context.dataIndex];
                   return `${label}: ${realValue} 技能点`;
                 },
@@ -153,17 +150,13 @@ export default {
             },
           },
           animation: {
-            // 初始加载动画配置
             duration: 1800,
             easing: 'easeOutQuad',
             animateRotate: true,
             animateScale: true,
-            // 初始加载动画完成后，触发活塞跳动动画
+            // ⚠️ 动画加载完毕后，开始“活塞”运动
             onComplete: () => {
-              // 确保只启动一次
-              if (!this.animationFrameId) {
-                this.startPistonAnimation();
-              }
+              this.startPistonAnimation();
             }
           },
         },
@@ -172,3 +165,6 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+</style>
