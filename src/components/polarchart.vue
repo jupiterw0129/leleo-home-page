@@ -5,10 +5,100 @@
 </template>
 
 <script>
-import { Chart, registerables } from 'chart.js';
+import { Chart, ArcElement, Tooltip, Legend, RadialLinearScale } from 'chart.js';
 import config from '../config.js';
 
-Chart.register(...registerables);
+Chart.register(ArcElement, Tooltip, Legend, RadialLinearScale);
+
+// 纯绘制型插件：不改数据，不改事件，只改显示效果
+const breathingPolarPlugin = {
+  id: 'breathingPolarPlugin',
+
+  afterDatasetsDraw(chart, args, pluginOptions) {
+    const datasetIndex = 0;
+    const meta = chart.getDatasetMeta(datasetIndex);
+    const dataset = chart.data.datasets[datasetIndex];
+    if (!meta || !meta.data) return;
+
+    const ctx = chart.ctx;
+    const time = performance.now() * (pluginOptions.speed || 0.0025);
+    const amplitude = pluginOptions.amplitude || 6;
+    const stagger = pluginOptions.stagger || 0.8;
+
+    meta.data.forEach((arc, i) => {
+      const props = arc.getProps(
+        ['x', 'y', 'startAngle', 'endAngle', 'innerRadius', 'outerRadius', 'options'],
+        true
+      );
+
+      const angle = (props.startAngle + props.endAngle) / 2;
+      const pulse = (Math.sin(time + i * stagger) + 1) / 2;
+      const offset = pulse * amplitude;
+
+      const dx = Math.cos(angle) * offset;
+      const dy = Math.sin(angle) * offset;
+
+      // hover 时保留原本的 hoverOffset 视觉增强
+      const isActive = arc.active === true;
+      const extraHoverOffset = isActive ? (props.options.hoverOffset || 15) : 0;
+      const hdx = Math.cos(angle) * extraHoverOffset;
+      const hdy = Math.sin(angle) * extraHoverOffset;
+
+      const backgroundColor = Array.isArray(dataset.backgroundColor)
+        ? dataset.backgroundColor[i]
+        : dataset.backgroundColor;
+
+      const borderColor = Array.isArray(dataset.borderColor)
+        ? dataset.borderColor[i]
+        : dataset.borderColor;
+
+      const hoverBackgroundColor = Array.isArray(dataset.hoverBackgroundColor)
+        ? dataset.hoverBackgroundColor[i]
+        : dataset.hoverBackgroundColor;
+
+      const hoverBorderColor = dataset.hoverBorderColor || '#ffffff';
+      const hoverBorderWidth = dataset.hoverBorderWidth || 3;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(props.x + dx + hdx, props.y + dy + hdy);
+      ctx.arc(
+        props.x + dx + hdx,
+        props.y + dy + hdy,
+        props.outerRadius,
+        props.startAngle,
+        props.endAngle
+      );
+      ctx.arc(
+        props.x + dx + hdx,
+        props.y + dy + hdy,
+        props.innerRadius,
+        props.endAngle,
+        props.startAngle,
+        true
+      );
+      ctx.closePath();
+
+      ctx.fillStyle = isActive
+        ? (hoverBackgroundColor || backgroundColor)
+        : backgroundColor;
+      ctx.fill();
+
+      ctx.lineWidth = isActive
+        ? hoverBorderWidth
+        : (Array.isArray(dataset.borderWidth) ? dataset.borderWidth[i] : dataset.borderWidth || 2);
+
+      ctx.strokeStyle = isActive
+        ? hoverBorderColor
+        : borderColor;
+
+      ctx.stroke();
+      ctx.restore();
+    });
+  }
+};
+
+Chart.register(breathingPolarPlugin);
 
 export default {
   name: 'polarChart',
@@ -19,7 +109,6 @@ export default {
       skillPoints: null,
       chartInstance: null,
       animationFrameId: null,
-      baseOffsets: [], // 每个扇形当前的动态偏移
     };
   },
   mounted() {
@@ -28,13 +117,12 @@ export default {
     }
     this.skills = this.configdata.polarChart.skills;
     this.skillPoints = this.configdata.polarChart.skillPoints;
-    this.baseOffsets = new Array(this.skills.length).fill(0);
 
     this.renderChart();
-    this.startPulseAnimation();
+    this.startBreathing();
   },
   beforeUnmount() {
-    this.stopPulseAnimation();
+    this.stopBreathing();
 
     if (this.chartInstance) {
       this.chartInstance.destroy();
@@ -71,25 +159,28 @@ export default {
           datasets: [{
             label: '技能点',
             data: this.skillPoints,
+
+            // 保持你的原配色
             backgroundColor: colors,
             borderColor: colors.map(color => color.replace('0.6', '1')),
             borderWidth: 2,
 
-            // 初始 offset
-            offset: (context) => {
-              return this.baseOffsets[context.dataIndex] || 0;
-            },
-
-            // 保留你的 hover 效果
+            // 保持 hover 配置
             hoverOffset: 15,
             hoverBackgroundColor: colors.map(color => color.replace('0.6', '0.8')),
             hoverBorderColor: '#ffffff',
-            hoverBorderWidth: 3
+            hoverBorderWidth: 3,
           }],
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
+
+          // 关闭默认数据动画，避免和自定义“呼吸”打架
+          animation: {
+            duration: 0,
+          },
+
           plugins: {
             legend: {
               display: false,
@@ -118,7 +209,15 @@ export default {
                 },
               },
             },
+
+            // 插件参数
+            breathingPolarPlugin: {
+              amplitude: 8,
+              speed: 0.003,
+              stagger: 0.8,
+            }
           },
+
           scales: {
             r: {
               ticks: {
@@ -134,42 +233,65 @@ export default {
               },
             },
           },
-          animation: {
-            duration: 1800,
-            easing: 'easeOutQuad',
-            animateRotate: true,
-            animateScale: true,
+
+          // 交互保持开启
+          interaction: {
+            mode: 'nearest',
+            intersect: true,
           },
         },
+
+        plugins: [
+          {
+            // 把原始扇形隐藏掉，但保留事件命中
+            id: 'hideOriginalArcs',
+            beforeDatasetDraw(chart, args) {
+              if (args.index !== 0) return;
+
+              const meta = chart.getDatasetMeta(0);
+              meta.data.forEach((arc) => {
+                if (!arc.$savedOptions) {
+                  arc.$savedOptions = {
+                    backgroundColor: arc.options.backgroundColor,
+                    borderColor: arc.options.borderColor,
+                    borderWidth: arc.options.borderWidth,
+                  };
+                }
+
+                arc.options.backgroundColor = 'rgba(0,0,0,0)';
+                arc.options.borderColor = 'rgba(0,0,0,0)';
+                arc.options.borderWidth = 0;
+              });
+            },
+            afterDatasetDraw(chart, args) {
+              if (args.index !== 0) return;
+
+              const meta = chart.getDatasetMeta(0);
+              meta.data.forEach((arc) => {
+                if (arc.$savedOptions) {
+                  arc.options.backgroundColor = arc.$savedOptions.backgroundColor;
+                  arc.options.borderColor = arc.$savedOptions.borderColor;
+                  arc.options.borderWidth = arc.$savedOptions.borderWidth;
+                }
+              });
+            }
+          }
+        ]
       });
     },
 
-    startPulseAnimation() {
-      const amplitude = 8;   // 最大外扩距离
-      const speed = 0.003;   // 速度
-      const stagger = 0.8;   // 每个扇形错峰
-
-      const animate = () => {
-        const t = performance.now() * speed;
-
-        this.baseOffsets = this.baseOffsets.map((_, i) => {
-          // 0 ~ 1 的平滑脉冲
-          const pulse = (Math.sin(t + i * stagger) + 1) / 2;
-          return pulse * amplitude;
-        });
-
+    startBreathing() {
+      const loop = () => {
         if (this.chartInstance) {
-          // 关键：更新但不要走大动画
-          this.chartInstance.update('none');
+          // 只重绘，不 update 数据，不破坏 hover 状态
+          this.chartInstance.draw();
         }
-
-        this.animationFrameId = requestAnimationFrame(animate);
+        this.animationFrameId = requestAnimationFrame(loop);
       };
-
-      animate();
+      loop();
     },
 
-    stopPulseAnimation() {
+    stopBreathing() {
       if (this.animationFrameId) {
         cancelAnimationFrame(this.animationFrameId);
         this.animationFrameId = null;
