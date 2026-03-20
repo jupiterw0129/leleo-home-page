@@ -54,28 +54,37 @@ export default {
       return colors;
     },
     
-    startPistonAnimation() {
-      // 如果已经在运行，直接跳过，防止动画打架
+        startPistonAnimation() {
       if (this.animationFrameId) return;
 
-      // 获取当前图表数据集的引用，直接在原数组上修改（极大提升性能，避免 GC 顿挫）
       const datasetData = this.chartInstance.data.datasets[0].data;
+      
+      // 新增：记录活塞动画开始的精确时间点
+      const startTime = Date.now(); 
 
       const animate = () => {
         if (!this.chartInstance) return;
 
-        const time = Date.now() / 300; 
+        const now = Date.now();
+        const elapsed = now - startTime; // 计算动画运行了多久（毫秒）
+        
+        // 【核心修复】：振幅淡入因子 (0 到 1)
+        // 让活塞跳动的力度在最初的 1.2 秒（1200ms）内，从 0 平滑过渡到 100%
+        // 这样交接瞬间的变化量绝对为 0，彻底消灭“突的一下”
+        const easeFactor = Math.min(1, elapsed / 1200); 
 
-        // 性能优化：使用普通的 for 循环原地更新数据，不再每次 map 产生新数组
+        const time = now / 300; 
+
         for (let i = 0; i < this.baseSkillPoints.length; i++) {
           const baseVal = this.baseSkillPoints[i];
-          const amplitude = baseVal * 0.10; 
+          
+          // 将淡入因子乘到振幅上
+          const amplitude = baseVal * 0.10 * easeFactor; 
           const phase = i * (Math.PI / 1.5); 
           
           datasetData[i] = baseVal + amplitude * Math.sin(time + phase);
         }
 
-        // 无动画模式强制刷新当前帧
         this.chartInstance.update('none');
 
         this.animationFrameId = requestAnimationFrame(animate);
