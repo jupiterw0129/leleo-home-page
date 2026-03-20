@@ -9,7 +9,6 @@
   justify-content: center;
   align-items: center;
 }
-
 .svg-frame svg {
   position: absolute;
   transition: .5s;
@@ -18,8 +17,6 @@
   width: 344px;
   height: 344px;
   fill: none;
-  filter: drop-shadow(0 0 1px v-bind(color2));
-  animation: waveGlow 4.6s ease-in-out infinite;
 }
 
 .svg-frame:hover svg {
@@ -29,58 +26,31 @@
 .svg-frame svg #center {
   transition: .5s;
   transform-origin: center;
-  filter: drop-shadow(0 0 1px v-bind(color1));
-  animation: waveGlowCenter 3.8s ease-in-out infinite;
 }
 
 .svg-frame:hover svg #center {
   transform: rotate(-30deg) translateX(45px) translateY(-3px);
 }
 
-/* 由内向外扩散 */
-.svg-frame svg:nth-of-type(1) {
-  animation-delay: 2.4s;
-}
-
-.svg-frame svg:nth-of-type(2) {
-  animation-delay: 1.8s;
-}
-
-.svg-frame svg:nth-of-type(3) {
-  animation-delay: 1.2s;
-}
-
-.svg-frame svg:nth-of-type(4) {
-  animation-delay: 0.6s;
-}
-
-.svg-frame svg:nth-of-type(5) {
-  animation-delay: 0s;
-}
-
 #out2 {
-  animation: rotate16 7s ease-in-out infinite alternate, waveGlow 5.2s ease-in-out infinite;
+  animation: rotate16 7s ease-in-out infinite alternate;
   transform-origin: center;
-  animation-delay: 0s, 2.4s;
 }
 
 #out3 {
-  animation: rotate16 3s ease-in-out infinite alternate, waveGlow 4.2s ease-in-out infinite;
+  animation: rotate16 3s ease-in-out infinite alternate;
   transform-origin: center;
-  animation-delay: 0s, 1.8s;
 }
 
 #inner3,
 #inner1 {
-  animation: rotate16 4s ease-in-out infinite alternate, waveGlow 4.8s ease-in-out infinite;
+  animation: rotate16 4s ease-in-out infinite alternate;
   transform-origin: center;
-  animation-delay: 0s, 0.6s;
 }
 
 #center1 {
-  animation: rotate16 2s ease-in-out infinite alternate, waveGlowCenter 3.2s ease-in-out infinite;
+  animation: rotate16 2s ease-in-out infinite alternate;
   transform-origin: center;
-  animation-delay: 0s, 0s;
 }
 
 @keyframes rotate16 {
@@ -88,54 +58,7 @@
     transform: rotate(360deg);
   }
 }
-
-@keyframes waveGlow {
-  0% {
-    filter: drop-shadow(0 0 1px v-bind(color2));
-    opacity: 0.88;
-  }
-  25% {
-    filter: drop-shadow(0 0 2px v-bind(color2));
-    opacity: 0.94;
-  }
-  50% {
-    filter: drop-shadow(0 0 3px v-bind(color2));
-    opacity: 1;
-  }
-  75% {
-    filter: drop-shadow(0 0 2px v-bind(color2));
-    opacity: 0.95;
-  }
-  100% {
-    filter: drop-shadow(0 0 1px v-bind(color2));
-    opacity: 0.88;
-  }
-}
-
-@keyframes waveGlowCenter {
-  0% {
-    filter: drop-shadow(0 0 1px v-bind(color1));
-    opacity: 0.9;
-  }
-  25% {
-    filter: drop-shadow(0 0 2px v-bind(color1));
-    opacity: 0.96;
-  }
-  50% {
-    filter: drop-shadow(0 0 3px v-bind(color1));
-    opacity: 1;
-  }
-  75% {
-    filter: drop-shadow(0 0 2px v-bind(color1));
-    opacity: 0.96;
-  }
-  100% {
-    filter: drop-shadow(0 0 1px v-bind(color1));
-    opacity: 0.9;
-  }
-}
 </style>
-
 
 <template> 
     <!-- From Uiverse.io by Nawsome -->
