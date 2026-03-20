@@ -26,10 +26,10 @@ export default {
     this.skillPoints = this.configdata.polarChart.skillPoints;
     this.baseSkillPoints = [...this.skillPoints]; 
     
-    // 初始化非响应式变量
+    // 非响应式变量
     this.chartInstance = null;
     this.animationFrameId = null;
-    this.pistonStarted = false; // 新增：动画锁，防止动画被重复触发
+    this.pistonStarted = false; 
 
     this.renderChart();
   },
@@ -54,31 +54,23 @@ export default {
       return colors;
     },
     
-        startPistonAnimation() {
+    startPistonAnimation() {
       if (this.animationFrameId) return;
 
       const datasetData = this.chartInstance.data.datasets[0].data;
-      
-      // 新增：记录活塞动画开始的精确时间点
       const startTime = Date.now(); 
 
       const animate = () => {
         if (!this.chartInstance) return;
 
         const now = Date.now();
-        const elapsed = now - startTime; // 计算动画运行了多久（毫秒）
-        
-        // 【核心修复】：振幅淡入因子 (0 到 1)
-        // 让活塞跳动的力度在最初的 1.2 秒（1200ms）内，从 0 平滑过渡到 100%
-        // 这样交接瞬间的变化量绝对为 0，彻底消灭“突的一下”
-        const easeFactor = Math.min(1, elapsed / 1200); 
-
+        // 稍微加快一点淡入速度 (800ms) 让过渡更果断
+        const easeFactor = Math.min(1, (now - startTime) / 800); 
         const time = now / 300; 
 
-        for (let i = 0; i < this.baseSkillPoints.length; i++) {
+        // 这里的 i < datasetData.length 比 this.baseSkillPoints.length 更安全
+        for (let i = 0; i < datasetData.length; i++) {
           const baseVal = this.baseSkillPoints[i];
-          
-          // 将淡入因子乘到振幅上
           const amplitude = baseVal * 0.10 * easeFactor; 
           const phase = i * (Math.PI / 1.5); 
           
@@ -86,7 +78,6 @@ export default {
         }
 
         this.chartInstance.update('none');
-
         this.animationFrameId = requestAnimationFrame(animate);
       };
 
@@ -97,11 +88,14 @@ export default {
       const ctx = document.getElementById('polarChart').getContext('2d');
       const colors = this.generateColors(this.skills.length);
       
+      // 1. 计算最大值，用于锁死坐标轴
+      const maxScore = Math.max(...this.skillPoints);
+      // 2. 预留 25% 的空间给活塞动画和悬停膨胀，防止撑破坐标轴
+      const maxScale = maxScore * 1.25;
+
       if (this.chartInstance) {
         this.chartInstance.destroy();
       }
-      
-      // 重置锁
       this.pistonStarted = false; 
 
       this.chartInstance = new Chart(ctx, {
@@ -123,16 +117,9 @@ export default {
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          
-          // 悬停动画配置：保持悬停响应，但缩短时间减少与 update('none') 的冲突
-          hover: {
-            animationDuration: 150 
-          },
-          
+          hover: { animationDuration: 0 }, // 禁用悬停时的过渡动画，防止打架
           plugins: {
-            legend: {
-              display: false,
-            },
+            legend: { display: false },
             tooltip: {
               backgroundColor: 'rgba(40, 40, 40, 0.7)',
               titleColor: '#fff',
@@ -140,11 +127,6 @@ export default {
               borderColor: 'rgba(255, 255, 255, 0.2)',
               borderWidth: 2,
               padding: 10,
-              caretSize: 6,
-              caretPadding: 8,
-              cornerRadius: 6,
-              boxWidth: 10,
-              boxHeight: 10,
               displayColors: true,
               callbacks: {
                 label: (context) => {
@@ -152,9 +134,7 @@ export default {
                   const realValue = this.baseSkillPoints[context.dataIndex];
                   return `${label}: ${realValue} 技能点`;
                 },
-                title: function(context) {
-                  return `${context[0].label}`;
-                },
+                title: (context) => context[0].label,
               },
             },
           },
@@ -163,6 +143,13 @@ export default {
               ticks: { display: false },
               grid: { color: 'rgba(0, 0, 0, 0.1)', lineWidth: 0.5 },
               angleLines: { color: 'rgba(0, 0, 0, 0.2)', lineWidth: 1 },
+              
+              // 【核心修复】锁死坐标轴！
+              // 告诉 Chart.js 无论数据怎么跳，坐标轴上限永远固定，
+              // 这样只有扇形在动，背景网格绝对不会跟着抖。
+              suggestedMax: maxScale, 
+              max: maxScale, 
+              beginAtZero: true
             },
           },
           animation: {
@@ -171,10 +158,12 @@ export default {
             animateRotate: true,
             animateScale: true,
             onComplete: () => {
-              // ⚠️ 关键修改：只在图表第一次彻底加载完毕时触发一次活塞动画
               if (!this.pistonStarted) {
                 this.pistonStarted = true;
-                this.startPistonAnimation();
+                // 加一个小小的延时(100ms)，等 Chart.js 把最后的像素渲染稳了再动
+                setTimeout(() => {
+                    this.startPistonAnimation();
+                }, 100);
               }
             }
           },
