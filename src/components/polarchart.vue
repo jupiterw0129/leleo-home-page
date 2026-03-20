@@ -1,104 +1,63 @@
 <template>
-  <div class="chart-wrap">
-    <canvas ref="polarChart"></canvas>
+  <div class="chart-wrapper">
+    <canvas id="polarChart"></canvas>
   </div>
 </template>
 
 <script>
-import { Chart, ArcElement, Tooltip, Legend, RadialLinearScale } from 'chart.js';
+import { Chart, registerables } from 'chart.js';
 import config from '../config.js';
 
-Chart.register(ArcElement, Tooltip, Legend, RadialLinearScale);
+Chart.register(...registerables);
 
-// 纯绘制型插件：不改数据，不改事件，只改显示效果
-const breathingPolarPlugin = {
-  id: 'breathingPolarPlugin',
+// 自定义插件：让每个扇形周期性向外伸缩
+const breathingPolarAreaPlugin = {
+  id: 'breathingPolarAreaPlugin',
+  afterDatasetDraw(chart, args, pluginOptions) {
+    const { ctx } = chart;
+    const meta = chart.getDatasetMeta(args.index);
 
-  afterDatasetsDraw(chart, args, pluginOptions) {
-    const datasetIndex = 0;
-    const meta = chart.getDatasetMeta(datasetIndex);
-    const dataset = chart.data.datasets[datasetIndex];
     if (!meta || !meta.data) return;
 
-    const ctx = chart.ctx;
-    const time = performance.now() * (pluginOptions.speed || 0.0025);
-    const amplitude = pluginOptions.amplitude || 6;
-    const stagger = pluginOptions.stagger || 0.8;
+    const time = Date.now() * 0.003; // 控制整体速度
+    const amplitude = pluginOptions?.amplitude ?? 8; // 律动幅度
+    const speed = pluginOptions?.speed ?? 1; // 律动速度
+    const stagger = pluginOptions?.stagger ?? 0.6; // 各扇形错峰
 
-    meta.data.forEach((arc, i) => {
-      const props = arc.getProps(
-        ['x', 'y', 'startAngle', 'endAngle', 'innerRadius', 'outerRadius', 'options'],
-        true
-      );
+    meta.data.forEach((arc, index) => {
+      if (!arc) return;
 
-      const angle = (props.startAngle + props.endAngle) / 2;
-      const pulse = (Math.sin(time + i * stagger) + 1) / 2;
+      // 保存原始半径，避免累计叠加
+      if (arc.$originalOuterRadius == null) {
+        arc.$originalOuterRadius = arc.outerRadius;
+      }
+
+      const pulse = Math.sin(time * speed + index * stagger);
       const offset = pulse * amplitude;
 
-      const dx = Math.cos(angle) * offset;
-      const dy = Math.sin(angle) * offset;
-
-      // hover 时保留原本的 hoverOffset 视觉增强
-      const isActive = arc.active === true;
-      const extraHoverOffset = isActive ? (props.options.hoverOffset || 15) : 0;
-      const hdx = Math.cos(angle) * extraHoverOffset;
-      const hdy = Math.sin(angle) * extraHoverOffset;
-
-      const backgroundColor = Array.isArray(dataset.backgroundColor)
-        ? dataset.backgroundColor[i]
-        : dataset.backgroundColor;
-
-      const borderColor = Array.isArray(dataset.borderColor)
-        ? dataset.borderColor[i]
-        : dataset.borderColor;
-
-      const hoverBackgroundColor = Array.isArray(dataset.hoverBackgroundColor)
-        ? dataset.hoverBackgroundColor[i]
-        : dataset.hoverBackgroundColor;
-
-      const hoverBorderColor = dataset.hoverBorderColor || '#ffffff';
-      const hoverBorderWidth = dataset.hoverBorderWidth || 3;
-
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(props.x + dx + hdx, props.y + dy + hdy);
-      ctx.arc(
-        props.x + dx + hdx,
-        props.y + dy + hdy,
-        props.outerRadius,
-        props.startAngle,
-        props.endAngle
-      );
-      ctx.arc(
-        props.x + dx + hdx,
-        props.y + dy + hdy,
-        props.innerRadius,
-        props.endAngle,
-        props.startAngle,
-        true
-      );
-      ctx.closePath();
-
-      ctx.fillStyle = isActive
-        ? (hoverBackgroundColor || backgroundColor)
-        : backgroundColor;
-      ctx.fill();
-
-      ctx.lineWidth = isActive
-        ? hoverBorderWidth
-        : (Array.isArray(dataset.borderWidth) ? dataset.borderWidth[i] : dataset.borderWidth || 2);
-
-      ctx.strokeStyle = isActive
-        ? hoverBorderColor
-        : borderColor;
-
-      ctx.stroke();
-      ctx.restore();
+      arc.outerRadius = arc.$originalOuterRadius + offset;
     });
+
+    // 触发下一帧
+    if (!chart.$breathingAnimationFrame) {
+      const animate = () => {
+        if (!chart || chart._destroyed) return;
+        chart.draw();
+        chart.$breathingAnimationFrame = requestAnimationFrame(animate);
+      };
+      chart.$breathingAnimationFrame = requestAnimationFrame(animate);
+    }
+  },
+
+  beforeDestroy(chart) {
+    if (chart.$breathingAnimationFrame) {
+      cancelAnimationFrame(chart.$breathingAnimationFrame);
+      chart.$breathingAnimationFrame = null;
+    }
   }
 };
 
-Chart.register(breathingPolarPlugin);
+Chart.register(breathingPolarAreaPlugin);
 
 export default {
   name: 'polarChart',
@@ -108,7 +67,6 @@ export default {
       skills: null,
       skillPoints: null,
       chartInstance: null,
-      animationFrameId: null,
     };
   },
   mounted() {
@@ -117,14 +75,14 @@ export default {
     }
     this.skills = this.configdata.polarChart.skills;
     this.skillPoints = this.configdata.polarChart.skillPoints;
-
     this.renderChart();
-    this.startBreathing();
   },
   beforeUnmount() {
-    this.stopBreathing();
-
     if (this.chartInstance) {
+      if (this.chartInstance.$breathingAnimationFrame) {
+        cancelAnimationFrame(this.chartInstance.$breathingAnimationFrame);
+        this.chartInstance.$breathingAnimationFrame = null;
+      }
       this.chartInstance.destroy();
       this.chartInstance = null;
     }
@@ -140,15 +98,16 @@ export default {
       }
       return colors;
     },
-
     renderChart() {
-      const canvas = this.$refs.polarChart;
-      if (!canvas) return;
-
+      const canvas = document.getElementById('polarChart');
       const ctx = canvas.getContext('2d');
       const colors = this.generateColors(this.skills.length);
 
       if (this.chartInstance) {
+        if (this.chartInstance.$breathingAnimationFrame) {
+          cancelAnimationFrame(this.chartInstance.$breathingAnimationFrame);
+          this.chartInstance.$breathingAnimationFrame = null;
+        }
         this.chartInstance.destroy();
       }
 
@@ -159,28 +118,18 @@ export default {
           datasets: [{
             label: '技能点',
             data: this.skillPoints,
-
-            // 保持你的原配色
             backgroundColor: colors,
             borderColor: colors.map(color => color.replace('0.6', '1')),
             borderWidth: 2,
-
-            // 保持 hover 配置
             hoverOffset: 15,
             hoverBackgroundColor: colors.map(color => color.replace('0.6', '0.8')),
             hoverBorderColor: '#ffffff',
-            hoverBorderWidth: 3,
+            hoverBorderWidth: 3
           }],
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-
-          // 关闭默认数据动画，避免和自定义“呼吸”打架
-          animation: {
-            duration: 0,
-          },
-
           plugins: {
             legend: {
               display: false,
@@ -210,14 +159,13 @@ export default {
               },
             },
 
-            // 插件参数
-            breathingPolarPlugin: {
-              amplitude: 8,
-              speed: 0.003,
-              stagger: 0.8,
+            // 自定义插件参数
+            breathingPolarAreaPlugin: {
+              amplitude: 6, // 往外伸缩的幅度
+              speed: 1.6,   // 速度
+              stagger: 0.8, // 每个扇形错开一点，更像律动
             }
           },
-
           scales: {
             r: {
               ticks: {
@@ -233,76 +181,21 @@ export default {
               },
             },
           },
-
-          // 交互保持开启
-          interaction: {
-            mode: 'nearest',
-            intersect: true,
+          animation: {
+            duration: 1800,
+            easing: 'easeOutQuad',
+            animateRotate: true,
+            animateScale: true,
           },
         },
-
-        plugins: [
-          {
-            // 把原始扇形隐藏掉，但保留事件命中
-            id: 'hideOriginalArcs',
-            beforeDatasetDraw(chart, args) {
-              if (args.index !== 0) return;
-
-              const meta = chart.getDatasetMeta(0);
-              meta.data.forEach((arc) => {
-                if (!arc.$savedOptions) {
-                  arc.$savedOptions = {
-                    backgroundColor: arc.options.backgroundColor,
-                    borderColor: arc.options.borderColor,
-                    borderWidth: arc.options.borderWidth,
-                  };
-                }
-
-                arc.options.backgroundColor = 'rgba(0,0,0,0)';
-                arc.options.borderColor = 'rgba(0,0,0,0)';
-                arc.options.borderWidth = 0;
-              });
-            },
-            afterDatasetDraw(chart, args) {
-              if (args.index !== 0) return;
-
-              const meta = chart.getDatasetMeta(0);
-              meta.data.forEach((arc) => {
-                if (arc.$savedOptions) {
-                  arc.options.backgroundColor = arc.$savedOptions.backgroundColor;
-                  arc.options.borderColor = arc.$savedOptions.borderColor;
-                  arc.options.borderWidth = arc.$savedOptions.borderWidth;
-                }
-              });
-            }
-          }
-        ]
       });
-    },
-
-    startBreathing() {
-      const loop = () => {
-        if (this.chartInstance) {
-          // 只重绘，不 update 数据，不破坏 hover 状态
-          this.chartInstance.draw();
-        }
-        this.animationFrameId = requestAnimationFrame(loop);
-      };
-      loop();
-    },
-
-    stopBreathing() {
-      if (this.animationFrameId) {
-        cancelAnimationFrame(this.animationFrameId);
-        this.animationFrameId = null;
-      }
     },
   },
 };
 </script>
 
 <style scoped>
-.chart-wrap {
+.chart-wrapper {
   position: relative;
   width: 100%;
   height: 400px;
