@@ -19,48 +19,70 @@
   height: 344px;
   fill: none;
   filter: drop-shadow(0 0 1px v-bind(color2));
+  animation: glowPulse 3s ease-in-out infinite alternate;
 }
 
 .svg-frame:hover svg {
   transform: rotate(-80deg) skew(30deg) translateX(calc(45px * var(--i))) translateY(calc(-35px * var(--i)));
-  filter: drop-shadow(0 0 2px v-bind(color2));
 }
 
 .svg-frame svg #center {
   transition: .5s;
   transform-origin: center;
   filter: drop-shadow(0 0 1px v-bind(color1));
+  animation: centerGlowPulse 2.4s ease-in-out infinite alternate;
 }
 
 .svg-frame:hover svg #center {
   transform: rotate(-30deg) translateX(45px) translateY(-3px);
-  filter: drop-shadow(0 0 2px v-bind(color1));
 }
 
 #out2 {
-  animation: rotate16 7s ease-in-out infinite alternate;
+  animation: rotate16 7s ease-in-out infinite alternate, glowPulse 3.2s ease-in-out infinite alternate;
   transform-origin: center;
 }
 
 #out3 {
-  animation: rotate16 3s ease-in-out infinite alternate;
+  animation: rotate16 3s ease-in-out infinite alternate, glowPulse 2.8s ease-in-out infinite alternate;
   transform-origin: center;
 }
 
 #inner3,
 #inner1 {
-  animation: rotate16 4s ease-in-out infinite alternate;
+  animation: rotate16 4s ease-in-out infinite alternate, glowPulse 3s ease-in-out infinite alternate;
   transform-origin: center;
 }
 
 #center1 {
-  animation: rotate16 2s ease-in-out infinite alternate;
+  animation: rotate16 2s ease-in-out infinite alternate, centerGlowPulse 2s ease-in-out infinite alternate;
   transform-origin: center;
 }
 
 @keyframes rotate16 {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes glowPulse {
+  0% {
+    filter: drop-shadow(0 0 1px v-bind(color2));
+    opacity: 0.92;
+  }
+  100% {
+    filter: drop-shadow(0 0 3px v-bind(color2));
+    opacity: 1;
+  }
+}
+
+@keyframes centerGlowPulse {
+  0% {
+    filter: drop-shadow(0 0 1px v-bind(color1));
+    opacity: 0.95;
+  }
+  100% {
+    filter: drop-shadow(0 0 4px v-bind(color1));
+    opacity: 1;
   }
 }
 </style>
