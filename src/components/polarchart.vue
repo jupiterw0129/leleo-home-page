@@ -87,8 +87,8 @@ export default {
 
         for (let i = 0; i < datasetData.length; i++) {
           const baseVal = this.baseSkillPoints[i];
-          const amplitude = baseVal * 0.10 * easeFactor; 
-          const phase = i * (Math.PI / 1.5); 
+          const amplitude = baseVal * 0.15 * easeFactor; 
+          const phase = i * (Math.PI / 1.6); 
           datasetData[i] = baseVal + amplitude * Math.sin(time + phase);
         }
 
