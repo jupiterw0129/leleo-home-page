@@ -67,7 +67,7 @@ onUnmounted(() => {
   letter-spacing: 1px;
   font-family: "xyz", serif;
   font-size: 25px;
-  font-weight: 500;
+  font-weight: 600;
   text-shadow: none;
 }
 
