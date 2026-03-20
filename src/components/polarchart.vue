@@ -1,6 +1,6 @@
 <template>
   <div class="chart-wrap">
-    <canvas id="polarChart"></canvas>
+    <canvas ref="polarChart"></canvas>
   </div>
 </template>
 
@@ -10,58 +10,6 @@ import config from '../config.js';
 
 Chart.register(...registerables);
 
-// 自定义插件：让 polarArea 的每个扇形周期性向外偏移再回弹
-const breathingPolarPlugin = {
-  id: 'breathingPolarPlugin',
-  afterDatasetDraw(chart, args, pluginOptions) {
-    if (args.index !== 0) return;
-
-    const meta = chart.getDatasetMeta(0);
-    const elements = meta.data || [];
-    const time = Date.now() * (pluginOptions.speed || 0.003);
-    const amplitude = pluginOptions.amplitude || 6; // 偏移幅度，建议 4~8
-    const stagger = pluginOptions.stagger || 0.6;   // 每个扇形错峰
-
-    elements.forEach((arc, index) => {
-      if (!arc) return;
-
-      const { x, y, startAngle, endAngle } = arc;
-      const angle = (startAngle + endAngle) / 2;
-
-      // 呼吸节奏：0~1
-      const pulse = (Math.sin(time + index * stagger) + 1) / 2;
-
-      // 计算向外偏移量
-      const offset = pulse * amplitude;
-
-      // 保存原始位置，避免累计偏移
-      if (!arc.$origin) {
-        arc.$origin = { x, y };
-      }
-
-      arc.x = arc.$origin.x + Math.cos(angle) * offset;
-      arc.y = arc.$origin.y + Math.sin(angle) * offset;
-    });
-  },
-
-  beforeDatasetDraw(chart, args) {
-    if (args.index !== 0) return;
-
-    // 每次绘制前先还原，防止位置不断累积漂移
-    const meta = chart.getDatasetMeta(0);
-    const elements = meta.data || [];
-
-    elements.forEach((arc) => {
-      if (arc && arc.$origin) {
-        arc.x = arc.$origin.x;
-        arc.y = arc.$origin.y;
-      }
-    });
-  }
-};
-
-Chart.register(breathingPolarPlugin);
-
 export default {
   name: 'polarChart',
   data() {
@@ -70,7 +18,8 @@ export default {
       skills: null,
       skillPoints: null,
       chartInstance: null,
-      animationFrameId: null, // 保存 requestAnimationFrame
+      animationFrameId: null,
+      baseOffsets: [], // 每个扇形当前的动态偏移
     };
   },
   mounted() {
@@ -79,11 +28,14 @@ export default {
     }
     this.skills = this.configdata.polarChart.skills;
     this.skillPoints = this.configdata.polarChart.skillPoints;
+    this.baseOffsets = new Array(this.skills.length).fill(0);
+
     this.renderChart();
-    this.startBreathing();
+    this.startPulseAnimation();
   },
   beforeUnmount() {
-    this.stopBreathing();
+    this.stopPulseAnimation();
+
     if (this.chartInstance) {
       this.chartInstance.destroy();
       this.chartInstance = null;
@@ -101,26 +53,8 @@ export default {
       return colors;
     },
 
-    startBreathing() {
-      const animate = () => {
-        if (this.chartInstance) {
-          // 不走默认大动画，直接轻量刷新
-          this.chartInstance.draw();
-        }
-        this.animationFrameId = requestAnimationFrame(animate);
-      };
-      animate();
-    },
-
-    stopBreathing() {
-      if (this.animationFrameId) {
-        cancelAnimationFrame(this.animationFrameId);
-        this.animationFrameId = null;
-      }
-    },
-
     renderChart() {
-      const canvas = document.getElementById('polarChart');
+      const canvas = this.$refs.polarChart;
       if (!canvas) return;
 
       const ctx = canvas.getContext('2d');
@@ -141,7 +75,12 @@ export default {
             borderColor: colors.map(color => color.replace('0.6', '1')),
             borderWidth: 2,
 
-            // 保留你原本的 hover 交互
+            // 初始 offset
+            offset: (context) => {
+              return this.baseOffsets[context.dataIndex] || 0;
+            },
+
+            // 保留你的 hover 效果
             hoverOffset: 15,
             hoverBackgroundColor: colors.map(color => color.replace('0.6', '0.8')),
             hoverBorderColor: '#ffffff',
@@ -151,12 +90,6 @@ export default {
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          animation: {
-            duration: 1800,
-            easing: 'easeOutQuad',
-            animateRotate: true,
-            animateScale: true,
-          },
           plugins: {
             legend: {
               display: false,
@@ -185,13 +118,6 @@ export default {
                 },
               },
             },
-
-            // 这里配置“呼吸”插件参数
-            breathingPolarPlugin: {
-              amplitude: 5, // 呼吸幅度：越大越明显，建议 4~8
-              speed: 0.0035, // 呼吸速度：越大越快
-              stagger: 0.8   // 扇形错峰
-            }
           },
           scales: {
             r: {
@@ -208,8 +134,46 @@ export default {
               },
             },
           },
+          animation: {
+            duration: 1800,
+            easing: 'easeOutQuad',
+            animateRotate: true,
+            animateScale: true,
+          },
         },
       });
+    },
+
+    startPulseAnimation() {
+      const amplitude = 8;   // 最大外扩距离
+      const speed = 0.003;   // 速度
+      const stagger = 0.8;   // 每个扇形错峰
+
+      const animate = () => {
+        const t = performance.now() * speed;
+
+        this.baseOffsets = this.baseOffsets.map((_, i) => {
+          // 0 ~ 1 的平滑脉冲
+          const pulse = (Math.sin(t + i * stagger) + 1) / 2;
+          return pulse * amplitude;
+        });
+
+        if (this.chartInstance) {
+          // 关键：更新但不要走大动画
+          this.chartInstance.update('none');
+        }
+
+        this.animationFrameId = requestAnimationFrame(animate);
+      };
+
+      animate();
+    },
+
+    stopPulseAnimation() {
+      if (this.animationFrameId) {
+        cancelAnimationFrame(this.animationFrameId);
+        this.animationFrameId = null;
+      }
     },
   },
 };
