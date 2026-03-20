@@ -17,9 +17,14 @@ export default {
       configdata: config,
       skills: null,
       skillPoints: null,
-      chartInstance: null,
-      animationFrameId: null, // 新增：用于存储动画帧ID，方便销毁
+      // ⚠️ 核心修复 1：绝对不要把 chartInstance 和 animationFrameId 放在 data 里！
+      // Vue 拦截 Chart 实例会导致可怕的性能问题和卡死。
     };
+  },
+  created() {
+    // 将不需要响应式的实例挂载到 this 上
+    this.chartInstance = null;
+    this.animationFrameId = null;
   },
   mounted() {
     if(import.meta.env.VITE_CONFIG){
@@ -30,7 +35,6 @@ export default {
     this.renderChart();
   },
   beforeDestroy() {
-    // 组件销毁前必须清理动画，防止内存泄漏
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
     }
@@ -51,38 +55,41 @@ export default {
       return colors;
     },
     
-    // 新增：启动律动动画的方法
     startRhythmAnimation() {
       const dataset = this.chartInstance.data.datasets[0];
       const numSlices = dataset.data.length;
       
-      // 初始化 offset 数组（如果还没有的话）
       if (!dataset.offset) {
         dataset.offset = new Array(numSlices).fill(0);
       }
 
-      // 动画核心参数
-      const speed = 400; // 动画速度，数值越小越快
-      const maxOffset = 15; // 扇形向外弹出的最大像素值
+      const speed = 400; // 动画速度
+      const maxOffset = 15; // 弹出的最大距离
 
       const animate = () => {
-        const time = Date.now() / speed;
-        
-        for (let i = 0; i < numSlices; i++) {
-          // 计算相位差：使得每个扇形依次弹起（发动机活塞效果）
-          // 如果你想要整体“心跳/呼吸”效果，把 phase 设为 0 即可：const phase = 0;
-          const phase = i * ((Math.PI * 2) / numSlices); 
+        // 如果实例已被销毁，安全退出
+        if (!this.chartInstance) return;
+
+        // ⚠️ 核心修复 2：悬停检测
+        // 获取当前鼠标正在悬停的元素
+        const activeElements = this.chartInstance.getActiveElements();
+        const isHovering = activeElements.length > 0;
+
+        // 只有在【没有悬停】的情况下，才更新律动动画
+        // 这样就把交互控制权完美还给了 Chart.js，悬停时绝对不会卡顿
+        if (!isHovering) {
+          const time = Date.now() / speed;
           
-          // Math.sin 产生 -1 到 1 的值，(sin + 1) / 2 将其转换为 0 到 1 的平滑值
-          const wave = (Math.sin(time + phase) + 1) / 2;
+          for (let i = 0; i < numSlices; i++) {
+            // 发动机活塞相差公式
+            const phase = i * ((Math.PI * 2) / numSlices); 
+            const wave = (Math.sin(time + phase) + 1) / 2;
+            dataset.offset[i] = wave * maxOffset;
+          }
           
-          // 动态设置当前扇形的偏移量
-          dataset.offset[i] = wave * maxOffset;
+          this.chartInstance.update('none'); 
         }
 
-        // 使用 'none' 模式更新图表，避免触发默认的重绘动画导致卡顿
-        this.chartInstance.update('none'); 
-        
         // 循环调用下一帧
         this.animationFrameId = requestAnimationFrame(animate);
       };
@@ -112,11 +119,10 @@ export default {
             borderColor: colors.map(color => color.replace('0.6', '1')),
             borderWidth: 2,
             
-            // 基础偏移量（会被动画动态修改）
             offset: new Array(this.skills.length).fill(0),
 
-            // 悬停效果
-            hoverOffset: 25, // 因为动画已经有 offset 了，悬停时的外扩可以再稍微加大一点点
+            // 悬停时的额外偏移量，当鼠标放上去时，扇形会进一步向外凸出一点
+            hoverOffset: 20, 
             hoverBackgroundColor: colors.map(color => color.replace('0.6', '0.9')),
             hoverBorderColor: '#ffffff',
             hoverBorderWidth: 3
@@ -128,11 +134,11 @@ export default {
           plugins: {
             legend: { display: false },
             tooltip: {
-              backgroundColor: 'rgba(40, 40, 40, 0.7)',
+              backgroundColor: 'rgba(40, 40, 40, 0.9)',
               titleColor: '#fff',
               bodyColor: '#fff',
-              borderColor: 'rgba(255, 255, 255, 0.2)',
-              borderWidth: 2,
+              borderColor: 'rgba(255, 255, 255, 0.3)',
+              borderWidth: 1,
               padding: 10,
               caretSize: 6,
               cornerRadius: 6,
@@ -151,12 +157,11 @@ export default {
             },
           },
           animation: {
-            duration: 1800,
-            easing: 'easeOutElastic', // 初始加载动画改成了有弹性的效果，看起来更有活力
+            duration: 1500,
+            easing: 'easeOutQuart',
             animateRotate: true,
             animateScale: true,
             onComplete: () => {
-              // 关键：等待 Chart.js 的初始开场动画结束后，再接上我们的无限循环律动动画
               if (!this.animationFrameId) {
                 this.startRhythmAnimation();
               }
