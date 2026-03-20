@@ -1,7 +1,5 @@
 <template>
-  <div style="width: 100%; height: 100%;">
-    <canvas id="polarChart"></canvas>
-  </div>
+  <canvas id="polarChart"></canvas>
 </template>
 
 <script>
@@ -17,14 +15,10 @@ export default {
       configdata: config,
       skills: null,
       skillPoints: null,
-      // ⚠️ 核心修复 1：绝对不要把 chartInstance 和 animationFrameId 放在 data 里！
-      // Vue 拦截 Chart 实例会导致可怕的性能问题和卡死。
+      originalSkillPoints: null, // 新增：保存真实的原始数据
+      chartInstance: null,
+      animationFrameId: null,    // 新增：保存动画帧ID，用于清理
     };
-  },
-  created() {
-    // 将不需要响应式的实例挂载到 this 上
-    this.chartInstance = null;
-    this.animationFrameId = null;
   },
   mounted() {
     if(import.meta.env.VITE_CONFIG){
@@ -32,14 +26,18 @@ export default {
     }
     this.skills = this.configdata.polarChart.skills;
     this.skillPoints = this.configdata.polarChart.skillPoints;
+    // 深拷贝一份原始数据，用于动画基准和 Tooltip 显示
+    this.originalSkillPoints = [...this.skillPoints]; 
+    
     this.renderChart();
   },
-  beforeDestroy() {
+  beforeDestroy() { 
+    // 组件销毁时，务必清除动画帧，防止内存泄漏
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
     }
     if (this.chartInstance) {
-      this.chartInstance.destroy();
+      this.chartInstance.destroy(); 
       this.chartInstance = null;
     }
   },
@@ -54,59 +52,16 @@ export default {
       }
       return colors;
     },
-    
-    startRhythmAnimation() {
-      const dataset = this.chartInstance.data.datasets[0];
-      const numSlices = dataset.data.length;
-      
-      if (!dataset.offset) {
-        dataset.offset = new Array(numSlices).fill(0);
-      }
-
-      const speed = 400; // 动画速度
-      const maxOffset = 15; // 弹出的最大距离
-
-      const animate = () => {
-        // 如果实例已被销毁，安全退出
-        if (!this.chartInstance) return;
-
-        // ⚠️ 核心修复 2：悬停检测
-        // 获取当前鼠标正在悬停的元素
-        const activeElements = this.chartInstance.getActiveElements();
-        const isHovering = activeElements.length > 0;
-
-        // 只有在【没有悬停】的情况下，才更新律动动画
-        // 这样就把交互控制权完美还给了 Chart.js，悬停时绝对不会卡顿
-        if (!isHovering) {
-          const time = Date.now() / speed;
-          
-          for (let i = 0; i < numSlices; i++) {
-            // 发动机活塞相差公式
-            const phase = i * ((Math.PI * 2) / numSlices); 
-            const wave = (Math.sin(time + phase) + 1) / 2;
-            dataset.offset[i] = wave * maxOffset;
-          }
-          
-          this.chartInstance.update('none'); 
-        }
-
-        // 循环调用下一帧
-        this.animationFrameId = requestAnimationFrame(animate);
-      };
-
-      animate();
-    },
-
     renderChart() {
       const ctx = document.getElementById('polarChart').getContext('2d');
       const colors = this.generateColors(this.skills.length);
       
       if (this.chartInstance) {
         this.chartInstance.destroy();
-        if (this.animationFrameId) {
-          cancelAnimationFrame(this.animationFrameId);
-        }
       }
+
+      // 计算最大值，用于固定网格大小（加上10%的余量，防止呼吸时顶破边界）
+      const maxDataValue = Math.max(...this.originalSkillPoints);
 
       this.chartInstance = new Chart(ctx, {
         type: 'polarArea',
@@ -114,62 +69,105 @@ export default {
           labels: this.skills,
           datasets: [{
             label: '技能点',
-            data: this.skillPoints,
+            data: [...this.originalSkillPoints], // 使用副本初始化
             backgroundColor: colors,
             borderColor: colors.map(color => color.replace('0.6', '1')),
             borderWidth: 2,
-            
-            offset: new Array(this.skills.length).fill(0),
-
-            // 悬停时的额外偏移量，当鼠标放上去时，扇形会进一步向外凸出一点
-            hoverOffset: 20, 
-            hoverBackgroundColor: colors.map(color => color.replace('0.6', '0.9')),
-            hoverBorderColor: '#ffffff',
-            hoverBorderWidth: 3
+            hoverOffset: 15,                      
+            hoverBackgroundColor: colors.map(color => color.replace('0.6', '0.8')), 
+            hoverBorderColor: '#ffffff',           
+            hoverBorderWidth: 3                    
           }],
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { display: false },
+            legend: {
+              display: false,
+            },
             tooltip: {
-              backgroundColor: 'rgba(40, 40, 40, 0.9)',
+              backgroundColor: 'rgba(40, 40, 40, 0.7)',
               titleColor: '#fff',
               bodyColor: '#fff',
-              borderColor: 'rgba(255, 255, 255, 0.3)',
-              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.2)',
+              borderWidth: 2,
               padding: 10,
               caretSize: 6,
+              caretPadding: 8,
               cornerRadius: 6,
+              boxWidth: 10,
+              boxHeight: 10,
               displayColors: true,
               callbacks: {
-                label: context => `${context.label || ''}: ${context.raw || ''} 技能点`,
-                title: context => `${context[0].label}`,
+                label: (context) => {
+                  const label = context.label || '';
+                  // 【关键】从原始数据中取值，否则会显示跳动产生的小数
+                  const realValue = this.originalSkillPoints[context.dataIndex];
+                  return `${label}: ${realValue} 技能点`;
+                },
+                title: function(context) {
+                  return `${context[0].label}`;
+                },
               },
             },
           },
           scales: {
             r: {
-              ticks: { display: false },
-              grid: { color: 'rgba(0, 0, 0, 0.1)', lineWidth: 0.5 },
-              angleLines: { color: 'rgba(0, 0, 0, 0.2)', lineWidth: 1 },
+              max: maxDataValue * 1.15, // 【关键】固定最大值，防止网格跟着呼吸缩放
+              ticks: {
+                display: false,
+              },
+              grid: {
+                color: 'rgba(0, 0, 0, 0.1)',
+                lineWidth: 0.5,
+              },
+              angleLines: {
+                color: 'rgba(0, 0, 0, 0.2)',
+                lineWidth: 1,
+              },
             },
           },
           animation: {
-            duration: 1500,
-            easing: 'easeOutQuart',
+            duration: 1800,
+            easing: 'easeOutQuad',
             animateRotate: true,
             animateScale: true,
-            onComplete: () => {
-              if (!this.animationFrameId) {
-                this.startRhythmAnimation();
-              }
-            }
           },
         },
       });
+
+      // 等待初始的出场动画（1800ms）结束后，开始呼吸律动
+      setTimeout(() => {
+        this.startBreathingAnimation();
+      }, 1800);
     },
+    
+    // 新增：呼吸律动核心逻辑
+    startBreathingAnimation() {
+      const animate = () => {
+        if (!this.chartInstance) return;
+
+        const time = Date.now() / 400; // 除数越小，跳动越快。400是一个偏向“心跳/呼吸”的舒适节奏
+        const dataset = this.chartInstance.data.datasets[0];
+
+        dataset.data = this.originalSkillPoints.map((val, index) => {
+          // 振幅：数值的 4% 作为波动的幅度
+          const amplitude = val * 0.04; 
+          // 相位差：index * 0.8 让相邻的扇形错开跳动，形成一圈一圈的律动感
+          const phase = index * 0.8; 
+          
+          return val + amplitude * Math.sin(time + phase);
+        });
+
+        // 使用 'none' 模式更新，避免触发默认的过渡动画，保证丝滑
+        this.chartInstance.update('none'); 
+        
+        this.animationFrameId = requestAnimationFrame(animate);
+      };
+
+      this.animationFrameId = requestAnimationFrame(animate);
+    }
   },
 };
 </script>
