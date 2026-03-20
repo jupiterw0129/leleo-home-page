@@ -72,7 +72,7 @@ export default {
         const now = Date.now();
         const elapsedSinceLast = now - lastRenderTime;
 
-        // 如果距离上次绘制还没到 33 毫秒，直接跳过，什么都不做（这步省下了海量 CPU！）
+        // 如果距离上次绘制还没到 33 毫秒，直接跳过，什么都不做
         if (elapsedSinceLast < frameInterval) {
             return; 
         }
@@ -80,7 +80,6 @@ export default {
         // 校准下次执行的时间，防止随着时间推移产生误差
         lastRenderTime = now - (elapsedSinceLast % frameInterval);
 
-        // --- 下面是原本的数学计算 ---
         const totalElapsed = now - startTime;
         const easeFactor = Math.min(1, totalElapsed / 800); 
         const time = now / 300; 
@@ -126,7 +125,7 @@ export default {
             hoverBorderWidth: 3,
             
             // 【核心修复 2】：开启纯净数据模式。
-            // 告诉 Chart.js："我的数据只是简单的一维数组，别去解析格式了！" 极大提升 update 性能。
+            // 告诉 Chart.js：数据只是简单的一维数组，别去解析格式
             normalized: true, 
           }],
         },
