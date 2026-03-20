@@ -15,29 +15,29 @@ export default {
       configdata: config,
       skills: null,
       skillPoints: null,
-      originalSkillPoints: null, // 新增：保存真实的原始数据
+      baseSkillPoints: null, // 新增：保存真实的初始技能点
       chartInstance: null,
-      animationFrameId: null,    // 新增：保存动画帧ID，用于清理
+      animationFrameId: null, // 新增：存储动画帧 ID 用于销毁
     };
   },
   mounted() {
-    if(import.meta.env.VITE_CONFIG){
-        this.configdata = JSON.parse(import.meta.env.VITE_CONFIG);
+    if (import.meta.env.VITE_CONFIG) {
+      this.configdata = JSON.parse(import.meta.env.VITE_CONFIG);
     }
     this.skills = this.configdata.polarChart.skills;
     this.skillPoints = this.configdata.polarChart.skillPoints;
-    // 深拷贝一份原始数据，用于动画基准和 Tooltip 显示
-    this.originalSkillPoints = [...this.skillPoints]; 
+    // 拷贝一份真实数据，作为活塞运动的基准线
+    this.baseSkillPoints = [...this.skillPoints]; 
     
     this.renderChart();
   },
   beforeDestroy() { 
-    // 组件销毁时，务必清除动画帧，防止内存泄漏
+    // 组件销毁前，必须停止动画循环，防止内存泄漏
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
     }
     if (this.chartInstance) {
-      this.chartInstance.destroy(); 
+      this.chartInstance.destroy();
       this.chartInstance = null;
     }
   },
@@ -52,6 +52,38 @@ export default {
       }
       return colors;
     },
+    
+    // 新增：活塞跳动动画引擎
+    startPistonAnimation() {
+      const animate = (timestamp) => {
+        if (!this.chartInstance) return;
+
+        // 控制速度：除以的数字越大，跳动越慢 (例如 300 比较适中)
+        const time = timestamp / 300; 
+
+        const newData = this.baseSkillPoints.map((baseVal, index) => {
+          // 控制幅度：基础值的 10% 作为振幅
+          const amplitude = baseVal * 0.10; 
+          // 控制相位差：让每个扇形的波动错开，产生此起彼伏的活塞感
+          const phase = index * (Math.PI / 1.5); 
+
+          // 核心公式：基础值 + 振幅 * sin(时间 + 相位差)
+          return baseVal + amplitude * Math.sin(time + phase);
+        });
+
+        // 将计算出的波动数据赋给图表
+        this.chartInstance.data.datasets[0].data = newData;
+        // 使用 'none' 模式更新，这非常重要！防止与 Chart.js 默认的过渡动画打架导致卡顿
+        this.chartInstance.update('none');
+
+        // 循环调用下一帧
+        this.animationFrameId = requestAnimationFrame(animate);
+      };
+
+      // 启动动画
+      this.animationFrameId = requestAnimationFrame(animate);
+    },
+
     renderChart() {
       const ctx = document.getElementById('polarChart').getContext('2d');
       const colors = this.generateColors(this.skills.length);
@@ -59,9 +91,9 @@ export default {
       if (this.chartInstance) {
         this.chartInstance.destroy();
       }
-
-      // 计算最大值，用于固定网格大小（加上10%的余量，防止呼吸时顶破边界）
-      const maxDataValue = Math.max(...this.originalSkillPoints);
+      if (this.animationFrameId) {
+        cancelAnimationFrame(this.animationFrameId);
+      }
 
       this.chartInstance = new Chart(ctx, {
         type: 'polarArea',
@@ -69,14 +101,14 @@ export default {
           labels: this.skills,
           datasets: [{
             label: '技能点',
-            data: [...this.originalSkillPoints], // 使用副本初始化
+            data: [...this.baseSkillPoints], // 初始使用真实数据
             backgroundColor: colors,
             borderColor: colors.map(color => color.replace('0.6', '1')),
             borderWidth: 2,
-            hoverOffset: 15,                      
-            hoverBackgroundColor: colors.map(color => color.replace('0.6', '0.8')), 
-            hoverBorderColor: '#ffffff',           
-            hoverBorderWidth: 3                    
+            hoverOffset: 15,
+            hoverBackgroundColor: colors.map(color => color.replace('0.6', '0.8')),
+            hoverBorderColor: '#ffffff',
+            hoverBorderWidth: 3
           }],
         },
         options: {
@@ -100,10 +132,11 @@ export default {
               boxHeight: 10,
               displayColors: true,
               callbacks: {
+                // 【重要修改】让 Tooltip 显示真实的技能点，而不是波动中的小数点
                 label: (context) => {
                   const label = context.label || '';
-                  // 【关键】从原始数据中取值，否则会显示跳动产生的小数
-                  const realValue = this.originalSkillPoints[context.dataIndex];
+                  // 从 baseSkillPoints 读取真实值，而不是用 context.raw
+                  const realValue = this.baseSkillPoints[context.dataIndex];
                   return `${label}: ${realValue} 技能点`;
                 },
                 title: function(context) {
@@ -114,63 +147,28 @@ export default {
           },
           scales: {
             r: {
-              max: maxDataValue * 1.15, // 【关键】固定最大值，防止网格跟着呼吸缩放
-              ticks: {
-                display: false,
-              },
-              grid: {
-                color: 'rgba(0, 0, 0, 0.1)',
-                lineWidth: 0.5,
-              },
-              angleLines: {
-                color: 'rgba(0, 0, 0, 0.2)',
-                lineWidth: 1,
-              },
+              ticks: { display: false },
+              grid: { color: 'rgba(0, 0, 0, 0.1)', lineWidth: 0.5 },
+              angleLines: { color: 'rgba(0, 0, 0, 0.2)', lineWidth: 1 },
             },
           },
           animation: {
+            // 初始加载动画配置
             duration: 1800,
             easing: 'easeOutQuad',
             animateRotate: true,
             animateScale: true,
+            // 初始加载动画完成后，触发活塞跳动动画
+            onComplete: () => {
+              // 确保只启动一次
+              if (!this.animationFrameId) {
+                this.startPistonAnimation();
+              }
+            }
           },
         },
       });
-
-      // 等待初始的出场动画（1800ms）结束后，开始呼吸律动
-      setTimeout(() => {
-        this.startBreathingAnimation();
-      }, 1800);
     },
-    
-    // 新增：呼吸律动核心逻辑
-    startBreathingAnimation() {
-      const animate = () => {
-        if (!this.chartInstance) return;
-
-        const time = Date.now() / 400; // 除数越小，跳动越快。400是一个偏向“心跳/呼吸”的舒适节奏
-        const dataset = this.chartInstance.data.datasets[0];
-
-        dataset.data = this.originalSkillPoints.map((val, index) => {
-          // 振幅：数值的 4% 作为波动的幅度
-          const amplitude = val * 0.04; 
-          // 相位差：index * 0.8 让相邻的扇形错开跳动，形成一圈一圈的律动感
-          const phase = index * 0.8; 
-          
-          return val + amplitude * Math.sin(time + phase);
-        });
-
-        // 使用 'none' 模式更新，避免触发默认的过渡动画，保证丝滑
-        this.chartInstance.update('none'); 
-        
-        this.animationFrameId = requestAnimationFrame(animate);
-      };
-
-      this.animationFrameId = requestAnimationFrame(animate);
-    }
   },
 };
 </script>
-
-<style scoped>
-</style>
