@@ -1,7 +1,5 @@
 <template>
-  <div class="chart-wrapper">
-    <canvas id="polarChart"></canvas>
-  </div>
+  <canvas id="polarChart"></canvas>
 </template>
 
 <script>
@@ -10,53 +8,27 @@ import config from '../config.js';
 
 Chart.register(...registerables);
 
-// 轻微呼吸动画插件
-const breathingPlugin = {
-  id: 'breathingPlugin',
-  beforeDraw(chart) {
-    const { ctx, canvas } = chart;
-    const now = Date.now();
-    const scale = 1 + Math.sin(now / 800) * 0.015; // 轻微缩放，幅度很小
-
-    ctx.save();
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    ctx.scale(scale, scale);
-    ctx.translate(-canvas.width / 2, -canvas.height / 2);
-  },
-  afterDraw(chart) {
-    chart.ctx.restore();
-  }
-};
-
-Chart.register(breathingPlugin);
-
 export default {
   name: 'polarChart',
   data() {
     return {
-      configdata: config,
+      configdata:config,
       skills: null,
       skillPoints: null,
-      chartInstance: null,
-      animationFrame: null,
+      chartInstance: null, // 新增：存储 Chart 实例
     };
   },
   mounted() {
-    if (import.meta.env.VITE_CONFIG) {
-      this.configdata = JSON.parse(import.meta.env.VITE_CONFIG);
+    if(import.meta.env.VITE_CONFIG){
+        this.configdata = JSON.parse(import.meta.env.VITE_CONFIG);
     }
     this.skills = this.configdata.polarChart.skills;
     this.skillPoints = this.configdata.polarChart.skillPoints;
     this.renderChart();
-    this.startLoop();
   },
-  beforeUnmount() {
-    if (this.animationFrame) {
-      cancelAnimationFrame(this.animationFrame);
-      this.animationFrame = null;
-    }
+  beforeDestroy() { // 组件销毁前钩子（Vue 3 选项式 API 中也可用 beforeUnmount）
     if (this.chartInstance) {
-      this.chartInstance.destroy();
+      this.chartInstance.destroy(); // 销毁 Chart 实例
       this.chartInstance = null;
     }
   },
@@ -71,26 +43,15 @@ export default {
       }
       return colors;
     },
-
-    startLoop() {
-      const animate = () => {
-        if (this.chartInstance) {
-          this.chartInstance.draw();
-        }
-        this.animationFrame = requestAnimationFrame(animate);
-      };
-      animate();
-    },
-
     renderChart() {
       const ctx = document.getElementById('polarChart').getContext('2d');
       const colors = this.generateColors(this.skills.length);
-
+      // 如果已有旧实例，先销毁（防止重复创建导致的内存泄漏）
       if (this.chartInstance) {
         this.chartInstance.destroy();
       }
 
-      this.chartInstance = new Chart(ctx, {
+      this.chartInstance = new Chart(ctx, { // 保存实例
         type: 'polarArea',
         data: {
           labels: this.skills,
@@ -100,10 +61,12 @@ export default {
             backgroundColor: colors,
             borderColor: colors.map(color => color.replace('0.6', '1')),
             borderWidth: 2,
-            hoverOffset: 15,
-            hoverBackgroundColor: colors.map(color => color.replace('0.6', '0.8')),
-            hoverBorderColor: '#ffffff',
-            hoverBorderWidth: 3
+
+            // 添加悬停效果
+            hoverOffset: 15,                      // 扇形向外偏移15像素
+            hoverBackgroundColor: colors.map(color => color.replace('0.6', '0.8')), // 悬停时更亮
+            hoverBorderColor: '#ffffff',           // 边框变白
+            hoverBorderWidth: 3                    // 边框加粗
           }],
         },
         options: {
@@ -154,25 +117,11 @@ export default {
             },
           },
           animation: {
+            duration: 1800,
+            easing: 'easeOutQuad',
             animateRotate: true,
             animateScale: true,
           },
-          animations: {
-            radius: {
-              duration: 1200,
-              easing: 'easeOutCubic',
-              delay(context) {
-                return context.dataIndex * 120;
-              }
-            },
-            rotate: {
-              duration: 1200,
-              easing: 'easeOutCubic',
-              delay(context) {
-                return context.dataIndex * 120;
-              }
-            }
-          }
         },
       });
     },
@@ -181,21 +130,4 @@ export default {
 </script>
 
 <style scoped>
-.chart-wrapper {
-  position: relative;
-  width: 100%;
-  height: 400px;
-  animation: fadeInScale 1s ease;
-}
-
-@keyframes fadeInScale {
-  from {
-    opacity: 0;
-    transform: scale(0.92);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
 </style>
