@@ -1,6 +1,6 @@
 <template>
   <div class="chart-wrapper">
-    <canvas ref="polarChart" class="breathing-chart"></canvas>
+    <canvas ref="polarChart"></canvas>
   </div>
 </template>
 
@@ -15,20 +15,29 @@ export default {
   data() {
     return {
       configdata: config,
-      skills: null,
-      skillPoints: null,
+      skills: [],
+      skillPoints: [],
       chartInstance: null,
+      pulseTimer: null,
+      activeIndex: 0,
+      colors: []
     };
   },
   mounted() {
     if (import.meta.env.VITE_CONFIG) {
       this.configdata = JSON.parse(import.meta.env.VITE_CONFIG);
     }
-    this.skills = this.configdata.polarChart.skills;
-    this.skillPoints = this.configdata.polarChart.skillPoints;
+
+    this.skills = this.configdata.polarChart.skills || [];
+    this.skillPoints = this.configdata.polarChart.skillPoints || [];
+    this.colors = this.generateColors(this.skills.length);
+
     this.renderChart();
+    this.startPulseAnimation();
   },
   beforeUnmount() {
+    this.stopPulseAnimation();
+
     if (this.chartInstance) {
       this.chartInstance.destroy();
       this.chartInstance = null;
@@ -45,36 +54,45 @@ export default {
       }
       return colors;
     },
+
     renderChart() {
       const ctx = this.$refs.polarChart.getContext('2d');
-      const colors = this.generateColors(this.skills.length);
 
       if (this.chartInstance) {
         this.chartInstance.destroy();
+        this.chartInstance = null;
       }
 
       this.chartInstance = new Chart(ctx, {
         type: 'polarArea',
         data: {
           labels: this.skills,
-          datasets: [{
-            label: '技能点',
-            data: this.skillPoints,
-            backgroundColor: colors,
-            borderColor: colors.map(color => color.replace('0.6', '1')),
-            borderWidth: 2,
-            hoverOffset: 15,
-            hoverBackgroundColor: colors.map(color => color.replace('0.6', '0.8')),
-            hoverBorderColor: '#ffffff',
-            hoverBorderWidth: 3
-          }],
+          datasets: [
+            {
+              label: '技能点',
+              data: this.skillPoints,
+              backgroundColor: this.colors,
+              borderColor: this.colors.map(color => color.replace('0.6', '1')),
+              borderWidth: 2,
+
+              // hover 时单个扇形弹出
+              hoverOffset: 22,
+              hoverBackgroundColor: this.colors.map(color => color.replace('0.6', '0.85')),
+              hoverBorderColor: '#ffffff',
+              hoverBorderWidth: 3
+            }
+          ]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          animation: {
+            duration: 380,
+            easing: 'easeOutCubic'
+          },
           plugins: {
             legend: {
-              display: false,
+              display: false
             },
             tooltip: {
               backgroundColor: 'rgba(40, 40, 40, 0.7)',
@@ -97,35 +115,72 @@ export default {
                 },
                 title(context) {
                   return `${context[0].label}`;
-                },
-              },
-            },
+                }
+              }
+            }
           },
           scales: {
             r: {
               ticks: {
-                display: false,
+                display: false
               },
               grid: {
                 color: 'rgba(0, 0, 0, 0.1)',
-                lineWidth: 0.5,
+                lineWidth: 0.5
               },
               angleLines: {
                 color: 'rgba(0, 0, 0, 0.2)',
-                lineWidth: 1,
-              },
-            },
-          },
-          animation: {
-            duration: 1800,
-            easing: 'easeOutQuad',
-            animateRotate: true,
-            animateScale: true,
-          },
-        },
+                lineWidth: 1
+              }
+            }
+          }
+        }
       });
     },
-  },
+
+    startPulseAnimation() {
+      this.stopPulseAnimation();
+
+      if (!this.chartInstance || !this.skills.length) return;
+
+      this.pulseTimer = setInterval(() => {
+        if (!this.chartInstance) return;
+
+        const total = this.skills.length;
+        const index = this.activeIndex % total;
+
+        // 让当前扇形进入 active 状态
+        this.chartInstance.setActiveElements([
+          { datasetIndex: 0, index }
+        ]);
+
+        // 如果你不想显示 tooltip，可以注释下面这行
+        this.chartInstance.tooltip.setActiveElements(
+          [{ datasetIndex: 0, index }],
+          { x: 0, y: 0 }
+        );
+
+        this.chartInstance.update();
+
+        // 短暂弹出后收回
+        setTimeout(() => {
+          if (!this.chartInstance) return;
+          this.chartInstance.setActiveElements([]);
+          this.chartInstance.tooltip.setActiveElements([], { x: 0, y: 0 });
+          this.chartInstance.update();
+        }, 260);
+
+        this.activeIndex++;
+      }, 520);
+    },
+
+    stopPulseAnimation() {
+      if (this.pulseTimer) {
+        clearInterval(this.pulseTimer);
+        this.pulseTimer = null;
+      }
+    }
+  }
 };
 </script>
 
@@ -134,30 +189,5 @@ export default {
   position: relative;
   width: 100%;
   height: 420px;
-  overflow: visible;
-}
-
-.breathing-chart {
-  animation: chartBreath 2.8s ease-in-out infinite;
-  transform-origin: center center;
-  will-change: transform;
-}
-
-@keyframes chartBreath {
-  0% {
-    transform: scale(1);
-  }
-  25% {
-    transform: scale(1.015);
-  }
-  50% {
-    transform: scale(1.03);
-  }
-  75% {
-    transform: scale(1.015);
-  }
-  100% {
-    transform: scale(1);
-  }
 }
 </style>
