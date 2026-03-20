@@ -19,7 +19,7 @@
   height: 344px;
   fill: none;
   filter: drop-shadow(0 0 1px v-bind(color2));
-  animation: glowPulse 3s ease-in-out infinite alternate;
+  animation: waveGlow 4.6s ease-in-out infinite;
 }
 
 .svg-frame:hover svg {
@@ -30,32 +30,56 @@
   transition: .5s;
   transform-origin: center;
   filter: drop-shadow(0 0 1px v-bind(color1));
-  animation: centerGlowPulse 2.4s ease-in-out infinite alternate;
+  animation: waveGlowCenter 3.8s ease-in-out infinite;
 }
 
 .svg-frame:hover svg #center {
   transform: rotate(-30deg) translateX(45px) translateY(-3px);
 }
 
+.svg-frame svg:nth-of-type(1) {
+  animation-delay: 0s;
+}
+
+.svg-frame svg:nth-of-type(2) {
+  animation-delay: 0.35s;
+}
+
+.svg-frame svg:nth-of-type(3) {
+  animation-delay: 0.7s;
+}
+
+.svg-frame svg:nth-of-type(4) {
+  animation-delay: 1.05s;
+}
+
+.svg-frame svg:nth-of-type(5) {
+  animation-delay: 1.4s;
+}
+
 #out2 {
-  animation: rotate16 7s ease-in-out infinite alternate, glowPulse 3.2s ease-in-out infinite alternate;
+  animation: rotate16 7s ease-in-out infinite alternate, waveGlow 5.2s ease-in-out infinite;
   transform-origin: center;
+  animation-delay: 0s, 0.35s;
 }
 
 #out3 {
-  animation: rotate16 3s ease-in-out infinite alternate, glowPulse 2.8s ease-in-out infinite alternate;
+  animation: rotate16 3s ease-in-out infinite alternate, waveGlow 4.2s ease-in-out infinite;
   transform-origin: center;
+  animation-delay: 0s, 0.7s;
 }
 
 #inner3,
 #inner1 {
-  animation: rotate16 4s ease-in-out infinite alternate, glowPulse 3s ease-in-out infinite alternate;
+  animation: rotate16 4s ease-in-out infinite alternate, waveGlow 4.8s ease-in-out infinite;
   transform-origin: center;
+  animation-delay: 0s, 1.05s;
 }
 
 #center1 {
-  animation: rotate16 2s ease-in-out infinite alternate, centerGlowPulse 2s ease-in-out infinite alternate;
+  animation: rotate16 2s ease-in-out infinite alternate, waveGlowCenter 3.2s ease-in-out infinite;
   transform-origin: center;
+  animation-delay: 0s, 1.4s;
 }
 
 @keyframes rotate16 {
@@ -64,25 +88,49 @@
   }
 }
 
-@keyframes glowPulse {
+@keyframes waveGlow {
   0% {
     filter: drop-shadow(0 0 1px v-bind(color2));
-    opacity: 0.92;
+    opacity: 0.88;
   }
-  100% {
+  25% {
+    filter: drop-shadow(0 0 2px v-bind(color2));
+    opacity: 0.94;
+  }
+  50% {
     filter: drop-shadow(0 0 3px v-bind(color2));
     opacity: 1;
   }
-}
-
-@keyframes centerGlowPulse {
-  0% {
-    filter: drop-shadow(0 0 1px v-bind(color1));
+  75% {
+    filter: drop-shadow(0 0 2px v-bind(color2));
     opacity: 0.95;
   }
   100% {
-    filter: drop-shadow(0 0 4px v-bind(color1));
+    filter: drop-shadow(0 0 1px v-bind(color2));
+    opacity: 0.88;
+  }
+}
+
+@keyframes waveGlowCenter {
+  0% {
+    filter: drop-shadow(0 0 1px v-bind(color1));
+    opacity: 0.9;
+  }
+  25% {
+    filter: drop-shadow(0 0 2px v-bind(color1));
+    opacity: 0.96;
+  }
+  50% {
+    filter: drop-shadow(0 0 3px v-bind(color1));
     opacity: 1;
+  }
+  75% {
+    filter: drop-shadow(0 0 2px v-bind(color1));
+    opacity: 0.96;
+  }
+  100% {
+    filter: drop-shadow(0 0 1px v-bind(color1));
+    opacity: 0.9;
   }
 }
 </style>
