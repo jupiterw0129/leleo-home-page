@@ -94,6 +94,11 @@ const pcVideoWallpapers = [
 		"url": "/img/wallpaper/dynamic/阿尓托莉雅/Saber.webm"
 	},
 	{
+		"title": "上杉绘梨衣",
+		"preview": "/img/wallpaper/dynamic/绘梨衣/Sakura-pre.webm",
+		"url": "/img/wallpaper/dynamic/绘梨衣/Sakura.webm"
+	},
+	{
 		"title": "尼尔：机械纪元 团队",
 		"preview": "/img/wallpaper/dynamic/尼尔：机械纪元 团队/Nier-Automata-Team-pre.webm",
 		"url": "/img/wallpaper/dynamic/尼尔：机械纪元 团队/Nier-Automata-Team.webm"
