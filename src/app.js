@@ -11,6 +11,10 @@ import { setMeta,getFormattedTime,getFormattedDate,dataConsole } from './utils/c
 import { useDisplay } from 'vuetify'
 
 export default {
+  onMounted(() => {
+    const bg = config.getBackground();
+    console.log("当前PC壁纸:", bg.pc);
+  })
   components: {
     tab1,tab2,tab3,loader,homeright,typewriter,polarchart
   },
