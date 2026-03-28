@@ -151,10 +151,10 @@ const config = {
 	tags: ['奇迹师', '通识者'],
 
 	// 默认背景壁纸
-	background: {
+	getBackground: () => ({
 		pc: getRandomBackground(pcPicWallpapers, pcVideoWallpapers, 0.5, "pc-bg"),
 		mobile: getRandomBackground(mobilePicWallpapers, [], 0, "mobile-bg"),
-	},
+	}),
 
 
 	//极坐标图数据
