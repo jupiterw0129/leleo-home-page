@@ -20,8 +20,6 @@ const safeSetStorage = (key, value) => {
 const A = "https://jpwhub.us.ci/file"
 const B = "/壁纸/诡秘之主"
 
-const safeUrl = encodeURI(rawUrl);
-
 const getRandomBackground = (pics, videos = [], videoRate = 0, storageKey = "bg-last") => {
 	const allItems = [
 		...pics.map(item => ({ type: "pic", datainfo: item })),
