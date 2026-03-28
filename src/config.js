@@ -52,13 +52,13 @@ const getRandomBackground = (pics, videos = [], videoRate = 0, storageKey = "bg-
 
 // PC 静态壁纸
 const pcPicWallpapers = [
-	{ "title": "时代", "preview": "/img/wallpaper/static/时代/image-pre.webp", "url": https://jpwhub.us.ci/file/壁纸/诡秘之主/1774657520390_002_时代.jpeg" },
-	{ "title": "光", "preview": "/img/wallpaper/static/光/image-pre.webp", "url": https://jpwhub.us.ci/file/壁纸/诡秘之主/1774657571515_034_光，就是一切的意义.jpeg"},
-	{ "title": "塞维亚菊", "preview": "/img/wallpaper/static/塞维亚菊/image-pre.webp", "url": https://jpwhub.us.ci/file/1774657522030_001_塞维亚菊.jpeg"},
-	{ "title": "奇迹", "preview": "/img/wallpaper/static/奇迹/image-pre.webp", "url": https://jpwhub.us.ci/file/壁纸/诡秘之主/1774657553778_024_奇迹.jpg"},
-	{ "title": "奥黛丽", "preview": "/img/wallpaper/static/奥黛丽/image-pre.webp", "url": https://jpwhub.us.ci/file/1774657577503_036_奥黛丽.jpg"},
-	{ "title": "节制", "preview": "/img/wallpaper/static/节制/image-pre.webp", "url": https://jpwhub.us.ci/file/1774657542899_008_节制.jpeg"},
-	{ "title": "观众", "preview": "/img/wallpaper/static/观众/image-pre.webp", "url": https://jpwhub.us.ci/file/1774657517118_004_观众.jpg"},
+	{ "title": "时代", "preview": "/img/wallpaper/static/时代/image-pre.webp", "url": "https://jpwhub.us.ci/file/壁纸/诡秘之主/1774657520390_002_时代.jpeg" },
+	{ "title": "光", "preview": "/img/wallpaper/static/光/image-pre.webp", "url": "https://jpwhub.us.ci/file/壁纸/诡秘之主/1774657571515_034_光，就是一切的意义.jpeg" },
+	{ "title": "塞维亚菊", "preview": "/img/wallpaper/static/塞维亚菊/image-pre.webp", "url": "https://jpwhub.us.ci/file/1774657522030_001_塞维亚菊.jpeg" },
+	{ "title": "奇迹", "preview": "/img/wallpaper/static/奇迹/image-pre.webp", "url": "https://jpwhub.us.ci/file/壁纸/诡秘之主/1774657553778_024_奇迹.jpg" },
+	{ "title": "奥黛丽", "preview": "/img/wallpaper/static/奥黛丽/image-pre.webp", "url": "https://jpwhub.us.ci/file/1774657577503_036_奥黛丽.jpg" },
+	{ "title": "节制", "preview": "/img/wallpaper/static/节制/image-pre.webp", "url": "https://jpwhub.us.ci/file/1774657542899_008_节制.jpeg" },
+	{ "title": "观众", "preview": "/img/wallpaper/static/观众/image-pre.webp", "url": "https://jpwhub.us.ci/file/1774657517118_004_观众.jpg" },
 ]
 
 // 移动端静态壁纸
