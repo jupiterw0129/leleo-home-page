@@ -168,15 +168,6 @@ export default {
     audioLoading(val){
       this.isPlaying = !val;
     }
-
-  //若弹出框使得页面播放卡顿，可以先停止背景播放
-  //   dialog1(val){
-  //     if(val){
-  //       this.$refs.VdPlayer.pause();
-  //     }else{
-  //       this.$refs.VdPlayer.play();
-  //     }
-  //  }
   },
 
   computed: {
@@ -228,23 +219,25 @@ export default {
         }
           
       }else{
+        // 核心修改部分：调用函数获取随机壁纸，而不是读取静态属性
+        const randomBg = config.getBackground();
+
         if(xs.value){
-          if(this.configdata.background.mobile.type == "pic"){
-            root.style.setProperty('--leleo-background-image-url', `url('${this.configdata.background.mobile.datainfo.url}')`);
-            imageurl = this.configdata.background.mobile.datainfo.url;
+          if(randomBg.mobile.type == "pic"){
+            root.style.setProperty('--leleo-background-image-url', `url('${randomBg.mobile.datainfo.url}')`);
+            imageurl = randomBg.mobile.datainfo.url;
             return imageurl;
           }else{
-            this.videosrc = this.configdata.background.mobile.datainfo.url;
+            this.videosrc = randomBg.mobile.datainfo.url;
           }
         }else{
-          if(this.configdata.background.pc.type == "pic"){
-            root.style.setProperty('--leleo-background-image-url', `url('${this.configdata.background.pc.datainfo.url}')`);
-            imageurl = this.configdata.background.pc.datainfo.url;
+          if(randomBg.pc.type == "pic"){
+            root.style.setProperty('--leleo-background-image-url', `url('${randomBg.pc.datainfo.url}')`);
+            imageurl = randomBg.pc.datainfo.url;
             return imageurl;
           }else{
-            this.videosrc = this.configdata.background.pc.datainfo.url;
+            this.videosrc = randomBg.pc.datainfo.url;
           }
-          
         }
       }
     },
