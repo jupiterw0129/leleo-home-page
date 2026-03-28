@@ -75,33 +75,33 @@ const mobilePicWallpapers = [
 const pcVideoWallpapers = [
 	{
 		"title": "克莱恩的葬礼",
-		"preview": "/img/wallpaper/dynamic/克莱恩的葬礼/Klein-pre.webm",
-		"url": "/img/wallpaper/dynamic/克莱恩的葬礼/Klein.webm"
+		"preview": "https://jpwhub.us.ci/file/壁纸/动态/克莱恩的葬礼/1774699855216_Klein-pre.webm",
+		"url": "https://jpwhub.us.ci/file/壁纸/动态/克莱恩的葬礼/1774699848280_Klein.webm"
 	},
 	{
 		"title": "不存在的战区",
-		"preview": "/img/wallpaper/dynamic/不存在的战区/86-pre.webm",
-		"url": "/img/wallpaper/dynamic/不存在的战区/86.webm"
+		"preview": "https://jpwhub.us.ci/file/壁纸/动态/不存在的战区/1774699773764_86-pre.webm",
+		"url": "https://jpwhub.us.ci/file/壁纸/动态/不存在的战区/1774699780023_86.webm"
 	},
 	{
 		"title": "薇尔莉特",
-		"preview": "/img/wallpaper/dynamic/薇尔莉特/Violet-pre.webm",
-		"url": "/img/wallpaper/dynamic/薇尔莉特/Violet.webm"
+		"preview": "https://jpwhub.us.ci/file/壁纸/动态/薇尔莉特/1774699944884_Violet-pre.webm",
+		"url": "https://jpwhub.us.ci/file/壁纸/动态/薇尔莉特/1774699940763_Violet.webm"
 	},
 	{
 		"title": "阿尓托莉雅",
-		"preview": "/img/wallpaper/dynamic/阿尓托莉雅/Saber-pre.webm",
-		"url": "/img/wallpaper/dynamic/阿尓托莉雅/Saber.webm"
+		"preview": "https://jpwhub.us.ci/file/壁纸/动态/阿尔托莉雅/1774699729993_Saber-pre.webm",
+		"url": "https://jpwhub.us.ci/file/壁纸/动态/阿尔托莉雅/1774699728141_Saber.webm"
 	},
 	{
 		"title": "上杉绘梨衣",
-		"preview": "/img/wallpaper/dynamic/绘梨衣/Sakura-pre.webm",
-		"url": "/img/wallpaper/dynamic/绘梨衣/Sakura.webm"
+		"preview": "https://jpwhub.us.ci/file/壁纸/动态/绘梨衣/1774699824795_Sakura-pre.webm",
+		"url": "https://jpwhub.us.ci/file/壁纸/动态/绘梨衣/1774699819230_Sakura.webm"
 	},
 	{
 		"title": "尼尔：机械纪元 团队",
-		"preview": "/img/wallpaper/dynamic/尼尔：机械纪元 团队/Nier-Automata-Team-pre.webm",
-		"url": "/img/wallpaper/dynamic/尼尔：机械纪元 团队/Nier-Automata-Team.webm"
+		"preview": "https://jpwhub.us.ci/file/壁纸/动态/尼尔/1774699914391_Nier-pre.webm",
+		"url": "https://jpwhub.us.ci/file/壁纸/动态/尼尔/1774699916301_Nier.webm"
 	},
 ]
 
