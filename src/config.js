@@ -17,7 +17,7 @@ const safeSetStorage = (key, value) => {
 	} catch (e) {}
 }
 
-const A = "https://jpwhub.us.ci"
+const A = "https://jpwhub.us.ci/file"
 const B = "/壁纸/诡秘之主"
 
 const getRandomBackground = (pics, videos = [], videoRate = 0, storageKey = "bg-last") => {
