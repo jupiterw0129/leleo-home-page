@@ -214,6 +214,7 @@ const config = {
 
 	//项目卡片
 	projectcards: [
+		{ go: "✨前往", img: "/img/fool.jpg", title: "诡秘之主", subtitle: "官网", text: "赞美愚者", url: "https://lomworld.com/", show: false },
 		{ go: "🎬 前往", img: "/img/hero.jpg", title: "抖音", subtitle: "短视频与热点", text: "看看今天有什么新鲜内容。", url: "https://www.douyin.com/jingxuan", show: false },
 		{ go: "📺 前往", img: "/img/wallpaper/static/时代/image-pre.webp", title: "哔哩哔哩", subtitle: "动画 / 音乐 / 知识", text: "适合放松，也适合补充一点灵感。", url: "https://www.bilibili.com/", show: false },
 		{ go: "📰 前往", img: "/img/wallpaper/static/光/image-pre.webp", title: "微博", subtitle: "热搜与舆论场", text: "快速浏览热点，但别停留太久。", url: "https://weibo.com/", show: false },
