@@ -52,13 +52,13 @@ const getRandomBackground = (pics, videos = [], videoRate = 0, storageKey = "bg-
 
 // PC 静态壁纸
 const pcPicWallpapers = [
-	{ "title": "时代", "preview": "/img/wallpaper/static/时代/image-pre.webp", "url": "https://jpwhub.us.ci/file/壁纸/诡秘之主/1774657520390_002_时代.jpeg" },
-	{ "title": "光", "preview": "/img/wallpaper/static/光/image-pre.webp", "url": "https://jpwhub.us.ci/file/壁纸/诡秘之主/1774657571515_034_光，就是一切的意义.jpeg" },
-	{ "title": "塞维亚菊", "preview": "/img/wallpaper/static/塞维亚菊/image-pre.webp", "url": "https://jpwhub.us.ci/file/壁纸/诡秘之主/1774657522030_001_塞维亚菊.jpeg" },
-	{ "title": "奇迹", "preview": "/img/wallpaper/static/奇迹/image-pre.webp", "url": "https://jpwhub.us.ci/file/壁纸/诡秘之主/1774657553778_024_奇迹.jpg" },
-	{ "title": "奥黛丽", "preview": "/img/wallpaper/static/奥黛丽/image-pre.webp", "url": "https://jpwhub.us.ci/file/壁纸/诡秘之主/1774657577503_036_奥黛丽.jpg" },
-	{ "title": "节制", "preview": "/img/wallpaper/static/节制/image-pre.webp", "url": "https://jpwhub.us.ci/file/壁纸/诡秘之主/1774657542899_008_节制.jpeg" },
-	{ "title": "观众", "preview": "/img/wallpaper/static/观众/image-pre.webp", "url": "https://jpwhub.us.ci/file/壁纸/诡秘之主/1774657517118_004_观众.jpg" },
+	{ "title": "时代", "preview": "/img/wallpaper/static/时代/image-pre.webp", "url": "/img/wallpaper/static/时代/image.png" },
+	{ "title": "光", "preview": "/img/wallpaper/static/光/image-pre.webp", "url": "/img/wallpaper/static/光/image.png" },
+	{ "title": "塞维亚菊", "preview": "/img/wallpaper/static/塞维亚菊/image-pre.webp", "url": "/img/wallpaper/static/塞维亚菊/image.png" },
+	{ "title": "奇迹", "preview": "/img/wallpaper/static/奇迹/image-pre.webp", "url": "/img/wallpaper/static/奇迹/image.png" },
+	{ "title": "奥黛丽", "preview": "/img/wallpaper/static/奥黛丽/image-pre.webp", "url": "/img/wallpaper/static/奥黛丽/image.png" },
+	{ "title": "节制", "preview": "/img/wallpaper/static/节制/image-pre.webp", "url": "/img/wallpaper/static/节制/image.png" },
+	{ "title": "观众", "preview": "/img/wallpaper/static/观众/image-pre.webp", "url": "/img/wallpaper/static/观众/image.png" },
 ]
 
 // 移动端静态壁纸
@@ -219,7 +219,6 @@ const config = {
 		{ go: "📺 前往", img: "/img/wallpaper/static/时代/image-pre.webp", title: "哔哩哔哩", subtitle: "动画 / 音乐 / 知识", text: "适合放松，也适合补充一点灵感。", url: "https://www.bilibili.com/", show: false },
 		{ go: "📰 前往", img: "/img/wallpaper/static/光/image-pre.webp", title: "微博", subtitle: "热搜与舆论场", text: "快速浏览热点，但别停留太久。", url: "https://weibo.com/", show: false },
 		{ go: "🗃 前往", img: "/img/wallpaper/static/奇迹/image-pre.webp", title: "Google", subtitle: "5,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://www.google.com/", show: false },
-		{ go: "💍 前往", img: "/img/wallpaper/static/节制/image-pre.webp", title: "LOMS", subtitle: "7,000 miles of wonder", text: "先运行Docker", url: "http://localhost:6060/manage/dashboard", show: false },
 		{ go: "🎨 前往", img: "/img/wallpaper/static/奥黛丽/image-pre.webp", title: "Cloudflare", subtitle: "6,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://dash.cloudflare.com/", show: false },
 		{ go: "👍 前往", img: "/img/wallpaper/static/塞维亚菊/image-pre.webp", title: "ImgHub", subtitle: "4,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://jpwhub.us.ci/", show: false },
 		{ go: "🔍 前往", img: "/img/wallpaper/static/观众/image-pre.webp", title: "作者", subtitle: "8,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://leleo.top", show: false },
