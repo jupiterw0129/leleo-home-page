@@ -1,14 +1,16 @@
+import { defineAsyncComponent } from 'vue'
 import homeright from '../src/components/hoemright.vue';
 import typewriter from './components/typewriter.vue';
-import tab1 from './components/tabs/tab1.vue';
-import tab2 from './components/tabs/tab2.vue';
-import tab3 from './components/tabs/tab3.vue';
 import loader from './components/loader.vue';
 import polarchart from './components/polarchart.vue';
 import config from './config.js';
 import { getCookie } from './utils/cookieUtils.js';
 import { setMeta,getFormattedTime,getFormattedDate,dataConsole } from './utils/common.js';
 import { useDisplay } from 'vuetify'
+
+const tab1 = defineAsyncComponent(() => import('./components/tabs/tab1.vue'))
+const tab2 = defineAsyncComponent(() => import('./components/tabs/tab2.vue'))
+const tab3 = defineAsyncComponent(() => import('./components/tabs/tab3.vue'))
 
 export default {
   components: {

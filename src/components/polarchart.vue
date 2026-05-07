@@ -3,10 +3,10 @@
 </template>
 
 <script>
-import { Chart, registerables } from 'chart.js';
+import { Chart, PolarAreaController, ArcElement, RadialLinearScale, Tooltip, Legend } from 'chart.js';
 import config from '../config.js';
 
-Chart.register(...registerables);
+Chart.register(PolarAreaController, ArcElement, RadialLinearScale, Tooltip, Legend);
 
 export default {
   name: 'polarChart',
