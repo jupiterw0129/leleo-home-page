@@ -150,7 +150,7 @@ export default {
       this.setupAudioListener();  //设置 ended 事件监听器，当歌曲播放结束时自动调用 nextTrack 方法。
   },
 
-  beforeUnmount() {     //在组件销毁前移除事件监听器，防止内存泄漏。
+  beforeDestroy() {     //在组件销毁前移除事件监听器，防止内存泄漏。
     this.$refs.audioPlayer.removeEventListener('ended',  this.nextTrack);
   },
 
@@ -171,6 +171,14 @@ export default {
       this.isPlaying = !val;
     }
 
+  //若弹出框使得页面播放卡顿，可以先停止背景播放
+  //   dialog1(val){
+  //     if(val){
+  //       this.$refs.VdPlayer.pause();
+  //     }else{
+  //       this.$refs.VdPlayer.play();
+  //     }
+  //  }
   },
 
   computed: {
@@ -254,14 +262,13 @@ export default {
       this.dialog1 = false;
     },
     jump(url){
-      window.open(url, '_blank', 'noopener,noreferrer')?.focus();
+      window.open(url, '_blank').focus();
     },
     
     async getMusicInfo(){
       this.musicinfoLoading = true;
       try {
-        const apiBase = import.meta.env.VITE_MUSIC_API || 'https://api.i-meto.com'
-        const response = await fetch(`${apiBase}/meting/api?server=${this.configdata.musicPlayer.server}&type=${this.configdata.musicPlayer.type}&id=${this.configdata.musicPlayer.id}`
+        const response = await fetch(`https://api.i-meto.com/meting/api?server=${this.configdata.musicPlayer.server}&type=${this.configdata.musicPlayer.type}&id=${this.configdata.musicPlayer.id}`
         );
         if (!response.ok) {
           throw new Error('网络请求失败');
@@ -269,8 +276,7 @@ export default {
         this.musicinfo = await response.json();
         this.musicinfoLoading = false;
       } catch (error) {
-        console.error('Music API request failed:', error);
-        this.musicinfoLoading = false;
+        console.error('请求失败:', error);
       }
       
     },

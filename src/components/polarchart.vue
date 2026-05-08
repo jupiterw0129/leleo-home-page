@@ -33,7 +33,7 @@ export default {
 
     this.renderChart();
   },
-  beforeUnmount() { 
+  beforeDestroy() { 
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
     }

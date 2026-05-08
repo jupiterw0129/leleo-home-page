@@ -9,7 +9,7 @@
 
     <video autoplay loop muted class="video-bg" id="bg-video" ref="VdPlayer"
     :style="xs?{height: '100%',width: '100%',top: '0',left:'0'}:(sm?{height: '98%',width: '98%',top: '1%',left:' 1%','border-radius': '16px'}:{height: '96.6%',width: '99%',top: '1.7%',left:' 0.5%','border-radius': '16px',})">
-        <source :src=videosrc type="video/webm">
+        <source :src=videosrc type="video/mp4">
     </video>
 
     <div class="floating-switch-container">
@@ -80,7 +80,7 @@
                         <v-btn :size="xs?25:33" variant="tonal" color="var(--leleo-vcard-color)"
                         class="ma-1 leleo-social-bticon"
                         icon
-                        :href="item.link" target="_blank" rel="noopener noreferrer"
+                        :href="item.link" target="_blank"
                         >
                     <v-icon :icon=item.icon :size="xs?20:25" class="social-bticon-icon"></v-icon></v-btn>
                     </v-col>

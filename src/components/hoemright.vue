@@ -92,7 +92,7 @@
 
                   <v-card-actions :style="xs||sm||md?{'padding': '0','min-height': '0','height':'2.5rem'}:{'min-height': '0','height':'2.8rem'}">
                     <v-btn :href="item.url"
-                    target="_blank" rel="noopener noreferrer"
+                    target="_blank"
                       :text= "item.go"
                     ></v-btn>
                     <v-spacer></v-spacer>
@@ -167,14 +167,10 @@ export default {
 			let url = query;
 			// 自动补全协议（如果缺少）
 			if (!/^[a-z]+:\/\//i.test(url)) {
-				url = 'https://' + url;
+				url = 'http://' + url; // 默认用http
 			}
-			// 阻止 javascript: 等危险协议
-			if (/^(javascript|data|vbscript):/i.test(url)) {
-				return;
-			}
-
-			window.open(url, '_blank', 'noopener,noreferrer');
+			
+			window.open(url, '_blank');
 		} else {
 			const engineUrls = {
 				google: `https://www.google.com/search?q=${encodeURIComponent(query)}`,
@@ -183,7 +179,7 @@ export default {
 				yandex: `https://yandex.com/search/?text=${encodeURIComponent(query)}`,
 				duckduckgo: `https://duckduckgo.com/?q=${encodeURIComponent(query)}`
 			};
-			window.open(engineUrls[this.selectedEngine.value], '_blank', 'noopener,noreferrer');
+			window.open(engineUrls[this.selectedEngine.value], '_blank');
 		}
 	  },
 	  isLikelyUrl(input) {

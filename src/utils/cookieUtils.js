@@ -7,7 +7,7 @@ export function setCookie(name, value, days) {
     expires = "; expires=" + date.toUTCString();
   }
   // 序列化对象为JSON字符串
-  document.cookie = name + "=" + encodeURIComponent(JSON.stringify(value)) + expires + "; path=/; SameSite=Lax; Secure";
+  document.cookie = name + "=" + encodeURIComponent(JSON.stringify(value)) + expires + "; path=/";
 }
   
 export function getCookie(name) {
@@ -25,5 +25,5 @@ export function getCookie(name) {
 }
   
 export function eraseCookie(name) {   
-  document.cookie = name + '=; Max-Age=-99999999; path=/; SameSite=Lax; Secure';  
+  document.cookie = name + '=; Max-Age=-99999999;';  
 }
