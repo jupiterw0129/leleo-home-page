@@ -1,7 +1,8 @@
 {
-  "name": "vite-vuetify",
+  "name": "leleo-home-page",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.1.0",
+  "description": "JupiterW的个人主页 - Personal homepage with dynamic wallpapers and music player",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
