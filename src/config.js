@@ -199,9 +199,14 @@ const config = {
 
 	//音乐播放配置
 	musicPlayer: {
+		// mode: 'meting' | 'ceru-share'
+		mode: 'ceru-share',
+		// meting 配置（mode=meting 时生效）
 		server: 'netease',
 		type: 'playlist',
-		id: '2056960641'
+		id: '2056960641',
+		// CeruMusic 分享配置（mode=ceru-share 时生效）
+		shareId: 'r7wdb3sRwD',
 	},
 
 	//壁纸数据

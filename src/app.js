@@ -268,17 +268,29 @@ export default {
     async getMusicInfo(){
       this.musicinfoLoading = true;
       try {
-        const response = await fetch(`https://api.i-meto.com/meting/api?server=${this.configdata.musicPlayer.server}&type=${this.configdata.musicPlayer.type}&id=${this.configdata.musicPlayer.id}`
-        );
-        if (!response.ok) {
-          throw new Error('网络请求失败');
+        const cfg = this.configdata.musicPlayer;
+        if (cfg.mode === 'ceru-share') {
+          const shareId = cfg.shareId;
+          const res = await fetch(`https://api.ceru.shiqianjiang.cn/api/share/playlist/${shareId}`);
+          if (!res.ok) throw new Error('网络请求失败');
+          const data = await res.json();
+          this.musicinfo = (data.data.playlist.songs || []).map(song => ({
+            title: song.name,
+            author: song.singer,
+            url: `https://api.ceru.shiqianjiang.cn/api/share/playlist/${shareId}/song/${song.songmid}/audio`,
+            pic: song.img || '',
+            lrc: '',
+          }));
+        } else {
+          const response = await fetch(`https://api.i-meto.com/meting/api?server=${cfg.server}&type=${cfg.type}&id=${cfg.id}`);
+          if (!response.ok) throw new Error('网络请求失败');
+          this.musicinfo = await response.json();
         }
-        this.musicinfo = await response.json();
         this.musicinfoLoading = false;
       } catch (error) {
         console.error('请求失败:', error);
+        this.musicinfoLoading = false;
       }
-      
     },
     musicplayershow(val) {
         this.ismusicplayer = val;
