@@ -70,6 +70,32 @@
           </v-list-item-content>
         </v-list-item>
       </v-list>
+
+      <v-divider :thickness="3" class="mt-3 mb-3"></v-divider>
+
+      <div class="pa-2">
+        <div :style="xs?{'font-size':'11px'}:{'font-size':'13px'}" style="color:var(--leleo-vcard-color);opacity:0.7;margin-bottom:6px;">
+          澜音分享 ID（到期后粘贴新 ID 即可续期）
+        </div>
+        <div style="display:flex;gap:8px;">
+          <v-text-field
+            v-model="shareIdInput"
+            placeholder="粘贴新的分享 ID"
+            variant="outlined"
+            density="compact"
+            hide-details
+            :style="xs?{'font-size':'12px'}:{}"
+            @keyup.enter="applyShareId"
+          ></v-text-field>
+          <v-btn
+            :size="xs?30:36"
+            color="var(--leleo-vcard-color)"
+            variant="tonal"
+            @click="applyShareId"
+            :loading="refreshing"
+          >更新</v-btn>
+        </div>
+      </div>
     </v-container>
   </template>
   
@@ -105,6 +131,10 @@ export default {
       type: Boolean,
       required: true
     },
+    shareId: {
+      type: String,
+      default: ''
+    },
   },
 
   data() {
@@ -115,6 +145,8 @@ export default {
       lyricInterval: null, // 歌词更新定时器
       currentTime:null,
       duration:null,
+      shareIdInput: '',
+      refreshing: false,
     };
   },
   computed: {
@@ -249,8 +281,15 @@ export default {
       const seconds = Math.floor(time % 60);
       return `${minutes}:${seconds.toString().padStart(2, '0')}`;
     },
+    applyShareId() {
+      const val = this.shareIdInput.trim();
+      if (!val) return;
+      this.refreshing = true;
+      this.$emit('update:share-id', val);
+      this.shareIdInput = '';
+      setTimeout(() => { this.refreshing = false; }, 1500);
+    },
   },
-  
   mounted() {
     if(this.fromLyrics.index>=0 && this.currentIndex == this.fromLyrics.index){
         this.lyrics = this.fromLyrics.lyrics;

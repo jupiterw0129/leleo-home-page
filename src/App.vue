@@ -143,16 +143,18 @@
                   <v-progress-circular indeterminate></v-progress-circular>
               </div>
               <!-- 通过组件绑定不同tab项的组件 -->
-              <component v-if="item.value!='tab-3' || (item.value=='tab-3' && !musicinfoLoading)" :is=item.component @cancel="handleCancel" 
+              <component v-if="item.value!='tab-3' || (item.value=='tab-3' && !musicinfoLoading)" :is=item.component @cancel="handleCancel"
               :musicinfo="item.value=='tab-3'?musicinfo:[]"
               :currentIndex="item.value=='tab-3'?playlistIndex:null"
               :isPlaying="item.value=='tab-3'?isPlaying:null"
               :audioPlayer="item.value=='tab-3'?audioPlayer:null"
               :fromLyrics="item.value=='tab-3'?lyrics:null"
               :audioLoading="item.value=='tab-3'?audioLoading:null"
+              :shareId="item.value=='tab-3'?ceruShareId:''"
               @update:current-index="updateCurrentIndex"
               @update:is-playing="updateIsPlaying"
               @update:current-lyrics="updateLyrics"
+              @update:share-id="updateCeruShareId"
               ></component>
             </v-tabs-window-item>
           </template>

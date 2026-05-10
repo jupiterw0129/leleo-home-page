@@ -24,6 +24,7 @@ export default {
     return {
       isloading:false,
       isClearScreen: false,
+      ceruShareId: localStorage.getItem('ceru-share-id') || config.musicPlayer.shareId,
       formattedTime:"",
       formattedDate:"",
       configdata: config,
@@ -270,7 +271,7 @@ export default {
       try {
         const cfg = this.configdata.musicPlayer;
         if (cfg.mode === 'ceru-share') {
-          const shareId = cfg.shareId;
+          const shareId = this.ceruShareId;
           const res = await fetch(`/api/ceru/api/share/playlist/${shareId}`);
           if (!res.ok) throw new Error('网络请求失败');
           const data = await res.json();
@@ -290,6 +291,14 @@ export default {
       } catch (error) {
         console.error('请求失败:', error);
         this.musicinfoLoading = false;
+      }
+    },
+    updateCeruShareId(newId) {
+      if (newId && newId.trim()) {
+        this.ceruShareId = newId.trim();
+        localStorage.setItem('ceru-share-id', this.ceruShareId);
+        this.getMusicInfo();
+        this.updateAudio();
       }
     },
     musicplayershow(val) {
