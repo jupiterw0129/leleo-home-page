@@ -295,7 +295,7 @@ export default {
             title: song.name,
             author: song.singer,
             url: `/api/share/playlist/${shareId}/song/${song.songmid}/audio`,
-            pic: song.img || '',
+            pic: (song.img || '').replace(/^http:\/\//, 'https://'),
             lrc: '',
           }));
         } else {
