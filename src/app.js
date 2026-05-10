@@ -280,17 +280,14 @@ export default {
       this.musicinfoLoading = true;
       try {
         const cfg = this.configdata.musicPlayer;
-        console.log('[music] mode:', cfg.mode, 'shareId:', this.ceruShareId);
         if (cfg.mode === 'ceru-share') {
           const shareId = this.ceruShareId;
           const controller = new AbortController();
           const timer = setTimeout(() => controller.abort(), 8000);
           const res = await fetch(`/api/share/playlist/${shareId}`, { signal: controller.signal });
           clearTimeout(timer);
-          console.log('[music] fetch status:', res.status);
           if (!res.ok) throw new Error('网络请求失败: ' + res.status);
           const data = await res.json();
-          console.log('[music] songs count:', data?.data?.playlist?.songs?.length);
           this.musicinfo = (data.data.playlist.songs || []).map(song => ({
             title: song.name,
             author: song.singer,
@@ -304,9 +301,8 @@ export default {
           this.musicinfo = await response.json();
         }
         this.musicinfoLoading = false;
-        console.log('[music] done, musicinfo length:', this.musicinfo?.length);
       } catch (error) {
-        console.error('[music] 请求失败:', error.message || error);
+        console.error('音乐加载失败:', error.message || error);
         this.musicinfoLoading = false;
       }
     },

@@ -6,11 +6,12 @@ export async function onRequest(context) {
   const isJson = (response.headers.get('Content-Type') || '').includes('json');
   const cache = isJson ? 'public, max-age=300' : 'public, max-age=60';
 
+  const headers = new Headers(response.headers);
+  headers.set('Cache-Control', cache);
+
   return new Response(response.body, {
     status: response.status,
-    headers: {
-      'Content-Type': response.headers.get('Content-Type') || 'application/octet-stream',
-      'Cache-Control': cache,
-    },
+    statusText: response.statusText,
+    headers,
   });
 }
