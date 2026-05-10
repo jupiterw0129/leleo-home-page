@@ -272,9 +272,16 @@ export default {
         const cfg = this.configdata.musicPlayer;
         if (cfg.mode === 'ceru-share') {
           const shareId = this.ceruShareId;
-          const res = await fetch(`/api/playlist?shareId=${shareId}`);
+          const res = await fetch(`/api/share/playlist/${shareId}`);
           if (!res.ok) throw new Error('网络请求失败');
-          this.musicinfo = await res.json();
+          const data = await res.json();
+          this.musicinfo = (data.data.playlist.songs || []).map(song => ({
+            title: song.name,
+            author: song.singer,
+            url: `/api/share/playlist/${shareId}/song/${song.songmid}/audio`,
+            pic: song.img || '',
+            lrc: '',
+          }));
         } else {
           const response = await fetch(`https://api.i-meto.com/meting/api?server=${cfg.server}&type=${cfg.type}&id=${cfg.id}`);
           if (!response.ok) throw new Error('网络请求失败');
