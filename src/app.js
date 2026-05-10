@@ -8,6 +8,12 @@ import { getCookie } from './utils/cookieUtils.js';
 import { setMeta,getFormattedTime,getFormattedDate,dataConsole } from './utils/common.js';
 import { useDisplay } from 'vuetify'
 
+const extractShareId = (input) => {
+  if (!input) return '';
+  const m = input.match(/\/p\/([a-zA-Z0-9]+)\/?$/);
+  return m ? m[1] : input.trim();
+};
+
 const tab1 = defineAsyncComponent(() => import('./components/tabs/tab1.vue'))
 const tab2 = defineAsyncComponent(() => import('./components/tabs/tab2.vue'))
 const tab3 = defineAsyncComponent(() => import('./components/tabs/tab3.vue'))
@@ -24,7 +30,7 @@ export default {
     return {
       isloading:false,
       isClearScreen: false,
-      ceruShareId: localStorage.getItem('ceru-share-id') || config.musicPlayer.shareId,
+      ceruShareId: extractShareId(localStorage.getItem('ceru-share-id')) || config.musicPlayer.shareId,
       formattedTime:"",
       formattedDate:"",
       configdata: config,
@@ -80,6 +86,10 @@ export default {
     this.projectcards = this.configdata.projectcards;this.socialPlatformIcons = this.configdata.socialPlatformIcons;
     this.personalizedtags = this.configdata.tags;
     this.isloading = true;
+    const storedId = localStorage.getItem('ceru-share-id');
+    if (storedId && storedId !== extractShareId(storedId)) {
+      localStorage.setItem('ceru-share-id', extractShareId(storedId));
+    }
     let imageurl = "";
     this.dataConsole();
     this.setMeta(this.configdata.metaData.title,this.configdata.metaData.description,this.configdata.metaData.keywords,this.configdata.metaData.icon);
@@ -301,9 +311,10 @@ export default {
       }
     },
     updateCeruShareId(newId) {
-      if (newId && newId.trim()) {
-        this.ceruShareId = newId.trim();
-        localStorage.setItem('ceru-share-id', this.ceruShareId);
+      const id = extractShareId(newId);
+      if (id) {
+        this.ceruShareId = id;
+        localStorage.setItem('ceru-share-id', id);
         this.getMusicInfo();
         this.updateAudio();
       }
