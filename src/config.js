@@ -200,7 +200,7 @@ const config = {
 	//音乐播放配置
 	musicPlayer: {
 		// mode: 'meting' | 'ceru-share'
-		mode: 'meting',
+		mode: 'ceru-share',
 		// meting 配置（mode=meting 时生效）
 		server: 'netease',
 		type: 'playlist',
