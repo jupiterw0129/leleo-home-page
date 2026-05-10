@@ -284,7 +284,7 @@ export default {
         if (cfg.mode === 'ceru-share') {
           const shareId = this.ceruShareId;
           const controller = new AbortController();
-          const timer = setTimeout(() => controller.abort(), 12000);
+          const timer = setTimeout(() => controller.abort(), 8000);
           const res = await fetch(`/api/share/playlist/${shareId}`, { signal: controller.signal });
           clearTimeout(timer);
           console.log('[music] fetch status:', res.status);
