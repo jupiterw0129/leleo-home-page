@@ -141,7 +141,7 @@
                 density="compact"
                 variant="outlined"
                 hide-details
-                label="自动轮播间隔（分钟，0=关闭）"
+                label="自动轮播间隔（0=关闭）"
                 style="max-width: 260px;"
             />
          </div>
