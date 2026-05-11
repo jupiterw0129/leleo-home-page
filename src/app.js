@@ -355,12 +355,28 @@ export default {
       this.updateAudio();
     },
     updateAudio() {
+      this.audioLoading = true;
       this.audioPlayer.src = this.currentSong.url;
       this.audioPlayer.volume = this.volume / 100;
       this.$refs.audiotitle.innerText = this.currentSong.title;
       this.$refs.audioauthor.innerText = this.currentSong.author;
       this.isPlaying = true;
       this.audioPlayer.play();
+      this.clearPrefetch();
+    },
+    preloadNext() {
+      const nextIndex = (this.playlistIndex + 1) % this.musicinfo.length;
+      const nextUrl = this.musicinfo[nextIndex]?.url;
+      if (!nextUrl) return;
+      const link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.as = 'audio';
+      link.href = nextUrl;
+      link.setAttribute('data-audio-prefetch', '');
+      document.head.appendChild(link);
+    },
+    clearPrefetch() {
+      document.head.querySelectorAll('link[data-audio-prefetch]').forEach(el => el.remove());
     },
     updateCurrentIndex(index) {
       this.playlistIndex = index;
@@ -376,9 +392,9 @@ export default {
     onWaiting() {
       this.audioLoading = true;
     },
-    // 监听可以播放事件（缓冲足够）
     onCanPlay() {
       this.audioLoading = false;
+      setTimeout(() => this.preloadNext(), 2000);
     },
     expandSwitch() {
       this.isExpanded = true;
