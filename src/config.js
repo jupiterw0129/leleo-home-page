@@ -103,6 +103,16 @@ const pcVideoWallpapers = [
 		"preview": "/img/wallpaper/dynamic/尼尔：机械纪元 团队/Nier-Automata-Team-pre.webm",
 		"url": "/img/wallpaper/dynamic/尼尔：机械纪元 团队/Nier-Automata-Team.webm"
 	},
+	{
+		"title": "绫波丽",
+		"preview": "/img/wallpaper/dynamic/绫波丽/Ayanami-pre.webm",
+		"url": "/img/wallpaper/dynamic/绫波丽/Ayanami.webm"
+	},
+	{
+		"title": "明日香",
+		"preview": "/img/wallpaper/dynamic/明日香/Asuka-pre.webm",
+		"url": "/img/wallpaper/dynamic/明日香/Asuka.webm"
+	},
 ]
 
 // 移动端动态壁纸（先保留列表，默认背景暂不随机用它）
