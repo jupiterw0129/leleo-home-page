@@ -132,19 +132,6 @@
             </v-tabs-window-item>
           </template>
         </v-tabs>
-         <div class="d-flex justify-center mt-2">
-            <v-text-field
-                v-model.number="carouselInterval"
-                type="number"
-                step="1"
-                min="0"
-                density="compact"
-                variant="outlined"
-                hide-details
-                label="自动轮播间隔（0=关闭）"
-                style="max-width: 260px;"
-            />
-         </div>
          <div style="text-align: center;font-size: 12px;"><span>不同壁纸在相应设备下响应</span></div>
     </v-container>
     <div class="d-flex justify-center mt-3">
@@ -170,9 +157,6 @@ import { setCookie, getCookie, eraseCookie } from '../../utils/cookieUtils.js';
 import config from '../../config.js';
 export default {
     emits: ['cancel'],
-    beforeUnmount() {
-        this.stopCarousel();
-    },
     setup() {
         const { smAndDown } = useDisplay();
         return { smAndDown };
@@ -208,9 +192,7 @@ export default {
                 { type: 'pc',name: '电脑壁纸' },
                 { type: 'mobile',name: '手机壁纸' },
             ],
-            type:'pc',
-            carouselInterval: parseInt(localStorage.getItem('wallpaper-carousel-interval')) || 0,
-            carouselTimer: null
+            type:'pc'
         }
     },
     mounted() {
@@ -220,26 +202,16 @@ export default {
         this.wallpaperPIC = this.configdata.wallpaper.pic;
         this.wallpaperVD = this.configdata.wallpaper.video;
         this.radios.title = "请选择壁纸";
-        if (this.carouselInterval > 0) this.startCarousel();
     },
     watch: {
-        carouselInterval(val) {
-            localStorage.setItem('wallpaper-carousel-interval', val);
-            this.stopCarousel();
-            if (val > 0) this.startCarousel();
-        },
         tab(val) {
             this.type = 'pc';
             this.itemsPerPage = 6;
-            this.stopCarousel();
             if(val == 'tab-1'){
                 this.wallpaperPIC = this.configdata.wallpaper.pic;
             }else{
                 this.wallpaperVD = this.configdata.wallpaper.video;
             }
-            this.currentVDPage = 1;
-            this.currentPICPage = 1;
-            if (this.carouselInterval > 0) this.startCarousel();
         }
     },
     computed: {
@@ -263,61 +235,6 @@ export default {
         },
     },
     methods: {
-        startCarousel() {
-            if (this.carouselInterval <= 0) return;
-            this.stopCarousel();
-            this.carouselTimer = setInterval(() => {
-                this.advanceCarousel();
-            }, this.carouselInterval * 60000);
-        },
-        stopCarousel() {
-            if (this.carouselTimer) {
-                clearInterval(this.carouselTimer);
-                this.carouselTimer = null;
-            }
-        },
-        advanceCarousel() {
-            if (this.tab === 'tab-1') {
-                const items = this.wallpaperPIC;
-                const perPage = this.itemsPerPage;
-                const currentPage = this.currentPICPage;
-                const start = (currentPage - 1) * perPage;
-                const pageItems = items.slice(start, start + perPage);
-                const currentIdx = pageItems.findIndex(item => item === this.radios);
-                if (currentIdx >= 0 && currentIdx < pageItems.length - 1) {
-                    this.radios = pageItems[currentIdx + 1];
-                } else if (currentPage < this.totalPICPages) {
-                    this.currentPICPage = currentPage + 1;
-                    this.$nextTick(() => {
-                        const ns = (this.currentPICPage - 1) * perPage;
-                        this.radios = items.slice(ns, ns + perPage)[0];
-                    });
-                } else {
-                    this.currentPICPage = 1;
-                    this.radios = items[0];
-                }
-            } else {
-                const items = this.wallpaperVD;
-                const perPage = this.itemsPerPage;
-                const currentPage = this.currentVDPage;
-                const start = (currentPage - 1) * perPage;
-                const pageItems = items.slice(start, start + perPage);
-                const currentIdx = pageItems.findIndex(item => item === this.radios);
-                if (currentIdx >= 0 && currentIdx < pageItems.length - 1) {
-                    this.radios = pageItems[currentIdx + 1];
-                } else if (currentPage < this.totalVDPages) {
-                    this.currentVDPage = currentPage + 1;
-                    this.$nextTick(() => {
-                        const ns = (this.currentVDPage - 1) * perPage;
-                        this.radios = items.slice(ns, ns + perPage)[0];
-                    });
-                } else {
-                    this.currentVDPage = 1;
-                    this.radios = items[0];
-                }
-            }
-        },
-
         setCookie,
         getCookie,
         eraseCookie,
