@@ -60,7 +60,7 @@
                           <v-icon>mdi-skip-next</v-icon>
                           </v-btn>
                         </div>
-                        <div style="display: flex; align-items: center; width: 70%;">
+                        <div style="display: flex; align-items: center; width: 70%; gap: 2px;">
                           <v-icon :size="xs||sm?10:12" style="color: #999; cursor: pointer;" @click="volume = volume === 0 ? 70 : 0">{{ volumeIcon }}</v-icon>
                           <v-slider
                             v-model="volume"
@@ -69,8 +69,9 @@
                             density="compact"
                             thumb-size="5"
                             hide-details
-                            style="flex: 1; margin-left: 2px;"
+                            style="flex: 1;"
                           ></v-slider>
+                          <span :style="xs||sm?'font-size:8px':'font-size:10px'" style="color: #999; min-width: 22px; text-align: right;">{{ volume }}%</span>
                         </div>
                       </div>
                   </v-card>

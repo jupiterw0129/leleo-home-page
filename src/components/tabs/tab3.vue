@@ -51,6 +51,7 @@
               hide-details
               style="flex: 1;"
             ></v-slider>
+            <span :style="xs?'font-size:10px':'font-size:12px'" style="color: var(--leleo-vcard-color); min-width: 26px; text-align: right;">{{ localVolume }}%</span>
           </div>
 
           <!-- 歌词区 -->
