@@ -1,0 +1,16 @@
+{
+  "name": "JupiterW 的个人主页",
+  "short_name": "JupiterW",
+  "description": "欢迎来到JupiterW的奇妙世界！",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#282c34",
+  "theme_color": "#282c34",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "512x512",
+      "type": "image/x-icon"
+    }
+  ]
+}

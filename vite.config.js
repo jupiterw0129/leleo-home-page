@@ -11,12 +11,15 @@ export default defineConfig({
   build: {
     target: 'es2020',
     minify: 'esbuild',
+    cssMinify: true,
+    cssCodeSplit: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vue: ['vue'],
-          vuetify: ['vuetify'],
-          chartjs: ['chart.js'],
+        manualChunks(id) {
+          if (id.includes('node_modules/vue')) return 'vue'
+          if (id.includes('node_modules/vuetify')) return 'vuetify'
+          if (id.includes('node_modules/chart.js')) return 'chartjs'
+          if (id.includes('node_modules/typeit')) return 'typeit'
         },
       },
     },

@@ -81,6 +81,7 @@
                     aspect-ratio="1.7778"
                     :src= item.img
                     cover
+                    loading="lazy"
                     :style="{ opacity: 0.8 }"
                   ></v-img>
                   <v-card-title :style="xs?{'font-size': '0.9rem','padding': '0.15rem 0.5rem'}:{'font-size': '1.1rem','padding':'0.2rem 0.8rem'}">
@@ -121,6 +122,7 @@
 <script>
 import typewriter from '../components/typewriter.vue';
 import turntable from '../components/turntable.vue';
+import scrolltotop from './scrolltotop.vue';
 import { useDisplay } from 'vuetify'
 
 export default {

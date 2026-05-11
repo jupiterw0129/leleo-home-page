@@ -50,18 +50,18 @@
                       </audio>
                       <div style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
                         <div style="display: flex; align-items: center; gap: 1px;">
-                          <v-btn :size="xs||sm?22:30" color="#999999" icon @click="previousTrack()">
+                          <v-btn :size="xs||sm?22:30" color="#999999" icon aria-label="上一首" @click="previousTrack()">
                           <v-icon>mdi-skip-previous</v-icon>
                           </v-btn>
-                          <v-btn :size="xs||sm?35:48" color="#999999" icon @click="togglePlay()">
+                          <v-btn :size="xs||sm?35:48" color="#999999" icon :aria-label="isPlaying ? `暂停` : `播放`" @click="togglePlay()">
                           <v-icon>{{ isPlaying? 'mdi-pause' : 'mdi-play' }}</v-icon>
                           </v-btn>
-                          <v-btn :size="xs||sm?22:30" color="#999999" icon @click="nextTrack()">
+                          <v-btn :size="xs||sm?22:30" color="#999999" icon aria-label="下一首" @click="nextTrack()">
                           <v-icon>mdi-skip-next</v-icon>
                           </v-btn>
                         </div>
                         <div style="display: flex; align-items: center; width: 70%; gap: 2px;">
-                          <v-icon :size="xs||sm?10:12" style="color: #999; cursor: pointer;" @click="volume = volume === 0 ? 70 : 0">{{ volumeIcon }}</v-icon>
+                          <v-icon :size="xs||sm?10:12" style="color: #999; cursor: pointer;" aria-label="静音切换" role="button" tabindex="0" @click="volume = volume === 0 ? 70 : 0">{{ volumeIcon }}</v-icon>
                           <v-slider
                             v-model="volume"
                             :min="0"
@@ -97,6 +97,7 @@
                         <v-btn :size="xs?25:33" variant="tonal" color="var(--leleo-vcard-color)"
                         class="ma-1 leleo-social-bticon"
                         icon
+                        :aria-label="item.icon.replace(`mdi-`, ``)"
                         :href="item.link" target="_blank"
                         >
                     <v-icon :icon=item.icon :size="xs?20:25" class="social-bticon-icon"></v-icon></v-btn>
