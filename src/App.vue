@@ -71,7 +71,7 @@
                             hide-details
                             style="flex: 1;"
                           ></v-slider>
-                          <span :style="xs||sm?'font-size:8px':'font-size:10px'" style="color: #999; min-width: 22px; text-align: right;">{{ volume }}%</span>
+                          <span :style="xs||sm?'font-size:8px':'font-size:10px'" style="color: #999; min-width: 22px; text-align: right;">{{ Math.round(volume) }}%</span>
                         </div>
                       </div>
                   </v-card>
