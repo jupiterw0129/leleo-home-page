@@ -31,12 +31,12 @@ export function getFormattedTime(currentDate){
 }
 
 export function getFormattedDate(currentDate){
-   const year = currentDate.getFullYear();
-   const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-   const day = String(currentDate.getDate()).padStart(2, '0');
-   const weekday = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'][currentDate.getDay()];
+   const month = currentDate.getMonth() + 1;
+   const day = currentDate.getDate();
+   const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+   const weekday = weekdays[currentDate.getDay()];
 
-   return `${year} 年 ${month} 月 ${day} 日 ${weekday}`;
+   return `${month}/${day} ${weekday}`;
 }
 
 export function dataConsole(){

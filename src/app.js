@@ -48,6 +48,7 @@ export default {
       lyrics:{},
       socialPlatformIcons: null,
       isExpanded: false,
+      clockTimer: null,
       stackicons:[
         {icon:"mdi-vuejs",color:"green", model: false,tip: 'vue'},
         {icon:"mdi-language-javascript",color:"#CAD300", model: false,tip: 'javascript'},
@@ -141,28 +142,38 @@ export default {
         });
      };
 
+    const startClock = () => {
+      const tick = () => {
+        const now = new Date();
+        this.formattedTime = this.getFormattedTime(now);
+        const msToNextSecond = 1000 - now.getMilliseconds();
+        this.clockTimer = setTimeout(tick, msToNextSecond);
+      };
+      const msToNextSecond = 1000 - Date.now() % 1000;
+      this.clockTimer = setTimeout(tick, msToNextSecond);
+    };
+
     loadImage().then(() => {
         this.formattedTime =  this.getFormattedTime(new Date());
         this.formattedDate =  this.getFormattedDate(new Date());
+        startClock();
         setTimeout(() => {
           this.isloading = false;
         }, "500");          
       }).catch((err) => {
         console.error('壁纸加载失败:', err);
+        startClock();
         setTimeout(() => {
           this.isloading = false;
         }, "100");  
-      });
- 
-      setInterval(() => {
-        this.formattedTime =  this.getFormattedTime(new Date()) ;
-      }, 1000);
+      });
 
       await this.getMusicInfo();  //获取音乐数据
       this.setupAudioListener();  //设置 ended 事件监听器，当歌曲播放结束时自动调用 nextTrack 方法。
   },
 
-  beforeDestroy() {     //在组件销毁前移除事件监听器，防止内存泄漏。
+  beforeDestroy() {
+    if (this.clockTimer) { clearTimeout(this.clockTimer); this.clockTimer = null; }
     this.$refs.audioPlayer.removeEventListener('ended',  this.nextTrack);
   },
 
