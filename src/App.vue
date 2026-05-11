@@ -48,15 +48,31 @@
                       @waiting="onWaiting"
                       @canplay="onCanPlay">
                       </audio>
-                      <v-btn :size="xs||sm?22:30" color="#999999" icon @click="previousTrack()">
-                      <v-icon>mdi-skip-previous</v-icon>
-                      </v-btn>
-                      <v-btn :size="xs||sm?35:48" color="#999999" icon @click="togglePlay()">
-                      <v-icon>{{ isPlaying? 'mdi-pause' : 'mdi-play' }}</v-icon>
-                      </v-btn>
-                      <v-btn :size="xs||sm?22:30" color="#999999" icon @click="nextTrack()">
-                      <v-icon>mdi-skip-next</v-icon>
-                      </v-btn>
+                      <div style="display: flex; flex-direction: column; align-items: center; gap: 1px;">
+                        <div style="display: flex; align-items: center; gap: 1px;">
+                          <v-btn :size="xs||sm?22:30" color="#999999" icon @click="previousTrack()">
+                          <v-icon>mdi-skip-previous</v-icon>
+                          </v-btn>
+                          <v-btn :size="xs||sm?35:48" color="#999999" icon @click="togglePlay()">
+                          <v-icon>{{ isPlaying? 'mdi-pause' : 'mdi-play' }}</v-icon>
+                          </v-btn>
+                          <v-btn :size="xs||sm?22:30" color="#999999" icon @click="nextTrack()">
+                          <v-icon>mdi-skip-next</v-icon>
+                          </v-btn>
+                        </div>
+                        <div style="display: flex; align-items: center; width: 70%;">
+                          <v-icon :size="xs||sm?10:12" style="color: #999; cursor: pointer;" @click="volume = volume === 0 ? 70 : 0">{{ volumeIcon }}</v-icon>
+                          <v-slider
+                            v-model="volume"
+                            :min="0"
+                            :max="100"
+                            density="compact"
+                            thumb-size="5"
+                            hide-details
+                            style="flex: 1; margin-left: 2px;"
+                          ></v-slider>
+                        </div>
+                      </div>
                   </v-card>
                   </transition>
                 </v-avatar>
@@ -151,10 +167,12 @@
               :fromLyrics="item.value=='tab-3'?lyrics:null"
               :audioLoading="item.value=='tab-3'?audioLoading:null"
               :shareId="item.value=='tab-3'?ceruShareId:''"
+              :volume="item.value=='tab-3'?volume:null"
               @update:current-index="updateCurrentIndex"
               @update:is-playing="updateIsPlaying"
               @update:current-lyrics="updateLyrics"
               @update:share-id="updateCeruShareId"
+              @update:volume="volume = $event"
               ></component>
             </v-tabs-window-item>
           </template>

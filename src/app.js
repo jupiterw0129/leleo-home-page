@@ -42,6 +42,7 @@ export default {
       isPlaying:false,
       playlistIndex: 0,
       audioLoading: false,
+      volume: parseInt(localStorage.getItem('music-volume')) || 70,
       musicinfo: null,
       musicinfoLoading:false,
       lyrics:{},
@@ -180,7 +181,13 @@ export default {
     },
     audioLoading(val){
       this.isPlaying = !val;
-    }
+    },
+    volume(val) {
+      if (this.$refs.audioPlayer) {
+        this.$refs.audioPlayer.volume = val / 100;
+      }
+      localStorage.setItem('music-volume', val);
+    },
 
   //若弹出框使得页面播放卡顿，可以先停止背景播放
   //   dialog1(val){
@@ -198,7 +205,13 @@ export default {
     },
     audioPlayer() {
       return this.$refs.audioPlayer;
-    }
+    },
+    volumeIcon() {
+      if (this.volume === 0) return 'mdi-volume-mute';
+      if (this.volume < 34) return 'mdi-volume-low';
+      if (this.volume < 67) return 'mdi-volume-medium';
+      return 'mdi-volume-high';
+    },
   },
   
   methods: {
@@ -343,6 +356,7 @@ export default {
     },
     updateAudio() {
       this.audioPlayer.src = this.currentSong.url;
+      this.audioPlayer.volume = this.volume / 100;
       this.$refs.audiotitle.innerText = this.currentSong.title;
       this.$refs.audioauthor.innerText = this.currentSong.author;
       this.isPlaying = true;

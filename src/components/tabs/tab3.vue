@@ -38,6 +38,21 @@
             <!-- 控制区 -->
           </div>
 
+          <!-- 音量控制 -->
+          <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+            <v-icon :size="xs?14:16" style="color: var(--leleo-vcard-color); cursor: pointer;" @click="localVolume = localVolume === 0 ? 70 : 0">{{ volumeIcon }}</v-icon>
+            <v-slider
+              v-model="localVolume"
+              :min="0"
+              :max="100"
+              color="var(--leleo-vcard-color)"
+              thumb-size="10"
+              density="compact"
+              hide-details
+              style="flex: 1;"
+            ></v-slider>
+          </div>
+
           <!-- 歌词区 -->
           <div class="lyrics-container ml-1">
               <div class="lyrics"
@@ -131,6 +146,10 @@ export default {
       type: Boolean,
       required: true
     },
+    volume: {
+      type: Number,
+      default: 70
+    },
     shareId: {
       type: String,
       default: ''
@@ -147,12 +166,19 @@ export default {
       duration:null,
       shareIdInput: '',
       refreshing: false,
+      localVolume: this.volume,
     };
   },
   computed: {
     currentSong() {
       return this.musicinfo[this.currentIndex];
-    }
+    },
+    volumeIcon() {
+      if (this.localVolume === 0) return 'mdi-volume-mute';
+      if (this.localVolume < 34) return 'mdi-volume-low';
+      if (this.localVolume < 67) return 'mdi-volume-medium';
+      return 'mdi-volume-high';
+    },
   },
   watch: {
     // 监听 currentIndex 变化，加载新歌词
@@ -167,7 +193,13 @@ export default {
       } else {
         this.stopLyricUpdate();
       }
-    }
+    },
+    localVolume(val) {
+      this.$emit('update:volume', val);
+    },
+    volume(val) {
+      this.localVolume = val;
+    },
   },
   methods: {
     // 加载歌词
