@@ -199,18 +199,30 @@ export default {
         if(import.meta.env.VITE_CONFIG){
             this.configdata = JSON.parse(import.meta.env.VITE_CONFIG);
         }
-        this.wallpaperPIC = this.configdata.wallpaper.pic;
-        this.wallpaperVD = this.configdata.wallpaper.video;
+        if (this.smAndDown) {
+            this.type = 'mobile';
+            this.wallpaperPIC = this.configdata.wallpaper.picMobile;
+            this.wallpaperVD = this.configdata.wallpaper.videoMobile;
+            this.itemsPerPage = 8;
+        } else {
+            this.wallpaperPIC = this.configdata.wallpaper.pic;
+            this.wallpaperVD = this.configdata.wallpaper.video;
+        }
         this.radios.title = "请选择壁纸";
     },
     watch: {
         tab(val) {
-            this.type = 'pc';
-            this.itemsPerPage = 6;
+            if (this.smAndDown) {
+                this.type = 'mobile';
+                this.itemsPerPage = 8;
+            } else {
+                this.type = 'pc';
+                this.itemsPerPage = 6;
+            }
             if(val == 'tab-1'){
-                this.wallpaperPIC = this.configdata.wallpaper.pic;
+                this.wallpaperPIC = this.smAndDown ? this.configdata.wallpaper.picMobile : this.configdata.wallpaper.pic;
             }else{
-                this.wallpaperVD = this.configdata.wallpaper.video;
+                this.wallpaperVD = this.smAndDown ? this.configdata.wallpaper.videoMobile : this.configdata.wallpaper.video;
             }
         }
     },
