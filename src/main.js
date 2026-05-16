@@ -131,12 +131,11 @@ const oml2d = loadOml2d({
   },
 })
 
-// 模型就绪后强制重绘
-oml2d.onLoad((status) => {
-  if (status !== 'success') return
+// 舞台完全展示后强制重绘，修复 PixiJS 初始化时序
+oml2d.onStageSlideIn(() => {
   setTimeout(() => {
     window.dispatchEvent(new Event('resize'))
-  }, 200)
+  }, 500)
 })
 
 // 拖拽
