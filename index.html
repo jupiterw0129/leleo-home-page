@@ -44,19 +44,19 @@
     <script src="/ba-spark/spark.js" defer></script>
     <script>
       window.addEventListener('DOMContentLoaded', () => {
+        const isMobile = window.innerWidth <= 768
+        if (isMobile) return
         if (window.SparkEffect) {
-          const isTouch = window.matchMedia('(pointer: coarse)').matches
           window.SparkEffect.create('sparkCanvas', {
             color: '45,175,255',
             scale: 1.5,
             opacity: 1.0,
             trailSpeed: 1.0,
             clickSpeed: 1.0,
-            enableTrail: !isTouch
+            enableTrail: true
           })
-          // 移动端关闭始终拖尾，桌面端开启
           if (window.setInputContext) {
-            window.setInputContext(isTouch ? 'touch' : 'mouse', !isTouch)
+            window.setInputContext('mouse', true)
           }
         }
       })
