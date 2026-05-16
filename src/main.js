@@ -106,7 +106,7 @@ app.config.warnHandler = () => {}
 app.use(vuetify).mount('#app')
 
 // Live2D 看板娘 - 来自 DoroPet_V3
-loadOml2d({
+const oml2d = loadOml2d({
   dockedPosition: 'right',
   mobileDisplay: true,
   models: [
@@ -129,4 +129,12 @@ loadOml2d({
       message: {},
     },
   },
+})
+
+// 模型就绪后强制重绘，修复 PixiJS 纹理初始化时序问题
+oml2d.onLoad((status) => {
+  if (status !== 'success') return
+  setTimeout(() => {
+    window.dispatchEvent(new Event('resize'))
+  }, 200)
 })
