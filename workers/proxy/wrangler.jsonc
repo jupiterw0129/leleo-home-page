@@ -1,0 +1,9 @@
+{
+  "name": "jupiterw-proxy",
+  "main": "index.js",
+  "compatibility_date": "2025-05-15",
+  "routes": [
+    { "pattern": "jupiterw.com/*", "zone_id": "a1d1bb39de1d5f39fce6070c3085784d" },
+    { "pattern": "jupiterw.cc.cd/*", "zone_id": "a8e9947212af823a9eed51342759dd57" }
+  ]
+}
