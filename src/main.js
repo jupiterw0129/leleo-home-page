@@ -149,6 +149,8 @@ oml2d.onStageSlideIn(() => {
     sx = e.clientX; sy = e.clientY
     const r = stage.getBoundingClientRect()
     sl = r.left; st = r.top
+    // 拖拽时播放跑动动作
+    oml2d.models?.model?.startMotion?.('跑', 0)
   })
 
   document.addEventListener('pointermove', (e) => {
@@ -162,6 +164,7 @@ oml2d.onStageSlideIn(() => {
   })
 
   document.addEventListener('pointerup', () => {
+    if (!dragging) return
     dragging = false
   })
 })
