@@ -106,7 +106,7 @@ app.config.warnHandler = () => {}
 app.use(vuetify).mount('#app')
 
 // Live2D 看板娘 - 来自 DoroPet_V3
-loadOml2d({
+const oml2d = loadOml2d({
   dockedPosition: 'right',
   mobileDisplay: true,
   models: [
@@ -130,3 +130,42 @@ loadOml2d({
     },
   },
 })
+
+// 拖拽
+;(function enableDrag() {
+  const stage = oml2d.stage?.element
+  const canvas = oml2d.stage?.canvasElement
+  if (!stage || !canvas) { setTimeout(enableDrag, 100); return }
+
+  stage.style.cursor = 'grab'
+  stage.style.touchAction = 'none'
+
+  let dragging = false, sx, sy, sl, st
+
+  stage.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return
+    dragging = true
+    sx = e.clientX; sy = e.clientY
+    const r = stage.getBoundingClientRect()
+    sl = r.left; st = r.top
+    stage.style.cursor = 'grabbing'
+    stage.style.transition = 'none'
+  })
+
+  document.addEventListener('pointermove', (e) => {
+    if (!dragging) return
+    const x = Math.max(0, Math.min(sl + (e.clientX - sx), window.innerWidth - stage.offsetWidth))
+    const y = Math.max(0, Math.min(st + (e.clientY - sy), window.innerHeight - stage.offsetHeight))
+    stage.style.left = x + 'px'
+    stage.style.top = y + 'px'
+    stage.style.right = 'auto'
+    stage.style.bottom = 'auto'
+  })
+
+  document.addEventListener('pointerup', () => {
+    if (!dragging) return
+    dragging = false
+    stage.style.cursor = 'grab'
+    stage.style.transition = ''
+  })
+})()
