@@ -134,9 +134,15 @@ const oml2d = loadOml2d({
 // 模型就绪后强制重绘 + 启用拖拽
 oml2d.onLoad((status) => {
   if (status !== 'success') return
-  setTimeout(() => {
-    window.dispatchEvent(new Event('resize'))
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      oml2d.pixiApp?.resize()
+      window.dispatchEvent(new Event('resize'))
+    })
+  })
 
+  // 拖拽初始化（延迟确保完全就绪）
+  setTimeout(() => {
     const stage = oml2d.stage?.element
     const canvas = oml2d.stage?.canvasElement
     if (!stage || !canvas) return
@@ -172,5 +178,5 @@ oml2d.onLoad((status) => {
       stage.style.cursor = 'grab'
       stage.style.transition = ''
     })
-  }, 200)
+  }, 500)
 })
