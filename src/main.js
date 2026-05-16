@@ -131,9 +131,10 @@ const oml2d = loadOml2d({
   },
 })
 
-// 模型加载完成后再启用拖拽
+// 模型加载完成后延迟启用拖拽，确保 PixiJS 纹理完全就绪
 oml2d.onLoad((status) => {
   if (status !== 'success') return
+  setTimeout(() => {
   const stage = oml2d.stage?.element
   const canvas = oml2d.stage?.canvasElement
   if (!stage || !canvas) return
@@ -169,4 +170,5 @@ oml2d.onLoad((status) => {
     stage.style.cursor = 'grab'
     stage.style.transition = ''
   })
+  }, 500)
 })
