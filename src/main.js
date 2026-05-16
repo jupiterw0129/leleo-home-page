@@ -131,52 +131,49 @@ const oml2d = loadOml2d({
   },
 })
 
-// 模型就绪后强制重绘 + 启用拖拽
+// 模型就绪后强制重绘
 oml2d.onLoad((status) => {
   if (status !== 'success') return
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      oml2d.pixiApp?.resize()
-      window.dispatchEvent(new Event('resize'))
-    })
+  setTimeout(() => {
+    window.dispatchEvent(new Event('resize'))
+  }, 200)
+})
+
+// 拖拽
+;(function enableDrag() {
+  const stage = oml2d.stage?.element
+  const canvas = oml2d.stage?.canvasElement
+  if (!stage || !canvas) { setTimeout(enableDrag, 100); return }
+
+  stage.style.cursor = 'grab'
+  stage.style.touchAction = 'none'
+
+  let dragging = false, sx, sy, sl, st
+
+  stage.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return
+    dragging = true
+    sx = e.clientX; sy = e.clientY
+    const r = stage.getBoundingClientRect()
+    sl = r.left; st = r.top
+    stage.style.cursor = 'grabbing'
+    stage.style.transition = 'none'
   })
 
-  // 拖拽初始化（延迟确保完全就绪）
-  setTimeout(() => {
-    const stage = oml2d.stage?.element
-    const canvas = oml2d.stage?.canvasElement
-    if (!stage || !canvas) return
+  document.addEventListener('pointermove', (e) => {
+    if (!dragging) return
+    const x = Math.max(0, Math.min(sl + (e.clientX - sx), window.innerWidth - stage.offsetWidth))
+    const y = Math.max(0, Math.min(st + (e.clientY - sy), window.innerHeight - stage.offsetHeight))
+    stage.style.left = x + 'px'
+    stage.style.top = y + 'px'
+    stage.style.right = 'auto'
+    stage.style.bottom = 'auto'
+  })
 
+  document.addEventListener('pointerup', () => {
+    if (!dragging) return
+    dragging = false
     stage.style.cursor = 'grab'
-    stage.style.touchAction = 'none'
-
-    let dragging = false, sx, sy, sl, st
-
-    stage.addEventListener('pointerdown', (e) => {
-      if (e.button !== 0) return
-      dragging = true
-      sx = e.clientX; sy = e.clientY
-      const r = stage.getBoundingClientRect()
-      sl = r.left; st = r.top
-      stage.style.cursor = 'grabbing'
-      stage.style.transition = 'none'
-    })
-
-    document.addEventListener('pointermove', (e) => {
-      if (!dragging) return
-      const x = Math.max(0, Math.min(sl + (e.clientX - sx), window.innerWidth - stage.offsetWidth))
-      const y = Math.max(0, Math.min(st + (e.clientY - sy), window.innerHeight - stage.offsetHeight))
-      stage.style.left = x + 'px'
-      stage.style.top = y + 'px'
-      stage.style.right = 'auto'
-      stage.style.bottom = 'auto'
-    })
-
-    document.addEventListener('pointerup', () => {
-      if (!dragging) return
-      dragging = false
-      stage.style.cursor = 'grab'
-      stage.style.transition = ''
-    })
-  }, 500)
-})
+    stage.style.transition = ''
+  })
+})()
