@@ -105,7 +105,11 @@ const app = createApp(App)
 app.config.warnHandler = () => {}
 app.use(vuetify).mount('#app')
 
-// Live2D 看板娘 - 来自 DoroPet_V3
+// Live2D 看板娘 - 清除可能残留的错误状态
+localStorage.removeItem('OML2D_STATUS')
+localStorage.removeItem('OML2D_MODEL_INDEX')
+localStorage.removeItem('OML2D_MODEL_CLOTHES_INDEX')
+
 const oml2d = loadOml2d({
   dockedPosition: 'right',
   mobileDisplay: true,
@@ -136,10 +140,6 @@ oml2d.onStageSlideIn(() => {
   const stage = oml2d.stage?.element
   if (!stage) return
 
-  // F12 开关会导致视口变化，触发 PixiJS 重绘
-  window.addEventListener('resize', () => {
-    oml2d.pixiApp?.resize?.()
-  })
 
   let dragging = false, sx, sy, sl, st
 
