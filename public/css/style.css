@@ -40,11 +40,6 @@
     background-color: var(--main_bg_color, linear-gradient(50deg, #a2d0ff, #ffffff));
 }
 
-*, *::before, *::after {
-	user-select: none !important;
-	-webkit-user-select: none !important;
-}
-
 body {
 	background-color: #282c34;
 }
