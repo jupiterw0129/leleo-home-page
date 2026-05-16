@@ -141,11 +141,13 @@ oml2d.onStageSlideIn(() => {
   if (!stage) return
 
   stage.style.cursor = 'grab'
+  stage.style.userSelect = 'none'
 
   let dragging = false, sx, sy, sl, st
 
   stage.addEventListener('pointerdown', (e) => {
     if (e.button !== 0) return
+    e.preventDefault()
     dragging = true
     sx = e.clientX; sy = e.clientY
     const r = stage.getBoundingClientRect()
