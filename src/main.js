@@ -136,6 +136,11 @@ oml2d.onStageSlideIn(() => {
   const stage = oml2d.stage?.element
   if (!stage) return
 
+  // F12 开关会导致视口变化，触发 PixiJS 重绘
+  window.addEventListener('resize', () => {
+    oml2d.pixiApp?.resize?.()
+  })
+
   let dragging = false, sx, sy, sl, st
 
   stage.addEventListener('pointerdown', (e) => {
