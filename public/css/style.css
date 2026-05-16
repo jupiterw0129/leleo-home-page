@@ -42,6 +42,8 @@
 
 body {
 	background-color: #282c34;
+	user-select: none;
+	-webkit-user-select: none;
 }
 
 .v-selection-control-group{
