@@ -39,6 +39,28 @@
   </head>
   <body>
     <div id="app"></div>
+    <canvas id="sparkCanvas"></canvas>
+    <link rel="stylesheet" href="/ba-spark/spark.css">
+    <script src="/ba-spark/spark.js" defer></script>
+    <script>
+      window.addEventListener('DOMContentLoaded', () => {
+        if (window.SparkEffect) {
+          const isTouch = window.matchMedia('(pointer: coarse)').matches
+          window.SparkEffect.create('sparkCanvas', {
+            color: '45,175,255',
+            scale: 1.5,
+            opacity: 1.0,
+            trailSpeed: 1.0,
+            clickSpeed: 1.0,
+            enableTrail: !isTouch
+          })
+          // 移动端关闭始终拖尾，桌面端开启
+          if (window.setInputContext) {
+            window.setInputContext(isTouch ? 'touch' : 'mouse', !isTouch)
+          }
+        }
+      })
+    </script>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
