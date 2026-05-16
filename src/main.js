@@ -140,6 +140,7 @@ oml2d.onStageSlideIn(() => {
   const stage = oml2d.stage?.element
   if (!stage) return
 
+  stage.style.cursor = 'grab'
 
   let dragging = false, sx, sy, sl, st
 
@@ -149,6 +150,7 @@ oml2d.onStageSlideIn(() => {
     sx = e.clientX; sy = e.clientY
     const r = stage.getBoundingClientRect()
     sl = r.left; st = r.top
+    stage.style.cursor = 'grabbing'
   })
 
   document.addEventListener('pointermove', (e) => {
@@ -164,5 +166,6 @@ oml2d.onStageSlideIn(() => {
   document.addEventListener('pointerup', () => {
     if (!dragging) return
     dragging = false
+    stage.style.cursor = 'grab'
   })
 })
