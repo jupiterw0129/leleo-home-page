@@ -150,7 +150,11 @@ oml2d.onStageSlideIn(() => {
     const r = stage.getBoundingClientRect()
     sl = r.left; st = r.top
     // 拖拽时播放跑动动作
-    oml2d.models?.model?.startMotion?.('跑', 0)
+    try {
+      const m = oml2d.models?.model?.children?.[0]
+      const mm = m?.internalModel?.motionManager
+      if (mm?.startMotion) mm.startMotion('跑', 0)
+    } catch {}
   })
 
   document.addEventListener('pointermove', (e) => {
