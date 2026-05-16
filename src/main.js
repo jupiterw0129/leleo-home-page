@@ -131,11 +131,12 @@ const oml2d = loadOml2d({
   },
 })
 
-// 拖拽
-;(function enableDrag() {
+// 模型加载完成后再启用拖拽
+oml2d.onLoad((status) => {
+  if (status !== 'success') return
   const stage = oml2d.stage?.element
   const canvas = oml2d.stage?.canvasElement
-  if (!stage || !canvas) { setTimeout(enableDrag, 100); return }
+  if (!stage || !canvas) return
 
   stage.style.cursor = 'grab'
   stage.style.touchAction = 'none'
@@ -168,4 +169,4 @@ const oml2d = loadOml2d({
     stage.style.cursor = 'grab'
     stage.style.transition = ''
   })
-})()
+})
