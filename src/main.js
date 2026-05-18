@@ -1,6 +1,5 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import { loadOml2d } from 'oh-my-live2d'
 
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
@@ -105,12 +104,13 @@ const app = createApp(App)
 app.config.warnHandler = () => {}
 app.use(vuetify).mount('#app')
 
-// Live2D 看板娘 - 仅桌面端，清除可能残留的错误状态
+// Live2D 看板娘 - 仅桌面端，动态按需加载（不阻塞首屏）
 if (window.innerWidth > 768) {
 localStorage.removeItem('OML2D_STATUS')
 localStorage.removeItem('OML2D_MODEL_INDEX')
 localStorage.removeItem('OML2D_MODEL_CLOTHES_INDEX')
 
+import('oh-my-live2d').then(({ loadOml2d }) => {
 const oml2d = loadOml2d({
   dockedPosition: 'right',
   mobileDisplay: false,
@@ -172,4 +172,5 @@ oml2d.onStageSlideIn(() => {
     stage.style.cursor = 'grab'
   })
 })
+}) // import('oh-my-live2d').then()
 }
