@@ -60,16 +60,22 @@ html {
 
 .skip-link {
   position: absolute;
-  top: -100px;
-  left: 0;
+  left: -9999px;
+  top: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 9999;
+}
+.skip-link:focus {
+  position: fixed;
+  left: 8px;
+  top: 8px;
+  width: auto;
+  height: auto;
   padding: 8px 16px;
   background: var(--leleo-vcard-color, #fff);
   color: #282c34;
-  z-index: 9999;
   font-weight: bold;
-  border-radius: 0 0 4px 0;
-  transition: top 0.2s;
-}
-.skip-link:focus {
-  top: 0;
+  border-radius: 4px;
 }
