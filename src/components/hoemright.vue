@@ -97,10 +97,12 @@
                     <v-btn :href="item.url"
                     target="_blank"
                       :text= "item.go"
+                      :aria-label="`${item.go} ${item.title}`"
                     ></v-btn>
                     <v-spacer></v-spacer>
                     <v-btn
                       :icon="item.show ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+                      :aria-label="item.show ? `收起 ${item.title}` : `展开 ${item.title}`"
                       @click="item.show = !item.show;projectcardsShow(key);"
                     ></v-btn>
                   </v-card-actions>
