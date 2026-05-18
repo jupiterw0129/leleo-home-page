@@ -120,9 +120,9 @@
                             icon="mdi-cog"
                             ></v-fab>
                         </template>
-                        <v-btn variant="tonal" class="setbtn" key="1" icon="mdi-key-chain" @click="dialog1 = true" size="31" color="var(--leleo-vcard-color)"></v-btn>
-                        <v-btn variant="tonal" class="setbtn" key="2" icon="mdi-information" @click="dialog2 = true" size="31" color="var(--leleo-vcard-color)"></v-btn>
-                        <v-btn variant="tonal" class="setbtn" key="3" icon="$error" size="31" color="var(--leleo-vcard-color)"></v-btn>
+                        <v-btn variant="tonal" class="setbtn" key="1" icon="mdi-key-chain" aria-label="样式设置" @click="dialog1 = true" size="31" color="var(--leleo-vcard-color)"></v-btn>
+                        <v-btn variant="tonal" class="setbtn" key="2" icon="mdi-information" aria-label="关于本站" @click="dialog2 = true" size="31" color="var(--leleo-vcard-color)"></v-btn>
+                        <v-btn variant="tonal" class="setbtn" key="3" icon="$error" aria-label="错误报告" size="31" color="var(--leleo-vcard-color)"></v-btn>
                         </v-speed-dial>
                     </v-col>
                     </v-row>
@@ -211,7 +211,7 @@
               <div>
                 <v-tooltip  v-for="item in stackicons" v-model="item.model" location="top">
                   <template v-slot:activator="{ props }">
-                    <v-btn icon v-bind="props" :color=item.color rounded="lg" class="ma-1 stack-btn" size="35">
+                    <v-btn icon v-bind="props" :color=item.color :aria-label="item.tip" rounded="lg" class="ma-1 stack-btn" size="35">
                       <v-icon size="25" color="white">{{item.icon}}</v-icon>
                     </v-btn>
                   </template>

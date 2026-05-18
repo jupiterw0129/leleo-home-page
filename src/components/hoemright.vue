@@ -80,6 +80,7 @@
                   <v-img
                     aspect-ratio="1.7778"
                     :src= item.img
+                    :alt="item.title"
                     cover
                     loading="lazy"
                     decoding="async"
