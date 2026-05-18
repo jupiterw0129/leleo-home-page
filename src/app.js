@@ -98,7 +98,7 @@ export default {
 
     imageurl = this.setMainProperty(imageurl);
 
-    //图片与视频并行加载，缩短总等待时间
+    //图片加载；视频背景不阻塞页面（后台加载）
     const loadImage = () => {
         const imageUrls = [
           config.avatar,
@@ -125,12 +125,7 @@ export default {
             img.onerror = () => resolve();
             setTimeout(() => resolve(), 2000);
           } else {
-            const video = this.$refs.VdPlayer;
-            if (!video) return resolve();
-            if (video.readyState >= 1) return resolve();
-            video.onloadedmetadata = () => resolve();
-            video.onerror = () => resolve();
-            setTimeout(() => resolve(), 3000);
+            resolve(); //视频背景不等待，后台加载
           }
         });
 
