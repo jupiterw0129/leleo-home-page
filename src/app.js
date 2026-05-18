@@ -95,51 +95,46 @@ export default {
     let imageurl = "";
     this.dataConsole();
     this.setMeta(this.configdata.metaData.title,this.configdata.metaData.description,this.configdata.metaData.keywords,this.configdata.metaData.icon);
-    
+
     imageurl = this.setMainProperty(imageurl);
 
-    //异步等待背景壁纸包括视频壁纸加载完成后再显示页面
+    //图片与视频并行加载，缩短总等待时间
     const loadImage = () => {
         const imageUrls = [
           config.avatar,
           ...config.projectcards.map(item => item.img)
         ];
-        return new Promise((resolve, reject) => {
-          const imagePromises = imageUrls.map((url) => {
-            return new Promise((resolve, reject) => {
-                const imgs = new Image();
-                imgs.src = url;
-                imgs.onload = () => resolve();
-                imgs.onerror = (err) => reject(err);
-            });
-          })
 
-          // 设置超时机制：2.5秒
-          const timeoutPromise = new Promise((resolve) => {
-            setTimeout(() => {
-              resolve();
-            }, 2500);
-          });
-          
-          // 等待所有图片加载完成或超时
-          Promise.race([Promise.all(imagePromises), timeoutPromise]).then(()=>{
-            if(imageurl){
-              const img = new Image();
-              img.src = imageurl;
-              // resolve() 函数通将一个 Promise 对象从未完成状态转变为已完成状态
-              img.onload = () => {resolve();};
-              img.onerror = (err) => {reject(err);};
-            }else{
-              const video = this.$refs.VdPlayer;
-              video.onloadedmetadata = () => {
-                setTimeout(() => {
-                }, "200");  
-                resolve();
-              };
-              video.onerror = (err) => {resolve();};
-            }
-          })
+        const imagesLoader = new Promise((resolve) => {
+          if (!imageUrls.length) return resolve();
+          const tasks = imageUrls.map((url) => new Promise((resolve) => {
+            const img = new Image();
+            img.src = url;
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+          }));
+          const timeout = new Promise(resolve => setTimeout(resolve, 2500));
+          Promise.race([Promise.all(tasks), timeout]).then(resolve);
         });
+
+        const bgLoader = new Promise((resolve) => {
+          if (imageurl) {
+            const img = new Image();
+            img.src = imageurl;
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+            setTimeout(() => resolve(), 2000);
+          } else {
+            const video = this.$refs.VdPlayer;
+            if (!video) return resolve();
+            if (video.readyState >= 1) return resolve();
+            video.onloadedmetadata = () => resolve();
+            video.onerror = () => resolve();
+            setTimeout(() => resolve(), 3000);
+          }
+        });
+
+        return Promise.all([imagesLoader, bgLoader]);
      };
 
     const startClock = () => {
@@ -159,14 +154,14 @@ export default {
         startClock();
         setTimeout(() => {
           this.isloading = false;
-        }, "500");          
+        }, "500");
       }).catch((err) => {
         console.error('壁纸加载失败:', err);
         startClock();
         setTimeout(() => {
           this.isloading = false;
-        }, "100");  
-      });
+        }, "100");
+      });
 
       await this.getMusicInfo();  //获取音乐数据
       this.setupAudioListener();  //设置 ended 事件监听器，当歌曲播放结束时自动调用 nextTrack 方法。
@@ -183,10 +178,10 @@ export default {
         return
       }
       if(val){
-        this.$refs.VdPlayer.style.zIndex = 0; 
+        this.$refs.VdPlayer.style.zIndex = 0;
         this.$refs.VdPlayer.controls = true;
       }else{
-        this.$refs.VdPlayer.style.zIndex = -100; 
+        this.$refs.VdPlayer.style.zIndex = -100;
         this.$refs.VdPlayer.controls = false;
       }
     },
@@ -224,7 +219,7 @@ export default {
       return 'mdi-volume-high';
     },
   },
-  
+
   methods: {
     getCookie,setMeta,getFormattedTime,getFormattedDate,dataConsole,
 
@@ -235,14 +230,14 @@ export default {
         root.style.setProperty('--leleo-welcomtitle-color', `${leleodata.color.welcometitlecolor}`);
         root.style.setProperty('--leleo-vcard-color', `${leleodata.color.themecolor}`);
         root.style.setProperty('--leleo-brightness', `${leleodata.brightness}%`);
-        root.style.setProperty('--leleo-blur', `${leleodata.blur}px`); 
+        root.style.setProperty('--leleo-blur', `${leleodata.blur}px`);
       }else{
         root.style.setProperty('--leleo-welcomtitle-color', `${this.configdata.color.welcometitlecolor}`);
-        root.style.setProperty('--leleo-vcard-color', `${this.configdata.color.themecolor}`);  
-        root.style.setProperty('--leleo-brightness', `${this.configdata.brightness}%`);  
+        root.style.setProperty('--leleo-vcard-color', `${this.configdata.color.themecolor}`);
+        root.style.setProperty('--leleo-brightness', `${this.configdata.brightness}%`);
         root.style.setProperty('--leleo-blur', `${this.configdata.blur}px`);
       }
-  
+
       let leleodatabackground = this.getCookie("leleodatabackground");
       const { xs } = useDisplay();
       if(leleodatabackground){
@@ -263,7 +258,7 @@ export default {
             this.videosrc = leleodatabackground.pc.datainfo.url;
           }
         }
-          
+
       }else{
         if(xs.value){
           if(this.configdata.background.mobile.type == "pic"){
@@ -281,7 +276,7 @@ export default {
           }else{
             this.videosrc = this.configdata.background.pc.datainfo.url;
           }
-          
+
         }
       }
     },
@@ -299,7 +294,7 @@ export default {
     jump(url){
       window.open(url, '_blank').focus();
     },
-    
+
     async getMusicInfo(){
       this.musicinfoLoading = true;
       try {
@@ -399,7 +394,6 @@ export default {
     updateLyrics(lyrics){
       this.lyrics = lyrics;
     },
-    // 监听等待事件（缓冲不足）
     onWaiting() {
       this.audioLoading = true;
     },
