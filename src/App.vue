@@ -7,7 +7,8 @@
       </div>
     </transition>
 
-    <video autoplay loop muted class="video-bg" id="bg-video" ref="VdPlayer"
+    <video autoplay loop muted playsinline disableRemotePlayback class="video-bg" id="bg-video" ref="VdPlayer"
+    :poster="videosrc ? '' : configdata.avatar"
     :style="xs?{height: '100%',width: '100%',top: '0',left:'0'}:(sm?{height: '98%',width: '98%',top: '1%',left:' 1%','border-radius': '16px'}:{height: '96.6%',width: '99%',top: '1.7%',left:' 0.5%','border-radius': '16px',})">
         <source :src=videosrc type="video/mp4">
     </video>
@@ -29,8 +30,10 @@
               <div :style="xs||sm?{'font-size':'2.3rem'}:{'display':'none'}" class="leleo-left-welcome">{{ configdata.welcometitle }}</div>  
               <v-avatar class="leleo-left-avatar" :size="xs||sm?120:140" :style="xs||sm?{'margin-top': '0'}:{'margin-top': '2rem'}" @mouseenter="musicplayershow(1)" @mouseleave="musicplayershow(0)">
                   <v-img :class="{'leleo-spin':isPlaying}"
-                  alt="Leleo"
+                  alt="JupiterW 头像"
                   :src=configdata.avatar
+                  width="140"
+                  height="140"
                   ></v-img>
                   <!-- 由于当ismusicplayer显示后，fadein无效果，所以需要设置一个过渡动画 -->
                   <transition name="fade">
