@@ -13,10 +13,10 @@
               :image="currentSong.pic"
               :size="xs?48:64"
             ></v-avatar>
-            <v-btn icon aria-label="播放暂停" @click="togglePlay" :size="xs?28:38" variant= 'tonal' class="ml-1">
+            <v-btn icon @click="togglePlay" :size="xs?28:38" variant= 'tonal' class="ml-1">
               <v-icon>{{ isPlaying ? 'mdi-pause' : 'mdi-play' }}</v-icon>
             </v-btn>
-            <v-btn icon aria-label="下一首" @click="nextTrack" :size="xs?28:38" variant= 'tonal' class="ml-1">
+            <v-btn icon @click="nextTrack" :size="xs?28:38" variant= 'tonal' class="ml-1">
               <v-icon>mdi-skip-next</v-icon>
             </v-btn>
             <v-slider style="margin-bottom: -22px;padding: 0;"

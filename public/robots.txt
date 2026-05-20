@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://leleo.top/sitemap.xml

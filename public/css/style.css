@@ -57,25 +57,3 @@ body {
 html {
   scroll-behavior: smooth;
 }
-
-.skip-link {
-  position: absolute;
-  left: -9999px;
-  top: -9999px;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  z-index: 9999;
-}
-.skip-link:focus {
-  position: fixed;
-  left: 8px;
-  top: 8px;
-  width: auto;
-  height: auto;
-  padding: 8px 16px;
-  background: var(--leleo-vcard-color, #fff);
-  color: #282c34;
-  font-weight: bold;
-  border-radius: 4px;
-}

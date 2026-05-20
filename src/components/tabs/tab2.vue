@@ -47,7 +47,6 @@
                         <v-row class="scroll-container">
                             <v-col :cols="type == 'mobile' ? 6:12" :sm="type == 'mobile' ? 4:6" :md="type == 'mobile' ? 3:4" v-for="item in paginatedPICItems" :key="item.preview" class="d-flex justify-center">
                                 <v-img rounded="lg" @click="radios = item" style="cursor: pointer"
-                                :alt="item.title || '壁纸预览'"
                                 :class="{'selected-item':radios === item }"
                                 :max-width="smAndDown ? (type == 'mobile' ? 100 : 200) : (type == 'mobile' ? 160 : 250)"
                                 :max-height="smAndDown ? (type == 'mobile' ? 170 : 120) : (type == 'mobile' ? 272 : 150)"

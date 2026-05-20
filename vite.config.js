@@ -16,11 +16,10 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('node_modules/vuetify')) return 'vuetify'
           if (id.includes('node_modules/vue')) return 'vue'
+          if (id.includes('node_modules/vuetify')) return 'vuetify'
           if (id.includes('node_modules/chart.js')) return 'chartjs'
           if (id.includes('node_modules/typeit')) return 'typeit'
-          if (id.includes('node_modules/oh-my-live2d')) return 'live2d'
         },
       },
     },

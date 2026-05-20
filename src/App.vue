@@ -7,8 +7,7 @@
       </div>
     </transition>
 
-    <video autoplay loop muted playsinline disableRemotePlayback aria-hidden="true" class="video-bg" id="bg-video" ref="VdPlayer"
-    :poster="videosrc ? '' : configdata.avatar"
+    <video autoplay loop muted class="video-bg" id="bg-video" ref="VdPlayer"
     :style="xs?{height: '100%',width: '100%',top: '0',left:'0'}:(sm?{height: '98%',width: '98%',top: '1%',left:' 1%','border-radius': '16px'}:{height: '96.6%',width: '99%',top: '1.7%',left:' 0.5%','border-radius': '16px',})">
         <source :src=videosrc type="video/mp4">
     </video>
@@ -30,10 +29,8 @@
               <div :style="xs||sm?{'font-size':'2.3rem'}:{'display':'none'}" class="leleo-left-welcome">{{ configdata.welcometitle }}</div>  
               <v-avatar class="leleo-left-avatar" :size="xs||sm?120:140" :style="xs||sm?{'margin-top': '0'}:{'margin-top': '2rem'}" @mouseenter="musicplayershow(1)" @mouseleave="musicplayershow(0)">
                   <v-img :class="{'leleo-spin':isPlaying}"
-                  alt="JupiterW 头像"
+                  alt="Leleo"
                   :src=configdata.avatar
-                  width="140"
-                  height="140"
                   ></v-img>
                   <!-- 由于当ismusicplayer显示后，fadein无效果，所以需要设置一个过渡动画 -->
                   <transition name="fade">
@@ -120,9 +117,9 @@
                             icon="mdi-cog"
                             ></v-fab>
                         </template>
-                        <v-btn variant="tonal" class="setbtn" key="1" icon="mdi-key-chain" aria-label="样式设置" @click="dialog1 = true" size="31" color="var(--leleo-vcard-color)"></v-btn>
-                        <v-btn variant="tonal" class="setbtn" key="2" icon="mdi-information" aria-label="关于本站" @click="dialog2 = true" size="31" color="var(--leleo-vcard-color)"></v-btn>
-                        <v-btn variant="tonal" class="setbtn" key="3" icon="$error" aria-label="错误报告" size="31" color="var(--leleo-vcard-color)"></v-btn>
+                        <v-btn variant="tonal" class="setbtn" key="1" icon="mdi-key-chain" @click="dialog1 = true" size="31" color="var(--leleo-vcard-color)"></v-btn>
+                        <v-btn variant="tonal" class="setbtn" key="2" icon="mdi-information" @click="dialog2 = true" size="31" color="var(--leleo-vcard-color)"></v-btn>
+                        <v-btn variant="tonal" class="setbtn" key="3" icon="$error" size="31" color="var(--leleo-vcard-color)"></v-btn>
                         </v-speed-dial>
                     </v-col>
                     </v-row>
@@ -211,7 +208,7 @@
               <div>
                 <v-tooltip  v-for="item in stackicons" v-model="item.model" location="top">
                   <template v-slot:activator="{ props }">
-                    <v-btn icon v-bind="props" :color=item.color :aria-label="item.tip" rounded="lg" class="ma-1 stack-btn" size="35">
+                    <v-btn icon v-bind="props" :color=item.color rounded="lg" class="ma-1 stack-btn" size="35">
                       <v-icon size="25" color="white">{{item.icon}}</v-icon>
                     </v-btn>
                   </template>
