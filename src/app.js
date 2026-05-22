@@ -17,10 +17,11 @@ const extractShareId = (input) => {
 const tab1 = defineAsyncComponent(() => import('./components/tabs/tab1.vue'))
 const tab2 = defineAsyncComponent(() => import('./components/tabs/tab2.vue'))
 const tab3 = defineAsyncComponent(() => import('./components/tabs/tab3.vue'))
+const tab4 = defineAsyncComponent(() => import('./components/tabs/tab4.vue'))
 
 export default {
   components: {
-    tab1,tab2,tab3,loader,homeright,typewriter,polarchart
+    tab1,tab2,tab3,tab4,loader,homeright,typewriter,polarchart
   },
   setup() {
     const { xs,sm,md } = useDisplay();
@@ -76,6 +77,12 @@ export default {
           text: '音乐播放',
           value: 'tab-3',
           component: "tab3",
+        },
+        {
+          icon: 'mdi-palette-swatch',
+          text: '个性化',
+          value: 'tab-4',
+          component: "tab4",
         },
       ],
 
@@ -166,7 +173,7 @@ export default {
         setTimeout(() => {
           this.isloading = false;
         }, "100");  
-      });
+      });
 
       await this.getMusicInfo();  //获取音乐数据
       this.setupAudioListener();  //设置 ended 事件监听器，当歌曲播放结束时自动调用 nextTrack 方法。
@@ -183,11 +190,9 @@ export default {
         return
       }
       if(val){
-        this.$refs.VdPlayer.style.zIndex = 0; 
-        this.$refs.VdPlayer.controls = true;
+        this.$refs.VdPlayer.style.zIndex = 0;
       }else{
-        this.$refs.VdPlayer.style.zIndex = -100; 
-        this.$refs.VdPlayer.controls = false;
+        this.$refs.VdPlayer.style.zIndex = -100;
       }
     },
     audioLoading(val){

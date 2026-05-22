@@ -108,8 +108,15 @@ app.use(vuetify).mount('#app')
 // Live2D 看板娘 - 仅桌面端，清除可能残留的错误状态
 if (window.innerWidth > 768) {
 localStorage.removeItem('OML2D_STATUS')
-localStorage.removeItem('OML2D_MODEL_INDEX')
 localStorage.removeItem('OML2D_MODEL_CLOTHES_INDEX')
+
+// 读取用户桌宠偏好，设置模型索引
+const savedPetIndex = localStorage.getItem('leleo-pet')
+if (savedPetIndex !== null) {
+  localStorage.setItem('OML2D_MODEL_INDEX', savedPetIndex)
+} else {
+  localStorage.removeItem('OML2D_MODEL_INDEX')
+}
 
 const oml2d = loadOml2d({
   dockedPosition: 'right',
@@ -117,6 +124,9 @@ const oml2d = loadOml2d({
   models: [
     {
       path: '/live2d/Doro/Doro.model3.json',
+    },
+    {
+      path: '/live2d/XiaoZhou/小周桌宠.model3.json',
     },
   ],
   statusBar: {
@@ -136,17 +146,20 @@ const oml2d = loadOml2d({
   },
 })
 
-// 舞台加载完成后再加拖拽，避免 PixiJS 初始化冲突
-oml2d.onStageSlideIn(() => {
-  const stage = oml2d.stage?.element
-  if (!stage) return
+// 暴露实例到 window，供 tab4 切换模型
+window.__oml2d = oml2d
+window.__oml2d.switchPet = async (index) => {
+  localStorage.setItem('leleo-pet', index)
+  await oml2d.loadModelByIndex(index)
+}
 
+const bindDrag = (stage) => {
   stage.style.cursor = 'grab'
   stage.style.userSelect = 'none'
 
   let dragging = false, sx, sy, sl, st
 
-  stage.addEventListener('pointerdown', (e) => {
+  const onPointerDown = (e) => {
     if (e.button !== 0) return
     e.preventDefault()
     dragging = true
@@ -154,9 +167,9 @@ oml2d.onStageSlideIn(() => {
     const r = stage.getBoundingClientRect()
     sl = r.left; st = r.top
     stage.style.cursor = 'grabbing'
-  })
+  }
 
-  document.addEventListener('pointermove', (e) => {
+  const onPointerMove = (e) => {
     if (!dragging) return
     const x = Math.max(0, Math.min(sl + (e.clientX - sx), window.innerWidth - stage.offsetWidth))
     const y = Math.max(0, Math.min(st + (e.clientY - sy), window.innerHeight - stage.offsetHeight))
@@ -164,12 +177,23 @@ oml2d.onStageSlideIn(() => {
     stage.style.top = y + 'px'
     stage.style.right = 'auto'
     stage.style.bottom = 'auto'
-  })
+  }
 
-  document.addEventListener('pointerup', () => {
+  const onPointerUp = () => {
     if (!dragging) return
     dragging = false
     stage.style.cursor = 'grab'
-  })
+  }
+
+  stage.addEventListener('pointerdown', onPointerDown)
+  document.addEventListener('pointermove', onPointerMove)
+  document.addEventListener('pointerup', onPointerUp)
+}
+
+// 舞台加载完成后再加拖拽，避免 PixiJS 初始化冲突
+oml2d.onStageSlideIn(() => {
+  const stage = oml2d.stage?.element
+  if (!stage) return
+  bindDrag(stage)
 })
 }

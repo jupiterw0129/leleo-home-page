@@ -46,6 +46,7 @@
       window.addEventListener('DOMContentLoaded', () => {
         const isMobile = window.innerWidth <= 768
         if (isMobile) return
+        if (localStorage.getItem('leleo-spark') === '0') return
         if (window.SparkEffect) {
           window.SparkEffect.create('sparkCanvas', {
             color: '45,175,255',

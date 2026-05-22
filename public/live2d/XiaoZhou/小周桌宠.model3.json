@@ -1,0 +1,25 @@
+{
+	"Version": 3,
+	"FileReferences": {
+		"Moc": "小周桌宠.moc3",
+		"Textures": [
+			"小周桌宠.2048/texture_00.png"
+		],
+		"Physics": "小周桌宠.physics3.json",
+		"DisplayInfo": "小周桌宠.cdi3.json"
+	},
+	"Groups": [
+		{
+			"Target": "Parameter",
+			"Name": "EyeBlink",
+			"Ids": [
+				"ParamEyeLOpen"
+			]
+		},
+		{
+			"Target": "Parameter",
+			"Name": "LipSync",
+			"Ids": []
+		}
+	]
+}
