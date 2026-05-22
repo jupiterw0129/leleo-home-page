@@ -6,7 +6,7 @@
         <v-icon class="mr-2">mdi-paw</v-icon>桌宠选择
       </v-card-title>
       <v-row class="justify-center">
-        <v-col cols="6" sm="4" v-for="pet in pets" :key="pet.index" class="d-flex justify-center">
+        <v-col cols="4" sm="4" md="3" v-for="pet in pets" :key="pet.index" class="d-flex justify-center">
           <v-card
             variant="tonal"
             rounded="lg"
@@ -16,7 +16,7 @@
           >
             <v-img
               :src="pet.icon"
-              :max-height="150"
+              :max-height="120"
               cover
               class="pet-img"
             >
@@ -74,8 +74,9 @@ export default {
   data() {
     return {
       pets: [
-        { name: 'Doro', index: 0, icon: '/live2d/Doro/icon.webp', author: 'UP：水脚脚' },
-        { name: '小周', index: 1, icon: '/live2d/XiaoZhou/icon.webp', author: 'UP：汪汪嗷唔' },
+        { name: 'Doro',  index: 0, icon: '/live2d/Doro/icon.webp',    author: 'UP：水脚脚',   type: 'live2d' },
+        { name: '小周',  index: 1, icon: '/live2d/XiaoZhou/icon.webp', author: 'UP：汪汪嗷唔', type: 'live2d' },
+        { name: '阿蒙',  index: 2, icon: '/shimeji/icon.webp',          author: 'UP：理智光泽汀', type: 'shimeji' },
       ],
       selectedPet: 0,
       sparkEnabled: true,
@@ -86,41 +87,44 @@ export default {
     if (savedPet !== null) {
       this.selectedPet = parseInt(savedPet)
     }
-
     this.sparkEnabled = localStorage.getItem(SPARK_KEY) !== '0'
   },
   methods: {
     async selectPet(index) {
       this.selectedPet = index
-      if (window.__oml2d?.switchPet) {
-        await window.__oml2d.switchPet(index)
+      localStorage.setItem('leleo-pet', index)
+
+      if (index === 2) {
+        // 阿蒙：隐藏 Live2D，启动 Shimeji
+        const stage = window.__oml2d?.stage?.element
+        if (stage) stage.style.display = 'none'
+        window.__toggleShimeji?.(true)
+      } else {
+        // Live2D：停止 Shimeji，显示 Live2D
+        window.__toggleShimeji?.(false)
+        const hideCss = document.getElementById('hide-live2d-temp')
+        if (hideCss) hideCss.remove()
+        const stage = window.__oml2d?.stage?.element
+        if (stage) stage.style.display = 'block'
+        if (window.__oml2d?.switchPet) {
+          await window.__oml2d.switchPet(index)
+        }
       }
     },
     toggleSpark(val) {
       localStorage.setItem(SPARK_KEY, val ? '1' : '0')
       const canvas = document.getElementById('sparkCanvas')
       if (val) {
-        if (canvas) {
-          canvas.style.display = 'block'
-        }
-        // 如果页面加载时 spark 未初始化，现在创建
+        if (canvas) canvas.style.display = 'block'
         if (window.SparkEffect && !window.spark) {
           window.SparkEffect.create('sparkCanvas', {
-            color: '45,175,255',
-            scale: 1.5,
-            opacity: 1.0,
-            trailSpeed: 1.0,
-            clickSpeed: 1.0,
-            enableTrail: true
+            color: '45,175,255', scale: 1.5, opacity: 1.0,
+            trailSpeed: 1.0, clickSpeed: 1.0, enableTrail: true
           })
-          if (window.setInputContext) {
-            window.setInputContext('mouse', true)
-          }
+          if (window.setInputContext) window.setInputContext('mouse', true)
         }
       } else {
-        if (canvas) {
-          canvas.style.display = 'none'
-        }
+        if (canvas) canvas.style.display = 'none'
       }
     },
     cancel() {
@@ -135,7 +139,7 @@ export default {
   cursor: pointer;
   transition: box-shadow 0.2s, border-color 0.2s;
   border: 2px solid transparent;
-  width: 160px;
+  width: 130px;
 }
 
 .pet-card:hover {
@@ -152,7 +156,7 @@ export default {
 }
 
 .pet-name {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: bold;
   color: var(--leleo-vcard-color);
 }

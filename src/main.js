@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import { loadOml2d } from 'oh-my-live2d'
+import { startShimeji, stopShimeji, isShimejiRunning } from './shimeji.js'
 
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
@@ -110,9 +111,9 @@ if (window.innerWidth > 768) {
 localStorage.removeItem('OML2D_STATUS')
 localStorage.removeItem('OML2D_MODEL_CLOTHES_INDEX')
 
-// 读取用户桌宠偏好，设置模型索引
+// 读取用户桌宠偏好，设置 Live2D 模型索引（阿蒙=2 时用 Doro 兜底）
 const savedPetIndex = localStorage.getItem('leleo-pet')
-if (savedPetIndex !== null) {
+if (savedPetIndex !== null && savedPetIndex !== '2') {
   localStorage.setItem('OML2D_MODEL_INDEX', savedPetIndex)
 } else {
   localStorage.removeItem('OML2D_MODEL_INDEX')
@@ -196,4 +197,23 @@ oml2d.onStageSlideIn(() => {
   if (!stage) return
   bindDrag(stage)
 })
+}
+
+// 阿蒙 Shimeji - 如果用户之前选了阿蒙，启动时加载
+if (window.innerWidth > 768 && localStorage.getItem('leleo-pet') === '2') {
+  // 先注入 CSS 隐藏 Live2D，避免闪烁
+  const style = document.createElement('style')
+  style.id = 'hide-live2d-temp'
+  style.textContent = '#oml2d-stage { display: none; }'
+  document.head.appendChild(style)
+  startShimeji()
+}
+
+// 暴露切换函数给 tab4
+window.__toggleShimeji = (enable) => {
+  if (enable) {
+    if (!isShimejiRunning()) startShimeji()
+  } else {
+    stopShimeji()
+  }
 }
