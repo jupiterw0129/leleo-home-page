@@ -200,13 +200,21 @@ oml2d.onStageSlideIn(() => {
 }
 
 // 阿蒙 Shimeji - 如果用户之前选了阿蒙，启动时加载
-if (window.innerWidth > 768 && localStorage.getItem('leleo-pet') === '2') {
+if (window.innerWidth > 768 && localStorage.getItem('leleo-pet') === '2' && localStorage.getItem('leleo-pet-off') !== '1') {
   // 先注入 CSS 隐藏 Live2D，避免闪烁
   const style = document.createElement('style')
   style.id = 'hide-live2d-temp'
   style.textContent = '#oml2d-stage { display: none; }'
   document.head.appendChild(style)
   startShimeji()
+}
+
+// 如果用户关闭了桌宠总开关，隐藏 Live2D
+if (localStorage.getItem('leleo-pet-off') === '1') {
+  const style = document.createElement('style')
+  style.id = 'hide-live2d-temp'
+  style.textContent = '#oml2d-stage { display: none; }'
+  document.head.appendChild(style)
 }
 
 // 暴露切换函数给 tab4

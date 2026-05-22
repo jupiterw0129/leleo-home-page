@@ -2,10 +2,19 @@
   <v-container fluid class="pa-0">
     <!-- 桌宠选择 -->
     <v-card variant="tonal" rounded="lg" class="mb-4 pa-3">
-      <v-card-title class="text-body-1 font-weight-bold pa-2">
-        <v-icon class="mr-2">mdi-paw</v-icon>桌宠选择
+      <v-card-title class="text-body-1 font-weight-bold pa-2 d-flex align-center">
+        <v-icon class="mr-2">mdi-paw</v-icon>桌宠
+        <v-spacer></v-spacer>
+        <v-switch
+          v-model="petEnabled"
+          color="var(--leleo-vcard-color)"
+          hide-details
+          inset
+          density="compact"
+          @update:model-value="togglePet"
+        ></v-switch>
       </v-card-title>
-      <v-row class="justify-center">
+      <v-row class="justify-center" v-show="petEnabled">
         <v-col cols="4" sm="4" md="3" v-for="pet in pets" :key="pet.index" class="d-flex justify-center">
           <v-card
             variant="tonal"
@@ -80,6 +89,7 @@ export default {
       ],
       selectedPet: 0,
       sparkEnabled: true,
+      petEnabled: true,
     }
   },
   mounted() {
@@ -88,6 +98,7 @@ export default {
       this.selectedPet = parseInt(savedPet)
     }
     this.sparkEnabled = localStorage.getItem(SPARK_KEY) !== '0'
+    this.petEnabled = localStorage.getItem('leleo-pet-off') !== '1'
   },
   methods: {
     async selectPet(index) {
@@ -109,6 +120,18 @@ export default {
         if (window.__oml2d?.switchPet) {
           await window.__oml2d.switchPet(index)
         }
+      }
+    },
+    togglePet(val) {
+      localStorage.setItem('leleo-pet-off', val ? '0' : '1')
+      if (val) {
+        // 重新显示当前选中的桌宠
+        this.selectPet(this.selectedPet)
+      } else {
+        // 隐藏全部
+        window.__toggleShimeji?.(false)
+        const stage = window.__oml2d?.stage?.element
+        if (stage) stage.style.display = 'none'
       }
     },
     toggleSpark(val) {
