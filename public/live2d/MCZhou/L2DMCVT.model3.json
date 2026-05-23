@@ -1,0 +1,41 @@
+{
+	"Version": 3,
+	"FileReferences": {
+		"Moc": "L2DMCVT.moc3",
+		"Textures": [
+			"L2DMCVT.4096/texture_00.png",
+			"L2DMCVT.4096/texture_01.png",
+			"L2DMCVT.4096/texture_02.png",
+			"L2DMCVT.4096/texture_03.png"
+		],
+		"Physics": "L2DMCVT.physics3.json",
+		"DisplayInfo": "L2DMCVT.cdi3.json",
+		"Motions": {
+			"": [
+				{ "File": "motions/L2DMCVT_ArmR_Attack.motion3.json" },
+				{ "File": "motions/L2DMCVT_ArmL_Attack.motion3.json" },
+				{ "File": "motions/L2DMCVT_ArmRL_Attack.motion3.json" },
+				{ "File": "motions/L2DMCVT_LegR_Attack.motion3.json" },
+				{ "File": "motions/L2DMCVT_LegL_Attack.motion3.json" },
+				{ "File": "motions/L2DMCVT_LegRL_Attack.motion3.json" }
+			]
+		}
+	},
+	"Groups": [
+		{
+			"Target": "Parameter",
+			"Name": "LipSync",
+			"Ids": [
+				"ParamMouthOpenY"
+			]
+		},
+		{
+			"Target": "Parameter",
+			"Name": "EyeBlink",
+			"Ids": [
+				"ParamEyeROpen",
+				"ParamEyeLOpen"
+			]
+		}
+	]
+}

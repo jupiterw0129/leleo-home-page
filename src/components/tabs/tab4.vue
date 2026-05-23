@@ -85,7 +85,8 @@ export default {
       pets: [
         { name: 'Doro',  index: 0, icon: '/live2d/Doro/icon.webp',    author: 'UP：水脚脚',   type: 'live2d' },
         { name: '小周',  index: 1, icon: '/live2d/XiaoZhou/icon.webp', author: 'UP：汪汪嗷唔', type: 'live2d' },
-        { name: '阿蒙',  index: 2, icon: '/shimeji/icon.webp',          author: 'UP：理智光泽汀', type: 'shimeji' },
+        { name: 'MCZhou', index: 2, icon: '/live2d/MCZhou/icon.webp', author: 'JupiterW',    type: 'live2d' },
+        { name: '阿蒙',  index: 3, icon: '/shimeji/icon.webp',          author: 'UP：理智光泽汀', type: 'shimeji' },
       ],
       selectedPet: 0,
       sparkEnabled: true,
@@ -105,7 +106,7 @@ export default {
       this.selectedPet = index
       localStorage.setItem('leleo-pet', index)
 
-      if (index === 2) {
+      if (index === 3) {
         // 阿蒙：隐藏 Live2D，启动 Shimeji
         const stage = window.__oml2d?.stage?.element
         if (stage) stage.style.display = 'none'
