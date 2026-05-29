@@ -39,9 +39,40 @@
   </head>
   <body>
     <div id="app"></div>
+    <div id="busuanzi-footer">
+      <span id="busuanzi_container_site_pv" style="display:none">
+        本站总访问 <span id="busuanzi_value_site_pv"></span> 次
+        &nbsp;·&nbsp;
+      </span>
+      <span id="busuanzi_container_site_uv" style="display:none">
+        访客 <span id="busuanzi_value_site_uv"></span> 人
+      </span>
+    </div>
     <canvas id="sparkCanvas"></canvas>
     <link rel="stylesheet" href="/ba-spark/spark.css">
     <script src="/ba-spark/spark.js" defer></script>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <style>
+      #busuanzi-footer {
+        position: fixed;
+        bottom: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 100;
+        font-size: 12px;
+        color: rgba(255,255,255,0.55);
+        background: rgba(0,0,0,0.25);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 4px 16px;
+        pointer-events: none;
+        user-select: none;
+      }
+      @media (max-width: 768px) {
+        #busuanzi-footer { font-size: 10px; padding: 3px 12px; bottom: 4px; }
+      }
+    </style>
     <script>
       window.addEventListener('DOMContentLoaded', () => {
         const isMobile = window.innerWidth <= 768
