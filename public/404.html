@@ -299,7 +299,7 @@
       this.vx = vx; this.vy = vy
       this.mass = mass; this.color = color
       this.trail = []; this.trailLen = trailLen
-      this.radius = Math.sqrt(mass) * 2.2
+      this.radius = Math.sqrt(mass) * 3.5
     }
 
     attract(other, G) {
@@ -320,7 +320,7 @@
     }
 
     draw(ctx, cx, cy, scale) {
-      const sx = cx + (this.x - cx) * scale, sy = cy + (this.y - cy) * scale
+      const sx = cx + this.x * scale, sy = cy + this.y * scale
       const r = this.radius * scale
 
       // 外层光晕 — 缩小
@@ -333,10 +333,10 @@
       // 轨道拖尾 — 加粗加亮
       if (this.trail.length > 1) {
         ctx.beginPath()
-        ctx.moveTo(cx + (this.trail[0].x - cx) * scale, cy + (this.trail[0].y - cy) * scale)
+        ctx.moveTo(cx + this.trail[0].x * scale, cy + this.trail[0].y * scale)
         for (let i = 1; i < this.trail.length; i++) {
           const p = this.trail[i]
-          ctx.lineTo(cx + (p.x - cx) * scale, cy + (p.y - cy) * scale)
+          ctx.lineTo(cx + p.x * scale, cy + p.y * scale)
         }
         ctx.strokeStyle = this.color.replace('1)', '0.5)').replace('rgb', 'rgba')
         ctx.lineWidth = 2; ctx.stroke()
@@ -562,7 +562,7 @@
   })
 
   // ==================== 主循环 ====================
-  const simScale = 3.2   // 更大更清晰
+  const simScale = 2.2   // 坐标换算: sx = cx + x * scale
 
   function drawBackground() {
     ctx.clearRect(0, 0, W, H)
