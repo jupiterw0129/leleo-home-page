@@ -299,7 +299,7 @@
       this.vx = vx; this.vy = vy
       this.mass = mass; this.color = color
       this.trail = []; this.trailLen = trailLen
-      this.radius = Math.sqrt(mass) * 1.8
+      this.radius = Math.sqrt(mass) * 2.2
     }
 
     attract(other, G) {
@@ -321,7 +321,17 @@
 
     draw(ctx, cx, cy, scale) {
       const sx = cx + (this.x - cx) * scale, sy = cy + (this.y - cy) * scale
+      const r = this.radius * scale
 
+      // 外层大气光晕
+      const outer = ctx.createRadialGradient(sx, sy, r * 0.6, sx, sy, r * 3.5)
+      outer.addColorStop(0, this.color.replace('1)', '0.5)').replace('rgb', 'rgba'))
+      outer.addColorStop(0.5, this.color.replace('1)', '0.15)').replace('rgb', 'rgba'))
+      outer.addColorStop(1, 'rgba(0,0,0,0)')
+      ctx.beginPath(); ctx.arc(sx, sy, r * 3.5, 0, Math.PI * 2)
+      ctx.fillStyle = outer; ctx.fill()
+
+      // 轨道拖尾
       if (this.trail.length > 1) {
         ctx.beginPath()
         ctx.moveTo(cx + (this.trail[0].x - cx) * scale, cy + (this.trail[0].y - cy) * scale)
@@ -329,22 +339,24 @@
           const p = this.trail[i]
           ctx.lineTo(cx + (p.x - cx) * scale, cy + (p.y - cy) * scale)
         }
-        ctx.strokeStyle = this.color.replace('1)', '0.3)').replace('rgb', 'rgba')
-        ctx.lineWidth = 1.2; ctx.stroke()
+        ctx.strokeStyle = this.color.replace('1)', '0.35)').replace('rgb', 'rgba')
+        ctx.lineWidth = 1.5; ctx.stroke()
       }
 
-      const grd = ctx.createRadialGradient(sx, sy, 0, sx, sy, this.radius * 6 * scale)
-      grd.addColorStop(0, this.color.replace('1)', '0.4)').replace('rgb', 'rgba'))
-      grd.addColorStop(1, 'rgba(0,0,0,0)')
-      ctx.beginPath(); ctx.arc(sx, sy, this.radius * 6 * scale, 0, Math.PI * 2)
-      ctx.fillStyle = grd; ctx.fill()
+      // 球体
+      const body = ctx.createRadialGradient(sx - r * 0.25, sy - r * 0.3, r * 0.05, sx, sy, r)
+      body.addColorStop(0, '#ffffff')
+      body.addColorStop(0.15, this.color.replace('1)', '0.95)').replace('rgb', 'rgba'))
+      body.addColorStop(0.5, this.color.replace('1)', '0.7)').replace('rgb', 'rgba'))
+      body.addColorStop(0.85, this.color.replace('1)', '0.3)').replace('rgb', 'rgba'))
+      body.addColorStop(1, this.color.replace('1)', '0.05)').replace('rgb', 'rgba'))
+      ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI * 2)
+      ctx.fillStyle = body; ctx.fill()
 
-      const bgrd = ctx.createRadialGradient(sx, sy, 0, sx, sy, this.radius * scale)
-      bgrd.addColorStop(0, '#fff')
-      bgrd.addColorStop(0.3, this.color)
-      bgrd.addColorStop(1, this.color.replace('1)', '0)').replace('rgb', 'rgba'))
-      ctx.beginPath(); ctx.arc(sx, sy, this.radius * scale, 0, Math.PI * 2)
-      ctx.fillStyle = bgrd; ctx.fill()
+      // 高光点
+      ctx.beginPath()
+      ctx.arc(sx - r * 0.25, sy - r * 0.3, r * 0.18, 0, Math.PI * 2)
+      ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fill()
     }
   }
 
@@ -377,8 +389,9 @@
       this.x = Math.random() * W; this.y = Math.random() * H
       this.targetX = Math.random() * W; this.targetY = Math.random() * H
       this.progress = 1
-      this.size = 6 + Math.random() * 4
-      this.speed = 0.002 + Math.random() * 0.004
+      this.size = 3 + Math.random() * 2.5      // 缩小，不抢眼
+      this.speed = 0.001 + Math.random() * 0.002  // 更慢
+      this.opacity = 0.25 + Math.random() * 0.15
     }
     update() {
       if (this.progress >= 1) {
@@ -392,15 +405,15 @@
       this.y = this.startY + (this.targetY - this.startY) * t
     }
     draw(ctx) {
-      ctx.save(); ctx.translate(this.x, this.y)
+      ctx.save(); ctx.translate(this.x, this.y); ctx.globalAlpha = this.opacity
       const grd = ctx.createLinearGradient(-this.size, -this.size * 2, this.size, this.size * 2)
-      grd.addColorStop(0, 'rgba(180,200,220,0.9)')
-      grd.addColorStop(0.25, 'rgba(255,255,255,0.95)')
-      grd.addColorStop(0.35, 'rgba(120,140,180,0.7)')
-      grd.addColorStop(0.5, '#fff')
-      grd.addColorStop(0.65, 'rgba(80,100,140,0.7)')
-      grd.addColorStop(0.85, 'rgba(200,220,240,0.85)')
-      grd.addColorStop(1, 'rgba(60,80,120,0.6)')
+      grd.addColorStop(0, 'rgba(180,200,220,0.8)')
+      grd.addColorStop(0.25, 'rgba(255,255,255,0.9)')
+      grd.addColorStop(0.35, 'rgba(120,140,180,0.6)')
+      grd.addColorStop(0.5, 'rgba(255,255,255,0.8)')
+      grd.addColorStop(0.65, 'rgba(80,100,140,0.6)')
+      grd.addColorStop(0.85, 'rgba(200,220,240,0.7)')
+      grd.addColorStop(1, 'rgba(60,80,120,0.5)')
       ctx.beginPath()
       const nose = this.size * 2
       ctx.moveTo(0, -nose)
@@ -516,7 +529,7 @@
   })
 
   // ==================== 主循环 ====================
-  const simScale = 1.8
+  const simScale = 2.6   // 更大更清晰
 
   function drawBackground() {
     ctx.clearRect(0, 0, W, H)
@@ -530,9 +543,11 @@
     }
 
     simulateThreeBody()
-    const scx = W * 0.25, scy = H * 0.4
+    // 三体运动放在左侧偏上，避免遮挡倒计时文字
+    const scx = W * 0.3, scy = H * 0.55
     for (const b of bodies) b.draw(ctx, scx, scy, simScale)
 
+    // 水滴静默地飘过（不抢视觉焦点）
     for (const wd of waterdrops) { wd.update(); wd.draw(ctx) }
   }
 
