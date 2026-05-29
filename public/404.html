@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>404 - 迷路了？</title>
+  <title>404 - 你迷失在灵界了</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -12,130 +12,344 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #1a1a2e;
+      background: #0c0c1d;
       font-family: 'Noto Serif SC', 'PingFang SC', 'Microsoft YaHei', serif;
       overflow: hidden;
+      cursor: default;
     }
 
-    .stars {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-    }
+    canvas#bg { position: fixed; top: 0; left: 0; z-index: 0; }
 
-    .star {
-      position: absolute;
-      background: #fff;
-      border-radius: 50%;
-      animation: twinkle var(--dur) ease-in-out infinite;
-      animation-delay: var(--delay);
-      opacity: 0;
-    }
-
-    @keyframes twinkle {
-      0%, 100% { opacity: 0.2; }
-      50% { opacity: 1; }
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      perspective: 800px;
     }
 
     .card {
       position: relative;
-      z-index: 1;
-      background: rgba(255,255,255,0.06);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 24px;
-      padding: 48px 40px;
+      background: rgba(20, 20, 50, 0.55);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 28px;
+      padding: 56px 48px;
       text-align: center;
-      max-width: 480px;
-      width: 90%;
+      max-width: 500px;
+      width: 90vw;
+      transition: transform 0.1s ease-out;
     }
 
-    .symbol {
-      font-size: 80px;
-      margin-bottom: 20px;
-      animation: float 3s ease-in-out infinite;
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 29px;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(167,139,250,0.5), rgba(99,102,241,0.2), rgba(129,140,248,0.5), rgba(167,139,250,0.2));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      animation: borderGlow 4s linear infinite;
+    }
+
+    @keyframes borderGlow {
+      0% { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(360deg); }
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 29px;
+      background: linear-gradient(135deg, rgba(167,139,250,0.4), transparent 40%, transparent 60%, rgba(129,140,248,0.4));
+      pointer-events: none;
+    }
+
+    .icon-ring {
+      width: 100px; height: 100px;
+      margin: 0 auto 28px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(129,140,248,0.2) 0%, transparent 70%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: float 4s ease-in-out infinite;
+      position: relative;
+    }
+
+    .icon-ring::before {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      border: 1px solid rgba(167,139,250,0.25);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .icon-ring::after {
+      content: '';
+      position: absolute;
+      inset: -20px;
+      border-radius: 50%;
+      border: 1px solid rgba(167,139,250,0.1);
+      animation: pulse 2s ease-in-out infinite 0.5s;
+    }
+
+    .icon-svg {
+      width: 52px; height: 52px;
+      position: relative;
+      z-index: 1;
     }
 
     @keyframes float {
       0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-12px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.05); opacity: 1; }
     }
 
     .code {
-      font-size: 64px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #a78bfa, #6366f1, #818cf8);
+      font-size: 96px;
+      font-weight: 800;
+      background: linear-gradient(180deg, #e8e0ff 0%, #a78bfa 50%, #6366f1 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      letter-spacing: 4px;
-      margin-bottom: 12px;
+      letter-spacing: 8px;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .divider {
+      width: 48px; height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(167,139,250,0.8), transparent);
+      margin: 0 auto 20px;
     }
 
     .title {
-      font-size: 22px;
-      color: #e0e0e0;
-      margin-bottom: 8px;
+      font-size: 24px;
+      color: #e0d8f0;
+      margin-bottom: 10px;
       font-weight: 600;
     }
 
     .subtitle {
       font-size: 15px;
-      color: rgba(255,255,255,0.6);
-      line-height: 1.8;
-      margin-bottom: 32px;
+      color: rgba(210,200,240,0.55);
+      line-height: 1.9;
+      margin-bottom: 36px;
     }
 
     .btn {
       display: inline-block;
-      padding: 10px 32px;
+      padding: 11px 36px;
       border-radius: 100px;
-      background: rgba(167, 139, 250, 0.2);
-      border: 1px solid rgba(167, 139, 250, 0.4);
+      background: rgba(129,140,248,0.15);
+      border: 1px solid rgba(167,139,250,0.35);
       color: #c4b5fd;
       text-decoration: none;
       font-size: 15px;
-      transition: all 0.3s;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      transition: all 0.35s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(167,139,250,0.3), rgba(99,102,241,0.3));
+      opacity: 0;
+      transition: opacity 0.35s;
     }
 
     .btn:hover {
-      background: rgba(167, 139, 250, 0.35);
-      border-color: rgba(167, 139, 250, 0.7);
-      color: #e0d4ff;
-      box-shadow: 0 0 24px rgba(167, 139, 250, 0.2);
+      border-color: rgba(167,139,250,0.7);
+      color: #f0e8ff;
+      box-shadow: 0 0 32px rgba(139,120,240,0.25), 0 0 64px rgba(99,102,241,0.1);
+      transform: translateY(-1px);
+    }
+
+    .btn:hover::before { opacity: 1; }
+
+    .btn span { position: relative; z-index: 1; }
+
+    .hint {
+      margin-top: 24px;
+      font-size: 12px;
+      color: rgba(210,200,240,0.3);
+    }
+
+    @media (max-width: 600px) {
+      .card { padding: 40px 28px; }
+      .code { font-size: 64px; letter-spacing: 4px; }
+      .title { font-size: 20px; }
+      .icon-ring { width: 80px; height: 80px; margin-bottom: 20px; }
+      .icon-svg { width: 40px; height: 40px; }
     }
   </style>
 </head>
 <body>
 
-<div class="stars" id="stars"></div>
+<canvas id="bg"></canvas>
 
-<div class="card">
-  <div class="symbol">🧭</div>
-  <div class="code">404</div>
-  <div class="title">你迷失在灵界了</div>
-  <div class="subtitle">
-    这里什么都没有。<br>
-    也许「愚者」先生知道路在哪里。
+<div class="wrapper">
+  <div class="card" id="card">
+    <div class="icon-ring">
+      <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="rgba(167,139,250,0.8)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 2a10 10 0 0 1 0 20"/>
+        <path d="M12 2a10 10 0 0 0 0 20"/>
+        <line x1="2" y1="12" x2="22" y2="12"/>
+        <line x1="12" y1="2" x2="12" y2="6"/>
+        <line x1="12" y1="18" x2="12" y2="22"/>
+      </svg>
+    </div>
+    <div class="code">404</div>
+    <div class="divider"></div>
+    <div class="title">你迷失在灵界了</div>
+    <div class="subtitle" id="typewriter"></div>
+    <a href="/" class="btn"><span>返回现世</span></a>
+    <div class="hint">「愚者」先生会为你指引方向</div>
   </div>
-  <a href="/" class="btn">返回现世</a>
 </div>
 
 <script>
-  // 星空背景
-  const stars = document.getElementById('stars')
-  for (let i = 0; i < 80; i++) {
-    const s = document.createElement('div')
-    s.className = 'star'
-    s.style.left = Math.random() * 100 + '%'
-    s.style.top = Math.random() * 100 + '%'
-    s.style.width = s.style.height = (Math.random() * 2.5 + 1) + 'px'
-    s.style.setProperty('--dur', (Math.random() * 3 + 2) + 's')
-    s.style.setProperty('--delay', Math.random() * 5 + 's')
-    stars.appendChild(s)
+(function() {
+  // ======= Canvas 星域背景 =======
+  const canvas = document.getElementById('bg')
+  const ctx = canvas.getContext('2d')
+  let W, H
+
+  const stars = []
+  const STAR_COUNT = 180
+
+  function resize() {
+    W = canvas.width = window.innerWidth
+    H = canvas.height = window.innerHeight
   }
+  resize()
+  window.addEventListener('resize', resize)
+
+  class Star {
+    constructor() {
+      this.reset(true)
+    }
+    reset(init) {
+      this.x = Math.random() * W
+      this.y = init ? Math.random() * H : -10
+      this.r = Math.random() * 1.8 + 0.6
+      this.speed = this.r * 0.04 + 0.02
+      this.opacity = 0
+      this.targetOpacity = Math.random() * 0.7 + 0.3
+      this.twinkleSpeed = Math.random() * 0.02 + 0.005
+      this.twinklePhase = Math.random() * Math.PI * 2
+      this.hue = Math.random() < 0.15 ? 260 : Math.random() < 0.25 ? 220 : 30  // purple, blue, warm
+    }
+    update() {
+      this.y += this.speed
+      if (this.y > H + 10) this.reset(false)
+      this.twinklePhase += this.twinkleSpeed
+      this.opacity = this.targetOpacity * (0.5 + 0.5 * Math.sin(this.twinklePhase))
+    }
+    draw(ctx) {
+      const alpha = this.opacity
+      ctx.beginPath()
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2)
+      if (this.hue > 200) {
+        ctx.fillStyle = `hsla(${this.hue}, 60%, 75%, ${alpha})`
+      } else {
+        ctx.fillStyle = `rgba(255,255,255,${alpha})`
+      }
+      ctx.fill()
+      // glow for bigger stars
+      if (this.r > 1.2 && alpha > 0.5) {
+        const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r * 4)
+        grd.addColorStop(0, `rgba(167,139,250,${alpha * 0.3})`)
+        grd.addColorStop(1, 'rgba(167,139,250,0)')
+        ctx.beginPath()
+        ctx.arc(this.x, this.y, this.r * 4, 0, Math.PI * 2)
+        ctx.fillStyle = grd
+        ctx.fill()
+      }
+    }
+  }
+
+  for (let i = 0; i < STAR_COUNT; i++) stars.push(new Star())
+
+  // 星座连线
+  function drawConstellations() {
+    for (let i = 0; i < stars.length; i++) {
+      for (let j = i + 1; j < stars.length; j++) {
+        const dx = stars[i].x - stars[j].x
+        const dy = stars[i].y - stars[j].y
+        const dist = Math.sqrt(dx * dx + dy * dy)
+        if (dist < 90 && stars[i].opacity > 0.35 && stars[j].opacity > 0.35) {
+          const alpha = (1 - dist / 90) * 0.15 * Math.min(stars[i].opacity, stars[j].opacity)
+          ctx.beginPath()
+          ctx.moveTo(stars[i].x, stars[i].y)
+          ctx.lineTo(stars[j].x, stars[j].y)
+          ctx.strokeStyle = `rgba(167,139,250,${alpha})`
+          ctx.lineWidth = 0.5
+          ctx.stroke()
+        }
+      }
+    }
+  }
+
+  // 星云光晕
+  function drawNebula() {
+    const cx1 = W * 0.3, cy1 = H * 0.25
+    const cx2 = W * 0.7, cy2 = H * 0.7
+    for (const [cx, cy] of [[cx1, cy1], [cx2, cy2]]) {
+      const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(W, H) * 0.35)
+      grd.addColorStop(0, 'rgba(99,60,180,0.06)')
+      grd.addColorStop(0.5, 'rgba(60,40,120,0.03)')
+      grd.addColorStop(1, 'rgba(0,0,0,0)')
+      ctx.fillStyle = grd
+      ctx.fillRect(0, 0, W, H)
+    }
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, W, H)
+    drawNebula()
+    drawConstellations()
+    for (const s of stars) {
+      s.update()
+      s.draw(ctx)
+    }
+    requestAnimationFrame(animate)
+  }
+  animate()
+
+  // ======= 鼠标视差 =======
+  const card = document.getElementById('card')
+  document.addEventListener('mousemove', e => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 6
+    const y = (e.clientY / window.innerHeight - 0.5) * 6
+    card.style.transform = `rotateY(${x}deg) rotateX(${-y}deg)`
+  })
+
+  // ======= 打字机效果 =======
+  const text = '这里什么都没有。也许「愚者」先生知道路在哪里。'
+  const el = document.getElementById('typewriter')
+  let idx = 0
+  function type() {
+    if (idx < text.length) {
+      el.textContent += text[idx]
+      idx++
+      setTimeout(type, 80 + Math.random() * 60)
+    }
+  }
+  setTimeout(type, 300)
+})();
 </script>
 
 </body>
