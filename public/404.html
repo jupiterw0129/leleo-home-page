@@ -25,36 +25,56 @@
     /* ====== 倒计时浮层 ====== */
     .countdown-layer {
       position: fixed;
-      top: 12%;
-      right: 8%;
+      top: 8%;
+      right: 6%;
       z-index: 1;
       pointer-events: none;
+      text-align: right;
     }
 
-    #countdown {
+    .countdown-label {
+      font-size: 12px;
+      color: rgba(255,80,80,0.55);
+      letter-spacing: 5px;
+      margin-bottom: 8px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .countdown-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .countdown-num {
       font-family: 'Courier New', 'Fira Code', monospace;
-      font-size: clamp(48px, 10vw, 120px);
       font-weight: 900;
       color: #ff2d2d;
-      text-shadow: 0 0 40px rgba(255,45,45,0.8), 0 0 80px rgba(255,45,45,0.4), 0 0 120px rgba(255,0,0,0.3);
-      animation: flicker 0.15s infinite alternate;
-      line-height: 1;
-      letter-spacing: 6px;
+      text-shadow: 0 0 32px rgba(255,45,45,0.7), 0 0 64px rgba(255,45,45,0.35);
+      animation: flicker 0.12s infinite alternate;
+    }
+
+    .countdown-num.big { font-size: clamp(32px, 5.5vw, 64px); }
+    .countdown-num.small { font-size: clamp(22px, 3.8vw, 44px); }
+
+    .countdown-unit {
+      font-size: 13px;
+      color: rgba(255,120,120,0.6);
+      font-family: 'Noto Serif SC', serif;
+      letter-spacing: 2px;
+    }
+
+    .cd-divider {
+      color: rgba(255,80,80,0.5);
+      font-size: clamp(18px, 3vw, 36px);
+      font-weight: 300;
     }
 
     @keyframes flicker {
       0% { opacity: 1; }
-      80% { opacity: 0.85; }
-      100% { opacity: 0.92; }
-    }
-
-    .countdown-label {
-      font-size: 13px;
-      color: rgba(255,80,80,0.7);
-      text-align: right;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      margin-top: 4px;
+      85% { opacity: 0.83; }
+      100% { opacity: 0.94; }
     }
 
     /* ====== ETO 标识 ====== */
@@ -202,8 +222,20 @@
 
 <!-- 倒计时 -->
 <div class="countdown-layer">
-  <div id="countdown">0404</div>
-  <div class="countdown-label">countdown</div>
+  <div class="countdown-label">距 离 末 日</div>
+  <div class="countdown-row">
+    <span class="countdown-num big" id="cd-years">10</span>
+    <span class="countdown-unit">年</span>
+    <span class="countdown-num big" id="cd-days">187</span>
+    <span class="countdown-unit">天</span>
+  </div>
+  <div class="countdown-row" style="margin-top:6px;">
+    <span class="countdown-num small" id="cd-h">00</span>
+    <span class="cd-divider">:</span>
+    <span class="countdown-num small" id="cd-m">00</span>
+    <span class="cd-divider">:</span>
+    <span class="countdown-num small" id="cd-s">00</span>
+  </div>
 </div>
 
 <!-- 404 卡片 -->
@@ -420,9 +452,66 @@
   const waterdrops = []
   for (let i = 0; i < 3; i++) waterdrops.push(new Waterdrop())
 
-  // ==================== 倒计时 ====================
-  const countdownEl = document.getElementById('countdown')
-  let countdownValue = 404
+  // ==================== 末日倒计时 ====================
+  // 危机纪元 1349年6月28日 → 末日 1360年1月1日
+  const DOOM_YEAR = 1360, DOOM_MONTH = 0, DOOM_DAY = 1      // 1360-01-01
+  const CRISIS_YEAR = 1349, CRISIS_MONTH = 5, CRISIS_DAY = 28 // 1349-06-28
+  // 映射到真实日期做差值计算
+  const BASE_YEAR = 2020
+  const doomDate = new Date(BASE_YEAR + (DOOM_YEAR - CRISIS_YEAR), DOOM_MONTH, DOOM_DAY, 0, 0, 0)
+  const crisisDate = new Date(BASE_YEAR, CRISIS_MONTH, CRISIS_DAY, 0, 0, 0)
+  const totalSpan = doomDate.getTime() - crisisDate.getTime()
+  const anchorReal = Date.now()
+
+  const cdY = document.getElementById('cd-years')
+  const cdD = document.getElementById('cd-days')
+  const cdH = document.getElementById('cd-h')
+  const cdM = document.getElementById('cd-m')
+  const cdS = document.getElementById('cd-s')
+
+  function pad2(n) { return String(n).padStart(2, '0') }
+
+  function updateCountdown() {
+    const elapsed = Date.now() - anchorReal
+    let remaining = totalSpan - elapsed
+    if (remaining <= 0) {
+      cdY.textContent = '0'; cdD.textContent = '0'
+      cdH.textContent = '00'; cdM.textContent = '00'; cdS.textContent = '00'
+      return
+    }
+    const totalSec = Math.floor(remaining / 1000)
+    const years = Math.floor(totalSec / 31557600) // avg year = 365.25*86400
+    const days  = Math.floor((totalSec % 31557600) / 86400)
+    const hours = Math.floor((totalSec % 86400) / 3600)
+    const mins  = Math.floor((totalSec % 3600) / 60)
+    const secs  = Math.floor(totalSec % 60)
+
+    cdY.textContent = years
+    cdD.textContent = days
+    cdH.textContent = pad2(hours)
+    cdM.textContent = pad2(mins)
+    cdS.textContent = pad2(secs)
+  }
+
+  updateCountdown()
+  setInterval(updateCountdown, 1000)
+
+  // 倒计时偶尔跳动（致敬原著闪烁效果）
+  const flickerTimer = setInterval(() => {
+    if (Math.random() < 0.03) {
+      const orig = [cdY.textContent, cdD.textContent, cdH.textContent, cdM.textContent, cdS.textContent]
+      cdY.style.textShadow = '0 0 60px rgba(255,45,45,1), 0 0 120px rgba(255,0,0,0.7)'
+      cdD.style.textShadow = '0 0 60px rgba(255,45,45,1), 0 0 120px rgba(255,0,0,0.7)'
+      if (Math.random() < 0.3) {
+        cdH.textContent = pad2(parseInt(cdH.textContent) + (Math.random() < 0.5 ? 1 : -1))
+        cdM.textContent = pad2(parseInt(cdM.textContent) + (Math.random() < 0.5 ? 1 : -1))
+      }
+      setTimeout(() => {
+        updateCountdown()
+        cdY.style.textShadow = cdD.style.textShadow = '0 0 32px rgba(255,45,45,0.7), 0 0 64px rgba(255,45,45,0.35)'
+      }, 80 + Math.random() * 120)
+    }
+  }, 500)
 
   // ==================== 鼠标视差 ====================
   document.addEventListener('mousemove', e => {
@@ -464,17 +553,6 @@
 
   function animate() {
     drawBackground()
-
-    // 倒计时偶尔跳动
-    if (Math.random() < 0.02) {
-      countdownValue = 404 + Math.floor(Math.random() * 3 - 1)
-      countdownEl.textContent = String(countdownValue).padStart(4, '0')
-      setTimeout(() => {
-        countdownValue = 404
-        countdownEl.textContent = '0404'
-      }, 120 + Math.random() * 200)
-    }
-
     requestAnimationFrame(animate)
   }
   animate()
