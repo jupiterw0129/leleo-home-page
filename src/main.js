@@ -154,6 +154,7 @@ const oml2d = loadOml2d({
 // 暴露实例到 window，供 tab4 切换模型
 window.__oml2d = oml2d
 window.__oml2d.switchPet = async (index) => {
+  stopWalk()
   localStorage.setItem('leleo-pet', index)
   await oml2d.loadModelByIndex(index)
 }
@@ -277,44 +278,63 @@ oml2d.onStageSlideIn(() => {
   bindDrag(stage)
 })
 
-// 空格键：走路切换
+// 走路状态
 let walking = false, walkTimer = 0
+
+function stopWalk() {
+  walking = false
+  clearInterval(walkTimer)
+}
+
+function resetWalkPose(core) {
+  if (!core || core.getParameterIndex('Param_MC_Leg_ControlR_Y') < 0) return
+  easeTo(core, 'Param_MC_Leg_ControlR_Y', 0, 200)
+  easeTo(core, 'Param_MC_LegR_Y', 0, 200)
+  easeTo(core, 'Param_MC_Leg_ControlL_Y', 0, 200)
+  easeTo(core, 'Param_MC_LegL_Y', 0, 200)
+  easeTo(core, 'Param_MC_Arm_ControlR_Y', 0, 200)
+  easeTo(core, 'Param_MC_ArmR_Y', 0, 200)
+  easeTo(core, 'Param_MC_Arm_ControlL_Y', 0, 200)
+  easeTo(core, 'Param_MC_ArmL_Y', 0, 200)
+}
+
+// 空格键：走路切换
 document.addEventListener('keydown', (e) => {
   if (e.code !== 'Space' || e.repeat) return
-  e.preventDefault()
   const core = oml2d.models?.model?.internalModel?.coreModel
   if (!core) return
+  // 只对 MCZhou 模型生效
+  if (core.getParameterIndex('Param_MC_Leg_ControlR_Y') < 0) return
 
+  e.preventDefault()
   walking = !walking
   if (walking) {
     let step = 0
     const doStep = () => {
+      const curCore = oml2d.models?.model?.internalModel?.coreModel
+      if (!curCore || curCore.getParameterIndex('Param_MC_Leg_ControlR_Y') < 0) {
+        stopWalk()
+        return
+      }
       const rLeg = step % 2 === 0 ? 20 : -10
       const lLeg = step % 2 === 0 ? -10 : 20
       const rArm = step % 2 === 0 ? -10 : 15
       const lArm = step % 2 === 0 ? 15 : -10
-      easeTo(core, 'Param_MC_Leg_ControlR_Y', rLeg, 250)
-      easeTo(core, 'Param_MC_LegR_Y', rLeg, 250)
-      easeTo(core, 'Param_MC_Leg_ControlL_Y', lLeg, 250)
-      easeTo(core, 'Param_MC_LegL_Y', lLeg, 250)
-      easeTo(core, 'Param_MC_Arm_ControlR_Y', rArm, 250)
-      easeTo(core, 'Param_MC_ArmR_Y', rArm, 250)
-      easeTo(core, 'Param_MC_Arm_ControlL_Y', lArm, 250)
-      easeTo(core, 'Param_MC_ArmL_Y', lArm, 250)
+      easeTo(curCore, 'Param_MC_Leg_ControlR_Y', rLeg, 250)
+      easeTo(curCore, 'Param_MC_LegR_Y', rLeg, 250)
+      easeTo(curCore, 'Param_MC_Leg_ControlL_Y', lLeg, 250)
+      easeTo(curCore, 'Param_MC_LegL_Y', lLeg, 250)
+      easeTo(curCore, 'Param_MC_Arm_ControlR_Y', rArm, 250)
+      easeTo(curCore, 'Param_MC_ArmR_Y', rArm, 250)
+      easeTo(curCore, 'Param_MC_Arm_ControlL_Y', lArm, 250)
+      easeTo(curCore, 'Param_MC_ArmL_Y', lArm, 250)
       step++
     }
     doStep()
     walkTimer = setInterval(doStep, 300)
   } else {
-    clearInterval(walkTimer)
-    easeTo(core, 'Param_MC_Leg_ControlR_Y', 0, 200)
-    easeTo(core, 'Param_MC_LegR_Y', 0, 200)
-    easeTo(core, 'Param_MC_Leg_ControlL_Y', 0, 200)
-    easeTo(core, 'Param_MC_LegL_Y', 0, 200)
-    easeTo(core, 'Param_MC_Arm_ControlR_Y', 0, 200)
-    easeTo(core, 'Param_MC_ArmR_Y', 0, 200)
-    easeTo(core, 'Param_MC_Arm_ControlL_Y', 0, 200)
-    easeTo(core, 'Param_MC_ArmL_Y', 0, 200)
+    stopWalk()
+    resetWalkPose(core)
   }
 })
 }
