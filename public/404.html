@@ -360,11 +360,12 @@
     }
   }
 
+  // 三颗恒星：红 / 蓝 / 金
   const G = 0.35
   const bodies = [
-    new Body(-80, 30, 0.3, 0.5, 30, 'rgb(255,160,60,1)', 90),
-    new Body(70, -20, -0.2, -0.4, 25, 'rgb(255,80,40,1)', 80),
-    new Body(10, 70, 0.5, -0.1, 35, 'rgb(255,200,80,1)', 100),
+    new Body(-80, 30, 0.3, 0.5, 30, 'rgb(255,65,35,1)', 90),
+    new Body(70, -20, -0.2, -0.4, 25, 'rgb(55,130,255,1)', 80),
+    new Body(10, 70, 0.5, -0.1, 35, 'rgb(255,195,50,1)', 100),
   ]
 
   function simulateThreeBody() {
@@ -382,57 +383,90 @@
     }
   }
 
-  // ==================== 水滴 ====================
-  class Waterdrop {
-    constructor() { this.reset() }
-    reset() {
-      this.x = Math.random() * W; this.y = Math.random() * H
-      this.targetX = Math.random() * W; this.targetY = Math.random() * H
-      this.progress = 1
-      this.size = 3 + Math.random() * 2.5      // 缩小，不抢眼
-      this.speed = 0.001 + Math.random() * 0.002  // 更慢
-      this.opacity = 0.25 + Math.random() * 0.15
+  // ==================== 彗星 ====================
+  class Comet {
+    constructor() {
+      this.dead = true
+      this.trail = []
     }
+
+    spawn() {
+      // 从边缘随机位置出现
+      const edge = Math.random()
+      if (edge < 0.25)      { this.x = -20; this.y = Math.random() * H }
+      else if (edge < 0.5)  { this.x = W + 20; this.y = Math.random() * H }
+      else if (edge < 0.75) { this.x = Math.random() * W; this.y = -20 }
+      else                  { this.x = Math.random() * W; this.y = H + 20 }
+
+      // 随机方向，偏右下或左下
+      const angle = (Math.random() - 0.5) * Math.PI * 0.8 + (this.y > H / 2 ? -Math.PI / 2 : Math.PI / 2)
+      const speed = 1.5 + Math.random() * 3
+      this.vx = Math.cos(angle) * speed
+      this.vy = Math.sin(angle) * speed
+      this.trail = []
+      this.life = 1
+      this.maxTrail = 30 + Math.floor(Math.random() * 50)
+      this.size = 1.5 + Math.random() * 2
+      // 彗星颜色：白、淡蓝、淡金
+      const hue = [0, 210, 45][Math.floor(Math.random() * 3)]
+      this.color = `hsla(${hue}, 80%, 75%`
+      this.dead = false
+    }
+
     update() {
-      if (this.progress >= 1) {
-        this.startX = this.x; this.startY = this.y
-        this.targetX = Math.random() * W; this.targetY = Math.random() * H
-        this.progress = 0
+      if (this.dead) return
+      this.x += this.vx; this.y += this.vy
+      this.trail.push({ x: this.x, y: this.y })
+      if (this.trail.length > this.maxTrail) this.trail.shift()
+      // 滑出屏幕后死亡
+      if (this.x < -60 || this.x > W + 60 || this.y < -60 || this.y > H + 60) {
+        this.dead = true
+        this.trail = []
       }
-      this.progress += this.speed
-      const t = this.progress < 0.5 ? 2 * this.progress * this.progress : -1 + (4 - 2 * this.progress) * this.progress
-      this.x = this.startX + (this.targetX - this.startX) * t
-      this.y = this.startY + (this.targetY - this.startY) * t
     }
+
     draw(ctx) {
-      ctx.save(); ctx.translate(this.x, this.y); ctx.globalAlpha = this.opacity
-      const grd = ctx.createLinearGradient(-this.size, -this.size * 2, this.size, this.size * 2)
-      grd.addColorStop(0, 'rgba(180,200,220,0.8)')
-      grd.addColorStop(0.25, 'rgba(255,255,255,0.9)')
-      grd.addColorStop(0.35, 'rgba(120,140,180,0.6)')
-      grd.addColorStop(0.5, 'rgba(255,255,255,0.8)')
-      grd.addColorStop(0.65, 'rgba(80,100,140,0.6)')
-      grd.addColorStop(0.85, 'rgba(200,220,240,0.7)')
-      grd.addColorStop(1, 'rgba(60,80,120,0.5)')
+      if (this.dead || this.trail.length < 2) return
+
+      // 尾部拖尾 — 从旧到新逐渐变亮
+      const head = this.trail[this.trail.length - 1]
+      for (let i = 1; i < this.trail.length; i++) {
+        const p = this.trail[i]
+        const alpha = i / this.trail.length
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, this.size * alpha * 0.7, 0, Math.PI * 2)
+        ctx.fillStyle = `${this.color}, ${alpha * 0.6})`
+        ctx.fill()
+      }
+
+      // 头部光晕
+      const glow = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, this.size * 6)
+      glow.addColorStop(0, 'rgba(255,255,255,0.9)')
+      glow.addColorStop(0.15, `${this.color}, 0.7)`)
+      glow.addColorStop(0.5, `${this.color}, 0.15)`)
+      glow.addColorStop(1, 'rgba(0,0,0,0)')
       ctx.beginPath()
-      const nose = this.size * 2
-      ctx.moveTo(0, -nose)
-      ctx.bezierCurveTo(this.size * 1.4, -nose * 0.5, this.size * 1.4, this.size * 0.6, 0, this.size)
-      ctx.bezierCurveTo(-this.size * 1.4, this.size * 0.6, -this.size * 1.4, -nose * 0.5, 0, -nose)
-      ctx.fillStyle = grd; ctx.fill()
+      ctx.arc(head.x, head.y, this.size * 6, 0, Math.PI * 2)
+      ctx.fillStyle = glow; ctx.fill()
+
+      // 头部亮点
       ctx.beginPath()
-      ctx.arc(-this.size * 0.25, -this.size * 0.8, this.size * 0.2, 0, Math.PI * 2)
-      ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fill()
-      ctx.beginPath()
-      ctx.moveTo(-this.size * 0.6, -this.size * 0.3)
-      ctx.quadraticCurveTo(0, this.size * 0.2, this.size * 0.6, -this.size * 0.3)
-      ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 0.5; ctx.stroke()
-      ctx.restore()
+      ctx.arc(head.x, head.y, this.size * 1.2, 0, Math.PI * 2)
+      ctx.fillStyle = '#fff'; ctx.fill()
     }
   }
 
-  const waterdrops = []
-  for (let i = 0; i < 3; i++) waterdrops.push(new Waterdrop())
+  const comets = []
+  const MAX_COMETS = 4
+  for (let i = 0; i < MAX_COMETS; i++) comets.push(new Comet())
+
+  // 每 3~8 秒随机发射一颗彗星
+  function maybeSpawnComet() {
+    const free = comets.find(c => c.dead)
+    if (free) free.spawn()
+  }
+  setInterval(maybeSpawnComet, 3000 + Math.random() * 5000)
+  maybeSpawnComet() // 立刻来一颗
 
   // ==================== 末日倒计时 ====================
   // 危机纪元 1349年6月28日 → 末日 1360年7月31日
@@ -547,8 +581,8 @@
     const scx = W * 0.3, scy = H * 0.55
     for (const b of bodies) b.draw(ctx, scx, scy, simScale)
 
-    // 水滴静默地飘过（不抢视觉焦点）
-    for (const wd of waterdrops) { wd.update(); wd.draw(ctx) }
+    // 彗星
+    for (const c of comets) { c.update(); c.draw(ctx) }
   }
 
   function animate() {
