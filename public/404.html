@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>404 - 你迷失在灵界了</title>
+  <title>404 — 你们是虫子</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -12,186 +12,180 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #0c0c1d;
+      background: #03050a;
       font-family: 'Noto Serif SC', 'PingFang SC', 'Microsoft YaHei', serif;
       overflow: hidden;
       cursor: default;
+      color: #e0d8f0;
+      user-select: none;
     }
 
     canvas#bg { position: fixed; top: 0; left: 0; z-index: 0; }
 
+    /* ====== 倒计时浮层 ====== */
+    .countdown-layer {
+      position: fixed;
+      top: 12%;
+      right: 8%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    #countdown {
+      font-family: 'Courier New', 'Fira Code', monospace;
+      font-size: clamp(48px, 10vw, 120px);
+      font-weight: 900;
+      color: #ff2d2d;
+      text-shadow: 0 0 40px rgba(255,45,45,0.8), 0 0 80px rgba(255,45,45,0.4), 0 0 120px rgba(255,0,0,0.3);
+      animation: flicker 0.15s infinite alternate;
+      line-height: 1;
+      letter-spacing: 6px;
+    }
+
+    @keyframes flicker {
+      0% { opacity: 1; }
+      80% { opacity: 0.85; }
+      100% { opacity: 0.92; }
+    }
+
+    .countdown-label {
+      font-size: 13px;
+      color: rgba(255,80,80,0.7);
+      text-align: right;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* ====== ETO 标识 ====== */
+    .eto-mark {
+      position: fixed;
+      top: 6%;
+      left: 6%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .eto-text {
+      font-size: 13px;
+      color: rgba(200,60,60,0.5);
+      letter-spacing: 6px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .eto-line {
+      width: 60px; height: 1px;
+      background: rgba(200,60,60,0.35);
+      margin: 6px 0;
+    }
+
+    /* ====== 主卡片 ====== */
     .wrapper {
       position: relative;
-      z-index: 1;
+      z-index: 2;
       perspective: 800px;
     }
 
     .card {
       position: relative;
-      background: rgba(20, 20, 50, 0.55);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border-radius: 28px;
-      padding: 56px 48px;
+      background: rgba(15, 12, 30, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 48px 44px;
       text-align: center;
-      max-width: 500px;
+      max-width: 460px;
       width: 90vw;
-      transition: transform 0.1s ease-out;
     }
 
     .card::before {
       content: '';
       position: absolute;
       inset: -1px;
-      border-radius: 29px;
+      border-radius: 25px;
       padding: 1px;
-      background: linear-gradient(135deg, rgba(167,139,250,0.5), rgba(99,102,241,0.2), rgba(129,140,248,0.5), rgba(167,139,250,0.2));
+      background: linear-gradient(160deg, rgba(255,60,60,0.5), transparent 30%, transparent 70%, rgba(255,60,60,0.3));
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
       -webkit-mask-composite: xor;
       mask-composite: exclude;
-      animation: borderGlow 4s linear infinite;
+      animation: borderPulse 3s ease-in-out infinite;
     }
 
-    @keyframes borderGlow {
-      0% { filter: hue-rotate(0deg); }
-      100% { filter: hue-rotate(360deg); }
-    }
-
-    .card::after {
-      content: '';
-      position: absolute;
-      inset: -1px;
-      border-radius: 29px;
-      background: linear-gradient(135deg, rgba(167,139,250,0.4), transparent 40%, transparent 60%, rgba(129,140,248,0.4));
-      pointer-events: none;
-    }
-
-    .icon-ring {
-      width: 100px; height: 100px;
-      margin: 0 auto 28px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(129,140,248,0.2) 0%, transparent 70%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      animation: float 4s ease-in-out infinite;
-      position: relative;
-    }
-
-    .icon-ring::before {
-      content: '';
-      position: absolute;
-      inset: -8px;
-      border-radius: 50%;
-      border: 1px solid rgba(167,139,250,0.25);
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    .icon-ring::after {
-      content: '';
-      position: absolute;
-      inset: -20px;
-      border-radius: 50%;
-      border: 1px solid rgba(167,139,250,0.1);
-      animation: pulse 2s ease-in-out infinite 0.5s;
-    }
-
-    .icon-svg {
-      width: 52px; height: 52px;
-      position: relative;
-      z-index: 1;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 0.6; }
-      50% { transform: scale(1.05); opacity: 1; }
+    @keyframes borderPulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
     }
 
     .code {
-      font-size: 96px;
-      font-weight: 800;
-      background: linear-gradient(180deg, #e8e0ff 0%, #a78bfa 50%, #6366f1 100%);
+      font-size: 88px;
+      font-weight: 900;
+      letter-spacing: 10px;
+      line-height: 1;
+      margin-bottom: 4px;
+      background: linear-gradient(180deg, #ff4d4d 0%, #cc1111 60%, #880808 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      letter-spacing: 8px;
-      line-height: 1;
-      margin-bottom: 8px;
+      text-shadow: none;
+      filter: drop-shadow(0 0 20px rgba(255,45,45,0.4));
     }
 
     .divider {
-      width: 48px; height: 2px;
-      background: linear-gradient(90deg, transparent, rgba(167,139,250,0.8), transparent);
-      margin: 0 auto 20px;
+      width: 40px; height: 1.5px;
+      background: rgba(255,60,60,0.5);
+      margin: 0 auto 16px;
     }
 
     .title {
-      font-size: 24px;
-      color: #e0d8f0;
-      margin-bottom: 10px;
+      font-size: 22px;
       font-weight: 600;
+      color: #e8d8d8;
+      margin-bottom: 6px;
     }
 
     .subtitle {
-      font-size: 15px;
-      color: rgba(210,200,240,0.55);
-      line-height: 1.9;
-      margin-bottom: 36px;
+      font-size: 14px;
+      color: rgba(200,160,160,0.55);
+      line-height: 1.8;
+      margin-bottom: 32px;
+    }
+
+    .quote {
+      font-size: 12px;
+      color: rgba(180,140,140,0.4);
+      font-style: italic;
+      margin-bottom: 28px;
     }
 
     .btn {
       display: inline-block;
-      padding: 11px 36px;
+      padding: 10px 34px;
       border-radius: 100px;
-      background: rgba(129,140,248,0.15);
-      border: 1px solid rgba(167,139,250,0.35);
-      color: #c4b5fd;
+      background: rgba(200,40,40,0.12);
+      border: 1px solid rgba(200,60,60,0.3);
+      color: #e0b0b0;
       text-decoration: none;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 500;
-      letter-spacing: 0.5px;
+      letter-spacing: 1px;
       transition: all 0.35s;
       position: relative;
-      overflow: hidden;
-    }
-
-    .btn::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(167,139,250,0.3), rgba(99,102,241,0.3));
-      opacity: 0;
-      transition: opacity 0.35s;
     }
 
     .btn:hover {
-      border-color: rgba(167,139,250,0.7);
-      color: #f0e8ff;
-      box-shadow: 0 0 32px rgba(139,120,240,0.25), 0 0 64px rgba(99,102,241,0.1);
+      background: rgba(200,40,40,0.22);
+      border-color: rgba(255,80,80,0.6);
+      color: #ffe0e0;
+      box-shadow: 0 0 36px rgba(200,40,40,0.25), 0 0 72px rgba(180,30,30,0.1);
       transform: translateY(-1px);
     }
 
-    .btn:hover::before { opacity: 1; }
-
-    .btn span { position: relative; z-index: 1; }
-
-    .hint {
-      margin-top: 24px;
-      font-size: 12px;
-      color: rgba(210,200,240,0.3);
-    }
-
     @media (max-width: 600px) {
-      .card { padding: 40px 28px; }
-      .code { font-size: 64px; letter-spacing: 4px; }
-      .title { font-size: 20px; }
-      .icon-ring { width: 80px; height: 80px; margin-bottom: 20px; }
-      .icon-svg { width: 40px; height: 40px; }
+      .card { padding: 36px 24px; }
+      .code { font-size: 60px; letter-spacing: 6px; }
+      .title { font-size: 18px; }
+      .countdown-layer { top: 8%; right: 5%; }
+      #countdown { font-size: clamp(36px, 12vw, 72px); }
     }
   </style>
 </head>
@@ -199,36 +193,37 @@
 
 <canvas id="bg"></canvas>
 
+<!-- ETO 标识 -->
+<div class="eto-mark">
+  <div class="eto-text">E·T·O</div>
+  <div class="eto-line"></div>
+  <div class="eto-text" style="font-size:10px;letter-spacing:3px;">EARTH-TRISOLARIS</div>
+</div>
+
+<!-- 倒计时 -->
+<div class="countdown-layer">
+  <div id="countdown">0404</div>
+  <div class="countdown-label">countdown</div>
+</div>
+
+<!-- 404 卡片 -->
 <div class="wrapper">
   <div class="card" id="card">
-    <div class="icon-ring">
-      <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="rgba(167,139,250,0.8)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M12 2a10 10 0 0 1 0 20"/>
-        <path d="M12 2a10 10 0 0 0 0 20"/>
-        <line x1="2" y1="12" x2="22" y2="12"/>
-        <line x1="12" y1="2" x2="12" y2="6"/>
-        <line x1="12" y1="18" x2="12" y2="22"/>
-      </svg>
-    </div>
     <div class="code">404</div>
     <div class="divider"></div>
-    <div class="title">你迷失在灵界了</div>
-    <div class="subtitle" id="typewriter"></div>
-    <a href="/" class="btn"><span>返回现世</span></a>
-    <div class="hint">「愚者」先生会为你指引方向</div>
+    <div class="title">你们是虫子</div>
+    <div class="subtitle">这段时空坐标上，什么都没有。</div>
+    <div class="quote">"不要回答！不要回答！！不要回答！！！"</div>
+    <a href="/" class="btn">返回地球</a>
   </div>
 </div>
 
 <script>
 (function() {
-  // ======= Canvas 星域背景 =======
   const canvas = document.getElementById('bg')
   const ctx = canvas.getContext('2d')
   let W, H
-
-  const stars = []
-  const STAR_COUNT = 180
+  let mouseX = 0, mouseY = 0
 
   function resize() {
     W = canvas.width = window.innerWidth
@@ -237,118 +232,252 @@
   resize()
   window.addEventListener('resize', resize)
 
-  class Star {
-    constructor() {
-      this.reset(true)
+  // ==================== 星空背景 ====================
+  const bgStars = []
+  for (let i = 0; i < 200; i++) {
+    bgStars.push({
+      x: Math.random() * 2000,
+      y: Math.random() * 2000,
+      r: Math.random() * 1.5 + 0.3,
+      twinkle: Math.random() * Math.PI * 2,
+      speed: Math.random() * 0.01 + 0.003,
+    })
+  }
+
+  // ==================== 三体运动模拟 ====================
+  class Body {
+    constructor(x, y, vx, vy, mass, color, trailLen) {
+      this.x = x; this.y = y
+      this.vx = vx; this.vy = vy
+      this.mass = mass
+      this.color = color
+      this.trail = []
+      this.trailLen = trailLen
+      this.radius = Math.sqrt(mass) * 1.8
     }
-    reset(init) {
-      this.x = Math.random() * W
-      this.y = init ? Math.random() * H : -10
-      this.r = Math.random() * 1.8 + 0.6
-      this.speed = this.r * 0.04 + 0.02
-      this.opacity = 0
-      this.targetOpacity = Math.random() * 0.7 + 0.3
-      this.twinkleSpeed = Math.random() * 0.02 + 0.005
-      this.twinklePhase = Math.random() * Math.PI * 2
-      this.hue = Math.random() < 0.15 ? 260 : Math.random() < 0.25 ? 220 : 30  // purple, blue, warm
+
+    attract(other, G) {
+      const dx = other.x - this.x
+      const dy = other.y - this.y
+      const dist = Math.sqrt(dx * dx + dy * dy)
+      const minDist = (this.radius + other.radius) * 3
+      const d = Math.max(dist, minDist)
+      const force = (G * this.mass * other.mass) / (d * d)
+      const fx = (force * dx) / d
+      const fy = (force * dy) / d
+      return { fx, fy }
     }
+
+    applyForce(fx, fy) {
+      this.vx += fx / this.mass
+      this.vy += fy / this.mass
+    }
+
     update() {
-      this.y += this.speed
-      if (this.y > H + 10) this.reset(false)
-      this.twinklePhase += this.twinkleSpeed
-      this.opacity = this.targetOpacity * (0.5 + 0.5 * Math.sin(this.twinklePhase))
+      this.x += this.vx
+      this.y += this.vy
+      this.trail.push({ x: this.x, y: this.y, life: 1 })
+      if (this.trail.length > this.trailLen) this.trail.shift()
+      for (const p of this.trail) p.life *= 0.985
     }
-    draw(ctx) {
-      const alpha = this.opacity
-      ctx.beginPath()
-      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2)
-      if (this.hue > 200) {
-        ctx.fillStyle = `hsla(${this.hue}, 60%, 75%, ${alpha})`
-      } else {
-        ctx.fillStyle = `rgba(255,255,255,${alpha})`
-      }
-      ctx.fill()
-      // glow for bigger stars
-      if (this.r > 1.2 && alpha > 0.5) {
-        const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r * 4)
-        grd.addColorStop(0, `rgba(167,139,250,${alpha * 0.3})`)
-        grd.addColorStop(1, 'rgba(167,139,250,0)')
+
+    draw(ctx, cx, cy, scale) {
+      const sx = cx + (this.x - cx) * scale
+      const sy = cy + (this.y - cy) * scale
+
+      // trail
+      if (this.trail.length > 1) {
         ctx.beginPath()
-        ctx.arc(this.x, this.y, this.r * 4, 0, Math.PI * 2)
-        ctx.fillStyle = grd
-        ctx.fill()
-      }
-    }
-  }
-
-  for (let i = 0; i < STAR_COUNT; i++) stars.push(new Star())
-
-  // 星座连线
-  function drawConstellations() {
-    for (let i = 0; i < stars.length; i++) {
-      for (let j = i + 1; j < stars.length; j++) {
-        const dx = stars[i].x - stars[j].x
-        const dy = stars[i].y - stars[j].y
-        const dist = Math.sqrt(dx * dx + dy * dy)
-        if (dist < 90 && stars[i].opacity > 0.35 && stars[j].opacity > 0.35) {
-          const alpha = (1 - dist / 90) * 0.15 * Math.min(stars[i].opacity, stars[j].opacity)
-          ctx.beginPath()
-          ctx.moveTo(stars[i].x, stars[i].y)
-          ctx.lineTo(stars[j].x, stars[j].y)
-          ctx.strokeStyle = `rgba(167,139,250,${alpha})`
-          ctx.lineWidth = 0.5
-          ctx.stroke()
+        const first = this.trail[0]
+        ctx.moveTo(cx + (first.x - cx) * scale, cy + (first.y - cy) * scale)
+        for (let i = 1; i < this.trail.length; i++) {
+          const p = this.trail[i]
+          ctx.lineTo(cx + (p.x - cx) * scale, cy + (p.y - cy) * scale)
         }
+        ctx.strokeStyle = this.color.replace('1)', `${0.3})`).replace('rgb', 'rgba')
+        ctx.lineWidth = 1.2
+        ctx.stroke()
       }
+
+      // glow
+      const grd = ctx.createRadialGradient(sx, sy, 0, sx, sy, this.radius * 6 * scale)
+      grd.addColorStop(0, this.color.replace('1)', '0.4)').replace('rgb', 'rgba'))
+      grd.addColorStop(1, 'rgba(0,0,0,0)')
+      ctx.beginPath()
+      ctx.arc(sx, sy, this.radius * 6 * scale, 0, Math.PI * 2)
+      ctx.fillStyle = grd
+      ctx.fill()
+
+      // body
+      const bgrd = ctx.createRadialGradient(sx, sy, 0, sx, sy, this.radius * scale)
+      bgrd.addColorStop(0, '#fff')
+      bgrd.addColorStop(0.3, this.color)
+      bgrd.addColorStop(1, this.color.replace('1)', '0)').replace('rgb', 'rgba'))
+      ctx.beginPath()
+      ctx.arc(sx, sy, this.radius * scale, 0, Math.PI * 2)
+      ctx.fillStyle = bgrd
+      ctx.fill()
     }
   }
 
-  // 星云光晕
-  function drawNebula() {
-    const cx1 = W * 0.3, cy1 = H * 0.25
-    const cx2 = W * 0.7, cy2 = H * 0.7
-    for (const [cx, cy] of [[cx1, cy1], [cx2, cy2]]) {
-      const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(W, H) * 0.35)
-      grd.addColorStop(0, 'rgba(99,60,180,0.06)')
-      grd.addColorStop(0.5, 'rgba(60,40,120,0.03)')
-      grd.addColorStop(1, 'rgba(0,0,0,0)')
+  // 三个天体初始条件（模仿三体混沌轨道）
+  const G = 0.35
+  const cx = 0, cy = 0
+  const bodies = [
+    new Body(-80, 30, 0.3, 0.5, 30, 'rgb(255,160,60,1)', 90),
+    new Body(70, -20, -0.2, -0.4, 25, 'rgb(255,80,40,1)', 80),
+    new Body(10, 70, 0.5, -0.1, 35, 'rgb(255,200,80,1)', 100),
+  ]
+
+  function simulateThreeBody() {
+    const forces = bodies.map(() => ({ fx: 0, fy: 0 }))
+    for (let i = 0; i < bodies.length; i++) {
+      for (let j = i + 1; j < bodies.length; j++) {
+        const { fx, fy } = bodies[i].attract(bodies[j], G)
+        forces[i].fx += fx; forces[i].fy += fy
+        forces[j].fx -= fx; forces[j].fy -= fy
+      }
+    }
+    for (let i = 0; i < bodies.length; i++) {
+      bodies[i].applyForce(forces[i].fx, forces[i].fy)
+      bodies[i].update()
+    }
+  }
+
+  // ==================== 水滴 (Strong Interaction Material Probe) ====================
+  class Waterdrop {
+    constructor() {
+      this.reset()
+    }
+
+    reset() {
+      this.x = Math.random() * W
+      this.y = Math.random() * H
+      this.targetX = Math.random() * W
+      this.targetY = Math.random() * H
+      this.progress = 1
+      this.size = 6 + Math.random() * 4
+      this.speed = 0.002 + Math.random() * 0.004
+    }
+
+    update() {
+      if (this.progress >= 1) {
+        this.startX = this.x
+        this.startY = this.y
+        this.targetX = Math.random() * W
+        this.targetY = Math.random() * H
+        this.progress = 0
+      }
+      this.progress += this.speed
+      const t = this.easeInOut(this.progress)
+      this.x = this.startX + (this.targetX - this.startX) * t
+      this.y = this.startY + (this.targetY - this.startY) * t
+    }
+
+    easeInOut(t) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t }
+
+    draw(ctx) {
+      ctx.save()
+      ctx.translate(this.x, this.y)
+
+      // 水滴主体 — 镜面反射渐变
+      const grd = ctx.createLinearGradient(-this.size, -this.size * 2, this.size, this.size * 2)
+      grd.addColorStop(0, 'rgba(180,200,220,0.9)')
+      grd.addColorStop(0.25, 'rgba(255,255,255,0.95)')
+      grd.addColorStop(0.35, 'rgba(120,140,180,0.7)')
+      grd.addColorStop(0.5, '#fff')
+      grd.addColorStop(0.65, 'rgba(80,100,140,0.7)')
+      grd.addColorStop(0.85, 'rgba(200,220,240,0.85)')
+      grd.addColorStop(1, 'rgba(60,80,120,0.6)')
+
+      // 水滴形状 (类泪滴)
+      ctx.beginPath()
+      const nose = this.size * 2
+      ctx.moveTo(0, -nose)
+      ctx.bezierCurveTo(this.size * 1.4, -nose * 0.5, this.size * 1.4, this.size * 0.6, 0, this.size)
+      ctx.bezierCurveTo(-this.size * 1.4, this.size * 0.6, -this.size * 1.4, -nose * 0.5, 0, -nose)
       ctx.fillStyle = grd
-      ctx.fillRect(0, 0, W, H)
+      ctx.fill()
+
+      // 高光点
+      ctx.beginPath()
+      ctx.arc(-this.size * 0.25, -this.size * 0.8, this.size * 0.2, 0, Math.PI * 2)
+      ctx.fillStyle = 'rgba(255,255,255,0.9)'
+      ctx.fill()
+
+      // 表面反射条纹
+      ctx.beginPath()
+      ctx.moveTo(-this.size * 0.6, -this.size * 0.3)
+      ctx.quadraticCurveTo(0, this.size * 0.2, this.size * 0.6, -this.size * 0.3)
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)'
+      ctx.lineWidth = 0.5
+      ctx.stroke()
+
+      ctx.restore()
+    }
+  }
+
+  const waterdrops = []
+  for (let i = 0; i < 3; i++) waterdrops.push(new Waterdrop())
+
+  // ==================== 倒计时 ====================
+  const countdownEl = document.getElementById('countdown')
+  let countdownValue = 404
+
+  // ==================== 鼠标视差 ====================
+  document.addEventListener('mousemove', e => {
+    mouseX = e.clientX; mouseY = e.clientY
+    const card = document.getElementById('card')
+    const rx = (e.clientX / W - 0.5) * 4
+    const ry = (e.clientY / H - 0.5) * 4
+    card.style.transform = `rotateY(${rx}deg) rotateX(${-ry}deg)`
+  })
+
+  // ==================== 主循环 ====================
+  // 三体运动取景范围
+  const simScale = 1.8
+
+  function drawBackground() {
+    ctx.clearRect(0, 0, W, H)
+
+    // 星空
+    for (const s of bgStars) {
+      s.twinkle += s.speed
+      const alpha = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(s.twinkle))
+      ctx.beginPath()
+      ctx.arc(s.x % W, s.y % H, s.r, 0, Math.PI * 2)
+      ctx.fillStyle = `rgba(255,255,255,${alpha})`
+      ctx.fill()
+    }
+
+    // 三体运动
+    simulateThreeBody()
+    const scx = W * 0.25, scy = H * 0.4
+    for (const b of bodies) b.draw(ctx, scx, scy, simScale)
+
+    // 水滴
+    for (const wd of waterdrops) {
+      wd.update()
+      wd.draw(ctx)
     }
   }
 
   function animate() {
-    ctx.clearRect(0, 0, W, H)
-    drawNebula()
-    drawConstellations()
-    for (const s of stars) {
-      s.update()
-      s.draw(ctx)
+    drawBackground()
+
+    // 倒计时偶尔跳动
+    if (Math.random() < 0.02) {
+      countdownValue = 404 + Math.floor(Math.random() * 3 - 1)
+      countdownEl.textContent = String(countdownValue).padStart(4, '0')
+      setTimeout(() => {
+        countdownValue = 404
+        countdownEl.textContent = '0404'
+      }, 120 + Math.random() * 200)
     }
+
     requestAnimationFrame(animate)
   }
   animate()
-
-  // ======= 鼠标视差 =======
-  const card = document.getElementById('card')
-  document.addEventListener('mousemove', e => {
-    const x = (e.clientX / window.innerWidth - 0.5) * 6
-    const y = (e.clientY / window.innerHeight - 0.5) * 6
-    card.style.transform = `rotateY(${x}deg) rotateX(${-y}deg)`
-  })
-
-  // ======= 打字机效果 =======
-  const text = '这里什么都没有。也许「愚者」先生知道路在哪里。'
-  const el = document.getElementById('typewriter')
-  let idx = 0
-  function type() {
-    if (idx < text.length) {
-      el.textContent += text[idx]
-      idx++
-      setTimeout(type, 80 + Math.random() * 60)
-    }
-  }
-  setTimeout(type, 300)
 })();
 </script>
 
