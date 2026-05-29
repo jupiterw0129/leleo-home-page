@@ -10,6 +10,7 @@
     body {
       min-height: 100vh;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       background: #03050a;
@@ -18,33 +19,38 @@
       cursor: default;
       color: #e0d8f0;
       user-select: none;
+      gap: 48px;
     }
 
     canvas#bg { position: fixed; top: 0; left: 0; z-index: 0; }
 
-    /* ====== 倒计时浮层 ====== */
+    /* ====== 倒计时 — 页面居中 ====== */
     .countdown-layer {
-      position: fixed;
-      top: 8%;
-      right: 6%;
-      z-index: 1;
+      position: relative;
+      z-index: 2;
       pointer-events: none;
-      text-align: right;
+      text-align: center;
     }
 
     .countdown-label {
-      font-size: 12px;
-      color: rgba(255,80,80,0.55);
-      letter-spacing: 5px;
-      margin-bottom: 8px;
-      font-family: 'Courier New', monospace;
+      font-size: 15px;
+      color: rgba(255,80,80,0.6);
+      letter-spacing: 6px;
+      margin-bottom: 16px;
     }
 
     .countdown-row {
       display: flex;
       align-items: baseline;
-      justify-content: flex-end;
-      gap: 6px;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .cd-block {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
     }
 
     .countdown-num {
@@ -55,20 +61,22 @@
       animation: flicker 0.12s infinite alternate;
     }
 
-    .countdown-num.big { font-size: clamp(32px, 5.5vw, 64px); }
-    .countdown-num.small { font-size: clamp(22px, 3.8vw, 44px); }
+    .num-y { font-size: clamp(40px, 7vw, 80px); }
+    .num-m { font-size: clamp(36px, 6vw, 68px); }
+    .num-d { font-size: clamp(34px, 5.5vw, 64px); }
+    .num-t { font-size: clamp(28px, 4.5vw, 52px); }
 
     .countdown-unit {
-      font-size: 13px;
-      color: rgba(255,120,120,0.6);
-      font-family: 'Noto Serif SC', serif;
+      font-size: 14px;
+      color: rgba(255,120,120,0.55);
       letter-spacing: 2px;
     }
 
-    .cd-divider {
+    .cd-colon {
       color: rgba(255,80,80,0.5);
-      font-size: clamp(18px, 3vw, 36px);
-      font-weight: 300;
+      font-size: clamp(24px, 3.5vw, 40px);
+      font-weight: 200;
+      margin: 0 -4px;
     }
 
     @keyframes flicker {
@@ -77,7 +85,7 @@
       100% { opacity: 0.94; }
     }
 
-    /* ====== ETO 标识 ====== */
+    /* ====== ETO ====== */
     .eto-mark {
       position: fixed;
       top: 6%;
@@ -146,7 +154,6 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      text-shadow: none;
       filter: drop-shadow(0 0 20px rgba(255,45,45,0.4));
     }
 
@@ -201,11 +208,13 @@
     }
 
     @media (max-width: 600px) {
+      body { gap: 28px; }
       .card { padding: 36px 24px; }
       .code { font-size: 60px; letter-spacing: 6px; }
       .title { font-size: 18px; }
-      .countdown-layer { top: 8%; right: 5%; }
-      #countdown { font-size: clamp(36px, 12vw, 72px); }
+      .countdown-row { gap: 6px; }
+      .cd-block { gap: 2px; }
+      .countdown-unit { font-size: 11px; }
     }
   </style>
 </head>
@@ -220,21 +229,29 @@
   <div class="eto-text" style="font-size:10px;letter-spacing:3px;">EARTH-TRISOLARIS</div>
 </div>
 
-<!-- 倒计时 -->
+<!-- 倒计时 — 页面居中 -->
 <div class="countdown-layer">
-  <div class="countdown-label">距 离 末 日</div>
+  <div class="countdown-label">距 离 深 红 从 天 而 降</div>
   <div class="countdown-row">
-    <span class="countdown-num big" id="cd-years">10</span>
-    <span class="countdown-unit">年</span>
-    <span class="countdown-num big" id="cd-days">187</span>
-    <span class="countdown-unit">天</span>
+    <div class="cd-block">
+      <span class="countdown-num num-y" id="cd-y">11</span>
+      <span class="countdown-unit">年</span>
+    </div>
+    <div class="cd-block">
+      <span class="countdown-num num-m" id="cd-mo">01</span>
+      <span class="countdown-unit">月</span>
+    </div>
+    <div class="cd-block">
+      <span class="countdown-num num-d" id="cd-d">03</span>
+      <span class="countdown-unit">天</span>
+    </div>
   </div>
-  <div class="countdown-row" style="margin-top:6px;">
-    <span class="countdown-num small" id="cd-h">00</span>
-    <span class="cd-divider">:</span>
-    <span class="countdown-num small" id="cd-m">00</span>
-    <span class="cd-divider">:</span>
-    <span class="countdown-num small" id="cd-s">00</span>
+  <div class="countdown-row" style="margin-top:10px;">
+    <span class="countdown-num num-t" id="cd-h">23</span>
+    <span class="cd-colon">:</span>
+    <span class="countdown-num num-t" id="cd-min">59</span>
+    <span class="cd-colon">:</span>
+    <span class="countdown-num num-t" id="cd-s">59</span>
   </div>
 </div>
 
@@ -255,7 +272,6 @@
   const canvas = document.getElementById('bg')
   const ctx = canvas.getContext('2d')
   let W, H
-  let mouseX = 0, mouseY = 0
 
   function resize() {
     W = canvas.width = window.innerWidth
@@ -281,80 +297,58 @@
     constructor(x, y, vx, vy, mass, color, trailLen) {
       this.x = x; this.y = y
       this.vx = vx; this.vy = vy
-      this.mass = mass
-      this.color = color
-      this.trail = []
-      this.trailLen = trailLen
+      this.mass = mass; this.color = color
+      this.trail = []; this.trailLen = trailLen
       this.radius = Math.sqrt(mass) * 1.8
     }
 
     attract(other, G) {
-      const dx = other.x - this.x
-      const dy = other.y - this.y
+      const dx = other.x - this.x, dy = other.y - this.y
       const dist = Math.sqrt(dx * dx + dy * dy)
       const minDist = (this.radius + other.radius) * 3
       const d = Math.max(dist, minDist)
       const force = (G * this.mass * other.mass) / (d * d)
-      const fx = (force * dx) / d
-      const fy = (force * dy) / d
-      return { fx, fy }
+      return { fx: (force * dx) / d, fy: (force * dy) / d }
     }
 
-    applyForce(fx, fy) {
-      this.vx += fx / this.mass
-      this.vy += fy / this.mass
-    }
+    applyForce(fx, fy) { this.vx += fx / this.mass; this.vy += fy / this.mass }
 
     update() {
-      this.x += this.vx
-      this.y += this.vy
-      this.trail.push({ x: this.x, y: this.y, life: 1 })
+      this.x += this.vx; this.y += this.vy
+      this.trail.push({ x: this.x, y: this.y })
       if (this.trail.length > this.trailLen) this.trail.shift()
-      for (const p of this.trail) p.life *= 0.985
     }
 
     draw(ctx, cx, cy, scale) {
-      const sx = cx + (this.x - cx) * scale
-      const sy = cy + (this.y - cy) * scale
+      const sx = cx + (this.x - cx) * scale, sy = cy + (this.y - cy) * scale
 
-      // trail
       if (this.trail.length > 1) {
         ctx.beginPath()
-        const first = this.trail[0]
-        ctx.moveTo(cx + (first.x - cx) * scale, cy + (first.y - cy) * scale)
+        ctx.moveTo(cx + (this.trail[0].x - cx) * scale, cy + (this.trail[0].y - cy) * scale)
         for (let i = 1; i < this.trail.length; i++) {
           const p = this.trail[i]
           ctx.lineTo(cx + (p.x - cx) * scale, cy + (p.y - cy) * scale)
         }
-        ctx.strokeStyle = this.color.replace('1)', `${0.3})`).replace('rgb', 'rgba')
-        ctx.lineWidth = 1.2
-        ctx.stroke()
+        ctx.strokeStyle = this.color.replace('1)', '0.3)').replace('rgb', 'rgba')
+        ctx.lineWidth = 1.2; ctx.stroke()
       }
 
-      // glow
       const grd = ctx.createRadialGradient(sx, sy, 0, sx, sy, this.radius * 6 * scale)
       grd.addColorStop(0, this.color.replace('1)', '0.4)').replace('rgb', 'rgba'))
       grd.addColorStop(1, 'rgba(0,0,0,0)')
-      ctx.beginPath()
-      ctx.arc(sx, sy, this.radius * 6 * scale, 0, Math.PI * 2)
-      ctx.fillStyle = grd
-      ctx.fill()
+      ctx.beginPath(); ctx.arc(sx, sy, this.radius * 6 * scale, 0, Math.PI * 2)
+      ctx.fillStyle = grd; ctx.fill()
 
-      // body
       const bgrd = ctx.createRadialGradient(sx, sy, 0, sx, sy, this.radius * scale)
       bgrd.addColorStop(0, '#fff')
       bgrd.addColorStop(0.3, this.color)
       bgrd.addColorStop(1, this.color.replace('1)', '0)').replace('rgb', 'rgba'))
-      ctx.beginPath()
-      ctx.arc(sx, sy, this.radius * scale, 0, Math.PI * 2)
-      ctx.fillStyle = bgrd
-      ctx.fill()
+      ctx.beginPath(); ctx.arc(sx, sy, this.radius * scale, 0, Math.PI * 2)
+      ctx.fillStyle = bgrd; ctx.fill()
     }
   }
 
-  // 三个天体初始条件（模仿三体混沌轨道）
   const G = 0.35
-  const cx = 0, cy = 0
   const bodies = [
     new Body(-80, 30, 0.3, 0.5, 30, 'rgb(255,160,60,1)', 90),
     new Body(70, -20, -0.2, -0.4, 25, 'rgb(255,80,40,1)', 80),
@@ -376,43 +370,29 @@
     }
   }
 
-  // ==================== 水滴 (Strong Interaction Material Probe) ====================
+  // ==================== 水滴 ====================
   class Waterdrop {
-    constructor() {
-      this.reset()
-    }
-
+    constructor() { this.reset() }
     reset() {
-      this.x = Math.random() * W
-      this.y = Math.random() * H
-      this.targetX = Math.random() * W
-      this.targetY = Math.random() * H
+      this.x = Math.random() * W; this.y = Math.random() * H
+      this.targetX = Math.random() * W; this.targetY = Math.random() * H
       this.progress = 1
       this.size = 6 + Math.random() * 4
       this.speed = 0.002 + Math.random() * 0.004
     }
-
     update() {
       if (this.progress >= 1) {
-        this.startX = this.x
-        this.startY = this.y
-        this.targetX = Math.random() * W
-        this.targetY = Math.random() * H
+        this.startX = this.x; this.startY = this.y
+        this.targetX = Math.random() * W; this.targetY = Math.random() * H
         this.progress = 0
       }
       this.progress += this.speed
-      const t = this.easeInOut(this.progress)
+      const t = this.progress < 0.5 ? 2 * this.progress * this.progress : -1 + (4 - 2 * this.progress) * this.progress
       this.x = this.startX + (this.targetX - this.startX) * t
       this.y = this.startY + (this.targetY - this.startY) * t
     }
-
-    easeInOut(t) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t }
-
     draw(ctx) {
-      ctx.save()
-      ctx.translate(this.x, this.y)
-
-      // 水滴主体 — 镜面反射渐变
+      ctx.save(); ctx.translate(this.x, this.y)
       const grd = ctx.createLinearGradient(-this.size, -this.size * 2, this.size, this.size * 2)
       grd.addColorStop(0, 'rgba(180,200,220,0.9)')
       grd.addColorStop(0.25, 'rgba(255,255,255,0.95)')
@@ -421,30 +401,19 @@
       grd.addColorStop(0.65, 'rgba(80,100,140,0.7)')
       grd.addColorStop(0.85, 'rgba(200,220,240,0.85)')
       grd.addColorStop(1, 'rgba(60,80,120,0.6)')
-
-      // 水滴形状 (类泪滴)
       ctx.beginPath()
       const nose = this.size * 2
       ctx.moveTo(0, -nose)
       ctx.bezierCurveTo(this.size * 1.4, -nose * 0.5, this.size * 1.4, this.size * 0.6, 0, this.size)
       ctx.bezierCurveTo(-this.size * 1.4, this.size * 0.6, -this.size * 1.4, -nose * 0.5, 0, -nose)
-      ctx.fillStyle = grd
-      ctx.fill()
-
-      // 高光点
+      ctx.fillStyle = grd; ctx.fill()
       ctx.beginPath()
       ctx.arc(-this.size * 0.25, -this.size * 0.8, this.size * 0.2, 0, Math.PI * 2)
-      ctx.fillStyle = 'rgba(255,255,255,0.9)'
-      ctx.fill()
-
-      // 表面反射条纹
+      ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fill()
       ctx.beginPath()
       ctx.moveTo(-this.size * 0.6, -this.size * 0.3)
       ctx.quadraticCurveTo(0, this.size * 0.2, this.size * 0.6, -this.size * 0.3)
-      ctx.strokeStyle = 'rgba(255,255,255,0.25)'
-      ctx.lineWidth = 0.5
-      ctx.stroke()
-
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 0.5; ctx.stroke()
       ctx.restore()
     }
   }
@@ -453,69 +422,93 @@
   for (let i = 0; i < 3; i++) waterdrops.push(new Waterdrop())
 
   // ==================== 末日倒计时 ====================
-  // 危机纪元 1349年6月28日 → 末日 1360年1月1日
-  const DOOM_YEAR = 1360, DOOM_MONTH = 0, DOOM_DAY = 1      // 1360-01-01
-  const CRISIS_YEAR = 1349, CRISIS_MONTH = 5, CRISIS_DAY = 28 // 1349-06-28
-  // 映射到真实日期做差值计算
+  // 危机纪元 1349年6月28日 → 末日 1360年7月31日
   const BASE_YEAR = 2020
-  const doomDate = new Date(BASE_YEAR + (DOOM_YEAR - CRISIS_YEAR), DOOM_MONTH, DOOM_DAY, 0, 0, 0)
-  const crisisDate = new Date(BASE_YEAR, CRISIS_MONTH, CRISIS_DAY, 0, 0, 0)
-  const totalSpan = doomDate.getTime() - crisisDate.getTime()
+  const crisisDate = new Date(BASE_YEAR, 5, 28, 0, 0, 0)
+  const doomDate    = new Date(BASE_YEAR + 11, 6, 31, 23, 59, 59) // 1360-07-31 23:59:59
   const anchorReal = Date.now()
 
-  const cdY = document.getElementById('cd-years')
-  const cdD = document.getElementById('cd-days')
-  const cdH = document.getElementById('cd-h')
-  const cdM = document.getElementById('cd-m')
-  const cdS = document.getElementById('cd-s')
+  const elY = document.getElementById('cd-y')
+  const elMo = document.getElementById('cd-mo')
+  const elD = document.getElementById('cd-d')
+  const elH = document.getElementById('cd-h')
+  const elMin = document.getElementById('cd-min')
+  const elS = document.getElementById('cd-s')
 
-  function pad2(n) { return String(n).padStart(2, '0') }
+  function pad(n) { return String(n).padStart(2, '0') }
+
+  function getCountdown() {
+    const elapsed = Date.now() - anchorReal
+    const now = new Date(crisisDate.getTime() + elapsed)
+    const remaining = doomDate.getTime() - now.getTime()
+    if (remaining <= 0) {
+      return { y: 0, mo: 0, d: 0, h: 0, m: 0, s: 0 }
+    }
+
+    // 逐层推进：年 → 月 → 日 → 时分秒
+    let cur = new Date(now)
+    let y = 0, mo = 0, d = 0
+
+    while (true) {
+      const next = new Date(cur)
+      next.setFullYear(cur.getFullYear() + 1)
+      if (next.getTime() <= doomDate.getTime()) { y++; cur = next }
+      else break
+    }
+    while (true) {
+      const next = new Date(cur)
+      next.setMonth(cur.getMonth() + 1)
+      if (next.getTime() <= doomDate.getTime()) { mo++; cur = next }
+      else break
+    }
+    while (true) {
+      const next = new Date(cur)
+      next.setDate(cur.getDate() + 1)
+      if (next.getTime() <= doomDate.getTime()) { d++; cur = next }
+      else break
+    }
+
+    const rem = doomDate.getTime() - cur.getTime()
+    const h = Math.floor(rem / 3600000)
+    const m = Math.floor((rem % 3600000) / 60000)
+    const s = Math.floor((rem % 60000) / 1000)
+
+    return { y, mo, d, h, m, s }
+  }
 
   function updateCountdown() {
-    const elapsed = Date.now() - anchorReal
-    let remaining = totalSpan - elapsed
-    if (remaining <= 0) {
-      cdY.textContent = '0'; cdD.textContent = '0'
-      cdH.textContent = '00'; cdM.textContent = '00'; cdS.textContent = '00'
-      return
-    }
-    const totalSec = Math.floor(remaining / 1000)
-    const years = Math.floor(totalSec / 31557600) // avg year = 365.25*86400
-    const days  = Math.floor((totalSec % 31557600) / 86400)
-    const hours = Math.floor((totalSec % 86400) / 3600)
-    const mins  = Math.floor((totalSec % 3600) / 60)
-    const secs  = Math.floor(totalSec % 60)
-
-    cdY.textContent = years
-    cdD.textContent = days
-    cdH.textContent = pad2(hours)
-    cdM.textContent = pad2(mins)
-    cdS.textContent = pad2(secs)
+    const cd = getCountdown()
+    elY.textContent = cd.y
+    elMo.textContent = pad(cd.mo)
+    elD.textContent = pad(cd.d)
+    elH.textContent = pad(cd.h)
+    elMin.textContent = pad(cd.m)
+    elS.textContent = pad(cd.s)
   }
 
   updateCountdown()
   setInterval(updateCountdown, 1000)
 
-  // 倒计时偶尔跳动（致敬原著闪烁效果）
-  const flickerTimer = setInterval(() => {
+  // 闪烁效果（致敬原著）
+  setInterval(() => {
     if (Math.random() < 0.03) {
-      const orig = [cdY.textContent, cdD.textContent, cdH.textContent, cdM.textContent, cdS.textContent]
-      cdY.style.textShadow = '0 0 60px rgba(255,45,45,1), 0 0 120px rgba(255,0,0,0.7)'
-      cdD.style.textShadow = '0 0 60px rgba(255,45,45,1), 0 0 120px rgba(255,0,0,0.7)'
+      [elY, elMo, elD, elH, elMin, elS].forEach(el => {
+        el.style.textShadow = '0 0 60px rgba(255,45,45,1), 0 0 120px rgba(255,0,0,0.7)'
+      })
       if (Math.random() < 0.3) {
-        cdH.textContent = pad2(parseInt(cdH.textContent) + (Math.random() < 0.5 ? 1 : -1))
-        cdM.textContent = pad2(parseInt(cdM.textContent) + (Math.random() < 0.5 ? 1 : -1))
+        elS.textContent = pad(parseInt(elS.textContent) + (Math.random() < 0.5 ? 1 : -1))
       }
       setTimeout(() => {
         updateCountdown()
-        cdY.style.textShadow = cdD.style.textShadow = '0 0 32px rgba(255,45,45,0.7), 0 0 64px rgba(255,45,45,0.35)'
+        ;[elY, elMo, elD, elH, elMin, elS].forEach(el => {
+          el.style.textShadow = '0 0 32px rgba(255,45,45,0.7), 0 0 64px rgba(255,45,45,0.35)'
+        })
       }, 80 + Math.random() * 120)
     }
   }, 500)
 
   // ==================== 鼠标视差 ====================
   document.addEventListener('mousemove', e => {
-    mouseX = e.clientX; mouseY = e.clientY
     const card = document.getElementById('card')
     const rx = (e.clientX / W - 0.5) * 4
     const ry = (e.clientY / H - 0.5) * 4
@@ -523,32 +516,24 @@
   })
 
   // ==================== 主循环 ====================
-  // 三体运动取景范围
   const simScale = 1.8
 
   function drawBackground() {
     ctx.clearRect(0, 0, W, H)
 
-    // 星空
     for (const s of bgStars) {
       s.twinkle += s.speed
       const alpha = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(s.twinkle))
       ctx.beginPath()
       ctx.arc(s.x % W, s.y % H, s.r, 0, Math.PI * 2)
-      ctx.fillStyle = `rgba(255,255,255,${alpha})`
-      ctx.fill()
+      ctx.fillStyle = `rgba(255,255,255,${alpha})`; ctx.fill()
     }
 
-    // 三体运动
     simulateThreeBody()
     const scx = W * 0.25, scy = H * 0.4
     for (const b of bodies) b.draw(ctx, scx, scy, simScale)
 
-    // 水滴
-    for (const wd of waterdrops) {
-      wd.update()
-      wd.draw(ctx)
-    }
+    for (const wd of waterdrops) { wd.update(); wd.draw(ctx) }
   }
 
   function animate() {
