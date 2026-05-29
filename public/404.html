@@ -323,15 +323,14 @@
       const sx = cx + (this.x - cx) * scale, sy = cy + (this.y - cy) * scale
       const r = this.radius * scale
 
-      // 外层大气光晕
-      const outer = ctx.createRadialGradient(sx, sy, r * 0.6, sx, sy, r * 3.5)
-      outer.addColorStop(0, this.color.replace('1)', '0.5)').replace('rgb', 'rgba'))
-      outer.addColorStop(0.5, this.color.replace('1)', '0.15)').replace('rgb', 'rgba'))
+      // 外层光晕 — 缩小
+      const outer = ctx.createRadialGradient(sx, sy, r * 0.5, sx, sy, r * 2)
+      outer.addColorStop(0, this.color.replace('1)', '0.35)').replace('rgb', 'rgba'))
       outer.addColorStop(1, 'rgba(0,0,0,0)')
-      ctx.beginPath(); ctx.arc(sx, sy, r * 3.5, 0, Math.PI * 2)
+      ctx.beginPath(); ctx.arc(sx, sy, r * 2, 0, Math.PI * 2)
       ctx.fillStyle = outer; ctx.fill()
 
-      // 轨道拖尾
+      // 轨道拖尾 — 加粗加亮
       if (this.trail.length > 1) {
         ctx.beginPath()
         ctx.moveTo(cx + (this.trail[0].x - cx) * scale, cy + (this.trail[0].y - cy) * scale)
@@ -339,24 +338,24 @@
           const p = this.trail[i]
           ctx.lineTo(cx + (p.x - cx) * scale, cy + (p.y - cy) * scale)
         }
-        ctx.strokeStyle = this.color.replace('1)', '0.35)').replace('rgb', 'rgba')
-        ctx.lineWidth = 1.5; ctx.stroke()
+        ctx.strokeStyle = this.color.replace('1)', '0.5)').replace('rgb', 'rgba')
+        ctx.lineWidth = 2; ctx.stroke()
       }
 
       // 球体
       const body = ctx.createRadialGradient(sx - r * 0.25, sy - r * 0.3, r * 0.05, sx, sy, r)
       body.addColorStop(0, '#ffffff')
-      body.addColorStop(0.15, this.color.replace('1)', '0.95)').replace('rgb', 'rgba'))
-      body.addColorStop(0.5, this.color.replace('1)', '0.7)').replace('rgb', 'rgba'))
-      body.addColorStop(0.85, this.color.replace('1)', '0.3)').replace('rgb', 'rgba'))
+      body.addColorStop(0.1, this.color.replace('1)', '0.95)').replace('rgb', 'rgba'))
+      body.addColorStop(0.45, this.color.replace('1)', '0.75)').replace('rgb', 'rgba'))
+      body.addColorStop(0.8, this.color.replace('1)', '0.35)').replace('rgb', 'rgba'))
       body.addColorStop(1, this.color.replace('1)', '0.05)').replace('rgb', 'rgba'))
       ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI * 2)
       ctx.fillStyle = body; ctx.fill()
 
       // 高光点
       ctx.beginPath()
-      ctx.arc(sx - r * 0.25, sy - r * 0.3, r * 0.18, 0, Math.PI * 2)
-      ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fill()
+      ctx.arc(sx - r * 0.25, sy - r * 0.3, r * 0.15, 0, Math.PI * 2)
+      ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fill()
     }
   }
 
@@ -563,7 +562,7 @@
   })
 
   // ==================== 主循环 ====================
-  const simScale = 2.6   // 更大更清晰
+  const simScale = 3.2   // 更大更清晰
 
   function drawBackground() {
     ctx.clearRect(0, 0, W, H)
@@ -577,8 +576,8 @@
     }
 
     simulateThreeBody()
-    // 三体运动放在左侧偏上，避免遮挡倒计时文字
-    const scx = W * 0.3, scy = H * 0.55
+    // 三体运动居中偏左
+    const scx = W * 0.35, scy = H * 0.55
     for (const b of bodies) b.draw(ctx, scx, scy, simScale)
 
     // 彗星
