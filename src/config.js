@@ -232,7 +232,7 @@ const config = {
 		{ go: "🎬 前往", img: "/img/fool.jpg", title: "诡秘之主", subtitle: "官网", text: "赞美愚者", url: "https://www.lomworld.com/zh", show: false },
 		{ go: "🎬 前往", img: "/img/hero.jpg", title: "抖音", subtitle: "短视频与热点", text: "看看今天有什么新鲜内容。", url: "https://www.douyin.com/jingxuan", show: false },
 		{ go: "📺 前往", img: "/img/wallpaper/static/时代/image-pre.webp", title: "哔哩哔哩", subtitle: "动画 / 音乐 / 知识", text: "适合放松，也适合补充一点灵感。", url: "https://www.bilibili.com/", show: false },
-		{ go: "📰 前往", img: "/img/wallpaper/static/光/image-pre.webp", title: "微博", subtitle: "热搜与舆论场", text: "快速浏览热点，但别停留太久。", url: "https://weibo.com/", show: false },
+		{ go: "📰 前往", img: "/img/wallpaper/static/光/image-pre.webp", title: "LittleSkin", subtitle: "无面人", text: "可以假扮任何人，但只能是自己", url: "https://littleskin.cn/user", show: false },
 		{ go: "👍 前往", img: "/img/wallpaper/static/塞维亚菊/image-pre.webp", title: "JPWHub", subtitle: "图床", text: "If you see this line, I've managed to get your attention.", url: "https://jpwhub.cc.cd/", show: false },
 		{ go: "🗃 前往", img: "/img/wallpaper/static/奇迹/image-pre.webp", title: "Google", subtitle: "5,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://www.google.com/", show: false },
 		{ go: "🎨 前往", img: "/img/wallpaper/static/奥黛丽/image-pre.webp", title: "Cloudflare", subtitle: "6,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://dash.cloudflare.com/", show: false },
