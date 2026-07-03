@@ -50,6 +50,10 @@ export default {
       socialPlatformIcons: null,
       isExpanded: false,
       clockTimer: null,
+      // Web Audio API — 音乐可视化
+      audioContext: null,
+      analyserNode: null,
+      audioSourceNode: null,
       stackicons:[
         {icon:"mdi-vuejs",color:"green", model: false,tip: 'vue'},
         {icon:"mdi-language-javascript",color:"#CAD300", model: false,tip: 'javascript'},
@@ -181,7 +185,15 @@ export default {
 
   beforeDestroy() {
     if (this.clockTimer) { clearTimeout(this.clockTimer); this.clockTimer = null; }
-    this.$refs.audioPlayer.removeEventListener('ended',  this.nextTrack);
+    if (this.$refs.audioPlayer) {
+      this.$refs.audioPlayer.removeEventListener('ended', this.nextTrack);
+    }
+    if (this.audioContext) {
+      this.audioContext.close();
+      this.audioContext = null;
+      this.analyserNode = null;
+      this.audioSourceNode = null;
+    }
   },
 
   watch:{
@@ -352,9 +364,36 @@ export default {
       this.$refs.audioPlayer.addEventListener('ended', this.nextTrack);
     },
 
+    /**
+     * 初始化 AudioContext + AnalyserNode（首次播放时调用）
+     * createMediaElementSource 对同一个 audio 元素只能调用一次，因此做幂等处理
+     */
+    ensureAudioContext() {
+      if (!this.audioContext) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        this.audioContext = new AudioCtx();
+        this.analyserNode = this.audioContext.createAnalyser();
+        this.analyserNode.fftSize = 256;
+        this.analyserNode.smoothingTimeConstant = 0.85;
+
+        // 将 <audio> 元素接入分析器 → 输出到扬声器
+        this.audioSourceNode = this.audioContext.createMediaElementSource(this.$refs.audioPlayer);
+        this.audioSourceNode.connect(this.analyserNode);
+        this.analyserNode.connect(this.audioContext.destination);
+      }
+
+      // 浏览器自动播放策略：如果 AudioContext 被挂起，恢复它
+      if (this.audioContext.state === 'suspended') {
+        return this.audioContext.resume();
+      }
+      return Promise.resolve();
+    },
+
     togglePlay() {
       if (!this.isPlaying) {
-        this.audioPlayer.play();
+        this.ensureAudioContext().then(() => {
+          this.audioPlayer.play();
+        });
         this.isVdMuted = true;
       } else {
         this.audioPlayer.pause();
@@ -362,6 +401,7 @@ export default {
       }
       this.isPlaying = !this.musicinfoLoading && !this.isPlaying;
     },
+
     previousTrack() {
       this.playlistIndex = this.playlistIndex > 0 ? this.playlistIndex - 1 : this.musicinfo.length - 1;
       this.updateAudio();
@@ -377,7 +417,9 @@ export default {
       this.$refs.audiotitle.innerText = this.currentSong.title;
       this.$refs.audioauthor.innerText = this.currentSong.author;
       this.isPlaying = true;
-      this.audioPlayer.play();
+      this.ensureAudioContext().then(() => {
+        this.audioPlayer.play();
+      });
       this.clearPrefetch();
     },
     preloadNext() {
