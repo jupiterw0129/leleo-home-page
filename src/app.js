@@ -31,7 +31,12 @@ export default {
     return {
       isloading:false,
       isClearScreen: false,
-      ceruShareId: extractShareId(localStorage.getItem('ceru-share-id')) || config.musicPlayer.shareId,
+      // 跨域同步：优先 URL hash → localStorage → 默认值
+      ceruShareId: (() => {
+        const hash = window.location.hash.match(/share=([a-zA-Z0-9]+)/);
+        if (hash) return hash[1];
+        return extractShareId(localStorage.getItem('ceru-share-id')) || config.musicPlayer.shareId;
+      })(),
       formattedTime:"",
       formattedDate:"",
       configdata: config,
@@ -352,6 +357,8 @@ export default {
       if (id) {
         this.ceruShareId = id;
         localStorage.setItem('ceru-share-id', id);
+        // 跨域同步：更新 URL hash，其他域名打开相同 URL 即可同步歌单
+        window.location.hash = 'share=' + id;
         this.getMusicInfo();
         this.updateAudio();
       }
@@ -374,7 +381,7 @@ export default {
         this.audioContext = new AudioCtx();
         this.analyserNode = this.audioContext.createAnalyser();
         this.analyserNode.fftSize = 256;
-        this.analyserNode.smoothingTimeConstant = 0.85;
+        this.analyserNode.smoothingTimeConstant = 0.6;  // 较低平滑 → 更快响应律动
 
         // 将 <audio> 元素接入分析器 → 输出到扬声器
         this.audioSourceNode = this.audioContext.createMediaElementSource(this.$refs.audioPlayer);
