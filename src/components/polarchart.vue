@@ -8,14 +8,39 @@ import config from '../config.js';
 
 Chart.register(PolarAreaController, ArcElement, RadialLinearScale, Tooltip, Legend);
 
+// —— 对数分频映射：将 128 个频率 bin 编为 11 组（低音细腻，高音聚合）——
+const TOTAL_BINS = 128;
+const SECTOR_COUNT = 11;
+const FREQ_GROUPS = (() => {
+  const groups = [];
+  for (let i = 0; i < SECTOR_COUNT; i++) {
+    const start = i === 0 ? 0 : Math.floor(Math.pow(TOTAL_BINS, i / SECTOR_COUNT));
+    const end = Math.min(Math.floor(Math.pow(TOTAL_BINS, (i + 1) / SECTOR_COUNT)), TOTAL_BINS - 1);
+    groups.push({ start, end, count: end - start + 1 });
+  }
+  return groups;
+})();
+
 export default {
   name: 'polarChart',
+  props: {
+    /** 来自父组件的 AnalyserNode（Web Audio API） */
+    analyserNode: {
+      type: Object,
+      default: null,
+    },
+    /** 当前是否正在播放音乐 */
+    isPlaying: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       configdata: config,
       skills: null,
       skillPoints: null,
-      baseSkillPoints: null, 
+      baseSkillPoints: null,
     };
   },
   mounted() {
@@ -24,23 +49,36 @@ export default {
     }
     this.skills = this.configdata.polarChart.skills;
     this.skillPoints = this.configdata.polarChart.skillPoints;
-    this.baseSkillPoints = [...this.skillPoints]; 
-    
-    // 非响应式变量
+    this.baseSkillPoints = [...this.skillPoints];
+
+    // 非响应式变量（避免 Vue 代理导致性能损耗）
     this.chartInstance = null;
     this.animationFrameId = null;
-    this.pistonStarted = false; 
+    this.chartReady = false;
+    this.smoothedFreqs = new Array(SECTOR_COUNT).fill(0);
+    this.freqBuffer = new Uint8Array(TOTAL_BINS);
 
     this.renderChart();
   },
-  beforeDestroy() { 
+  beforeDestroy() {
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
     }
     if (this.chartInstance) {
       this.chartInstance.destroy();
       this.chartInstance = null;
     }
+  },
+  watch: {
+    /** 监听播放状态：播放→律动 / 暂停→归位 */
+    isPlaying(val) {
+      if (val) {
+        this.startMusicAnimation();
+      } else {
+        this.stopMusicAnimation();
+      }
+    },
   },
   methods: {
     generateColors(count) {
@@ -53,42 +91,47 @@ export default {
       }
       return colors;
     },
-    
-    startPistonAnimation() {
+
+    // ===================== 音乐律动动画 =====================
+
+    /**
+     * 启动：从 AnalyserNode 读取真实频谱 → 驱动扇区脉动
+     */
+    startMusicAnimation() {
       if (this.animationFrameId) return;
+      if (!this.analyserNode) return;
 
       const datasetData = this.chartInstance.data.datasets[0].data;
-      const startTime = Date.now(); 
-
-      // 【核心修复 1】：添加帧率控制器，锁定 30 FPS
-      const targetFPS = 30; 
-      const frameInterval = 1000 / targetFPS; // 约 33.33ms 绘制一次
-      let lastRenderTime = startTime;
+      const targetFPS = 30;
+      const frameInterval = 1000 / targetFPS;
+      let lastRenderTime = performance.now();
 
       const animate = () => {
-        // 先注册下一帧，保证循环继续
         this.animationFrameId = requestAnimationFrame(animate);
 
-        const now = Date.now();
-        const elapsedSinceLast = now - lastRenderTime;
+        const now = performance.now();
+        if (now - lastRenderTime < frameInterval) return;
+        lastRenderTime = now - ((now - lastRenderTime) % frameInterval);
 
-        // 如果距离上次绘制还没到 33 毫秒，直接跳过，什么都不做
-        if (elapsedSinceLast < frameInterval) {
-            return; 
-        }
+        // ① 取频域数据（浏览器 C 层 FFT，主线程无开销）
+        this.analyserNode.getByteFrequencyData(this.freqBuffer);
 
-        // 校准下次执行的时间，防止随着时间推移产生误差
-        lastRenderTime = now - (elapsedSinceLast % frameInterval);
+        // ② 对数分组成 11 段 → 均值 → 归一化
+        for (let i = 0; i < SECTOR_COUNT; i++) {
+          const { start, end, count } = FREQ_GROUPS[i];
+          let sum = 0;
+          for (let j = start; j <= end; j++) {
+            sum += this.freqBuffer[j];
+          }
+          const avg = sum / count / 255; // 0~1
 
-        const totalElapsed = now - startTime;
-        const easeFactor = Math.min(1, totalElapsed / 800); 
-        const time = now / 300; 
+          // ③ EMA 平滑（消抖）
+          this.smoothedFreqs[i] = this.smoothedFreqs[i] * 0.7 + avg * 0.3;
 
-        for (let i = 0; i < datasetData.length; i++) {
+          // ④ 映射到技能点：基础值 ±18%
           const baseVal = this.baseSkillPoints[i];
-          const amplitude = baseVal * 0.12 * easeFactor; 
-          const phase = i * (Math.PI / 1.55); 
-          datasetData[i] = baseVal + amplitude * Math.sin(time + phase);
+          const swing = baseVal * 0.18;
+          datasetData[i] = baseVal + swing * (this.smoothedFreqs[i] * 2 - 1);
         }
 
         this.chartInstance.update('none');
@@ -97,17 +140,59 @@ export default {
       this.animationFrameId = requestAnimationFrame(animate);
     },
 
+    /**
+     * 停止律动 → 指数衰减回到基准值（约 1 秒）
+     */
+    stopMusicAnimation() {
+      if (this.animationFrameId) {
+        cancelAnimationFrame(this.animationFrameId);
+        this.animationFrameId = null;
+      }
+      this.animateToBase();
+    },
+
+    animateToBase() {
+      const datasetData = this.chartInstance.data.datasets[0].data;
+      const returnSpeed = 0.08;
+      const threshold = 0.3;
+
+      const step = () => {
+        let settled = 0;
+        for (let i = 0; i < datasetData.length; i++) {
+          const diff = this.baseSkillPoints[i] - datasetData[i];
+          if (Math.abs(diff) < threshold) {
+            datasetData[i] = this.baseSkillPoints[i];
+            settled++;
+          } else {
+            datasetData[i] += diff * returnSpeed;
+          }
+        }
+
+        this.chartInstance.update('none');
+
+        if (settled < datasetData.length) {
+          requestAnimationFrame(step);
+        } else {
+          this.smoothedFreqs.fill(0);
+        }
+      };
+
+      requestAnimationFrame(step);
+    },
+
+    // ===================== 图表初始化 =====================
+
     renderChart() {
       const ctx = document.getElementById('polarChart').getContext('2d');
       const colors = this.generateColors(this.skills.length);
-      
+
       const maxScore = Math.max(...this.skillPoints);
       const maxScale = maxScore * 1.25;
 
       if (this.chartInstance) {
         this.chartInstance.destroy();
       }
-      this.pistonStarted = false; 
+      this.chartReady = false;
 
       this.chartInstance = new Chart(ctx, {
         type: 'polarArea',
@@ -123,22 +208,18 @@ export default {
             hoverBackgroundColor: colors.map(color => color.replace('0.6', '0.8')),
             hoverBorderColor: '#ffffff',
             hoverBorderWidth: 3,
-            
-            // 【核心修复 2】：开启纯净数据模式。
-            // 告诉 Chart.js：数据只是简单的一维数组，别去解析格式
-            normalized: true, 
+            normalized: true,
           }],
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          hover: { animationDuration: 0 }, 
-          // 【核心修复 3】：进一步关闭没必要的内部动画开销
-          transitions: { active: { animation: { duration: 0 } } }, 
+          hover: { animationDuration: 0 },
+          transitions: { active: { animation: { duration: 0 } } },
           plugins: {
             legend: { display: false },
             tooltip: {
-              animation: false, // 保持之前修复的 tooltip 无动画配置
+              animation: false,
               backgroundColor: 'rgba(40, 40, 40, 0.7)',
               titleColor: '#fff',
               bodyColor: '#fff',
@@ -161,9 +242,9 @@ export default {
               ticks: { display: false },
               grid: { color: 'rgba(0, 0, 0, 0.1)', lineWidth: 0.5 },
               angleLines: { color: 'rgba(0, 0, 0, 0.2)', lineWidth: 1 },
-              suggestedMax: maxScale, 
-              max: maxScale, 
-              beginAtZero: true
+              suggestedMax: maxScale,
+              max: maxScale,
+              beginAtZero: true,
             },
           },
           animation: {
@@ -172,13 +253,12 @@ export default {
             animateRotate: true,
             animateScale: true,
             onComplete: () => {
-              if (!this.pistonStarted) {
-                this.pistonStarted = true;
-                setTimeout(() => {
-                    this.startPistonAnimation();
-                }, 100);
+              this.chartReady = true;
+              // 入场动画结束时若音乐已在播放，立刻启动律动
+              if (this.isPlaying && this.analyserNode) {
+                this.startMusicAnimation();
               }
-            }
+            },
           },
         },
       });
