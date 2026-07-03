@@ -55,7 +55,8 @@ export default {
     this.chartInstance = null;
     this.animationFrameId = null;
     this.chartReady = false;
-    this.smoothedFreqs = new Array(SECTOR_COUNT).fill(0);
+    this.chartMaxScale = 0;
+    this.smoothedEnergy = 0;
     this.freqBuffer = new Uint8Array(TOTAL_BINS);
 
     this.renderChart();
@@ -95,7 +96,12 @@ export default {
     // ===================== 音乐律动动画 =====================
 
     /**
-     * 启动：从 AnalyserNode 读取真实频谱 → 驱动扇区脉动
+     * 启动：包络跟随器 + 统一脉动（美观优先，不畸形）
+     *
+     * 策略：
+     *   - 整体频谱能量 → 包络跟随（快攻慢衰）→ 所有扇区统一呼吸
+     *   - 各频段仅贡献 20% 的细微差异，不会破坏对称美感
+     *   - 只向外扩张（不收缩），严格钳位到 maxScale
      */
     startMusicAnimation() {
       if (this.animationFrameId) return;
@@ -113,26 +119,41 @@ export default {
         if (now - lastRenderTime < frameInterval) return;
         lastRenderTime = now - ((now - lastRenderTime) % frameInterval);
 
-        // ① 取频域数据（浏览器 C 层 FFT，主线程无开销）
+        // ① 频谱数据
         this.analyserNode.getByteFrequencyData(this.freqBuffer);
 
-        // ② 对数分组成 11 段 → 取最大值 → 增益放大
+        // ② 整体频谱能量（全频段平均 → 0~1）
+        let total = 0;
+        for (let i = 0; i < TOTAL_BINS; i++) total += this.freqBuffer[i];
+        const avgEnergy = total / TOTAL_BINS / 255;
+
+        // ③ 包络跟随器：快攻（beat 立刻跳起）+ 慢衰（自然回落）
+        if (avgEnergy > this.smoothedEnergy) {
+          this.smoothedEnergy = avgEnergy;
+        } else {
+          this.smoothedEnergy += (avgEnergy - this.smoothedEnergy) * 0.08;
+        }
+
+        // ④ 每个扇区：80% 统一能量 + 20% 本频段特色 → 对称又灵动
         for (let i = 0; i < SECTOR_COUNT; i++) {
+          const baseVal = this.baseSkillPoints[i];
+
           const { start, end } = FREQ_GROUPS[i];
           let maxVal = 0;
           for (let j = start; j <= end; j++) {
             if (this.freqBuffer[j] > maxVal) maxVal = this.freqBuffer[j];
           }
-          // 增益 ×1.5，让低音量也能有明显效果
-          const norm = Math.min(1, (maxVal / 255) * 1.5);
+          const freqNorm = maxVal / 255;
 
-          // ③ EMA 平滑（0.55 旧 + 0.45 新 → 更快响应）
-          this.smoothedFreqs[i] = this.smoothedFreqs[i] * 0.55 + norm * 0.45;
+          const combined = this.smoothedEnergy * 0.80 + freqNorm * 0.20;
 
-          // ④ 映射到技能点：基础值 ±30%
-          const baseVal = this.baseSkillPoints[i];
-          const swing = baseVal * 0.30;
-          datasetData[i] = baseVal + swing * (this.smoothedFreqs[i] * 2 - 1);
+          // ⑤ 只向外扩张 ±25%，严格不越界
+          const swing = baseVal * 0.25;
+          let newVal = baseVal + swing * combined;
+          if (newVal > this.chartMaxScale) newVal = this.chartMaxScale;
+          if (newVal < baseVal * 0.25) newVal = baseVal * 0.25;
+
+          datasetData[i] = newVal;
         }
 
         this.chartInstance.update('none');
@@ -174,7 +195,7 @@ export default {
         if (settled < datasetData.length) {
           requestAnimationFrame(step);
         } else {
-          this.smoothedFreqs.fill(0);
+          this.smoothedEnergy = 0;
         }
       };
 
@@ -188,7 +209,8 @@ export default {
       const colors = this.generateColors(this.skills.length);
 
       const maxScore = Math.max(...this.skillPoints);
-      const maxScale = maxScore * 1.10;
+      const maxScale = maxScore * 1.30;
+      this.chartMaxScale = maxScale;  // 存储供动画钳位
 
       if (this.chartInstance) {
         this.chartInstance.destroy();
