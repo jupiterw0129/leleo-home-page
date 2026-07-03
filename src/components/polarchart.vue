@@ -56,7 +56,7 @@ export default {
     this.animationFrameId = null;
     this.chartReady = false;
     this.chartMaxScale = 0;
-    this.smoothedEnergy = 0;
+    this.sectorEnergies = new Array(SECTOR_COUNT).fill(0);
     this.freqBuffer = new Uint8Array(TOTAL_BINS);
 
     this.renderChart();
@@ -96,12 +96,13 @@ export default {
     // ===================== 音乐律动动画 =====================
 
     /**
-     * 启动：包络跟随器 + 统一脉动（美观优先，不畸形）
+     * 启动：每扇区独立响应其频段 + 相邻平滑 + 压缩平衡
      *
      * 策略：
-     *   - 整体频谱能量 → 包络跟随（快攻慢衰）→ 所有扇区统一呼吸
-     *   - 各频段仅贡献 20% 的细微差异，不会破坏对称美感
-     *   - 只向外扩张（不收缩），严格钳位到 maxScale
+     *   - 每个扇区独立跟踪自己频段的能量（包络跟随）→ 有层次
+     *   - 相邻扇区加权混合（空间平滑）→ 过渡自然，不畸形
+     *   - 平方根压缩 → 缩窄强弱差距，各频段都有表现机会
+     *   - 严格钳位 → 不越界
      */
     startMusicAnimation() {
       if (this.animationFrameId) return;
@@ -122,34 +123,34 @@ export default {
         // ① 频谱数据
         this.analyserNode.getByteFrequencyData(this.freqBuffer);
 
-        // ② 整体频谱能量（全频段平均 → 0~1）
-        let total = 0;
-        for (let i = 0; i < TOTAL_BINS; i++) total += this.freqBuffer[i];
-        const avgEnergy = total / TOTAL_BINS / 255;
-
-        // ③ 包络跟随器：快攻（beat 立刻跳起）+ 慢衰（自然回落）
-        if (avgEnergy > this.smoothedEnergy) {
-          this.smoothedEnergy = avgEnergy;
-        } else {
-          this.smoothedEnergy += (avgEnergy - this.smoothedEnergy) * 0.08;
-        }
-
-        // ④ 每个扇区：80% 统一能量 + 20% 本频段特色 → 对称又灵动
+        // ② 每个扇区：独立包络跟随 + 平方根压缩
+        const rawEnergies = [];
         for (let i = 0; i < SECTOR_COUNT; i++) {
-          const baseVal = this.baseSkillPoints[i];
-
           const { start, end } = FREQ_GROUPS[i];
           let maxVal = 0;
           for (let j = start; j <= end; j++) {
             if (this.freqBuffer[j] > maxVal) maxVal = this.freqBuffer[j];
           }
-          const freqNorm = maxVal / 255;
+          const norm = Math.sqrt(maxVal / 255); // sqrt 压缩：拉近强弱差距
 
-          const combined = this.smoothedEnergy * 0.80 + freqNorm * 0.20;
+          if (norm > this.sectorEnergies[i]) {
+            this.sectorEnergies[i] = norm;           // 快攻
+          } else {
+            this.sectorEnergies[i] += (norm - this.sectorEnergies[i]) * 0.1; // 慢衰
+          }
+          rawEnergies[i] = this.sectorEnergies[i];
+        }
 
-          // ⑤ 只向外扩张 ±25%，严格不越界
-          const swing = baseVal * 0.25;
-          let newVal = baseVal + swing * combined;
+        // ③ 空间平滑 + 应用到扇区
+        for (let i = 0; i < SECTOR_COUNT; i++) {
+          const prev = rawEnergies[(i - 1 + SECTOR_COUNT) % SECTOR_COUNT];
+          const curr = rawEnergies[i];
+          const next = rawEnergies[(i + 1) % SECTOR_COUNT];
+          const smoothed = prev * 0.20 + curr * 0.60 + next * 0.20;
+
+          const baseVal = this.baseSkillPoints[i];
+          const swing = baseVal * 0.22;
+          let newVal = baseVal + swing * smoothed;
           if (newVal > this.chartMaxScale) newVal = this.chartMaxScale;
           if (newVal < baseVal * 0.25) newVal = baseVal * 0.25;
 
@@ -195,7 +196,7 @@ export default {
         if (settled < datasetData.length) {
           requestAnimationFrame(step);
         } else {
-          this.smoothedEnergy = 0;
+          this.sectorEnergies.fill(0);
         }
       };
 
