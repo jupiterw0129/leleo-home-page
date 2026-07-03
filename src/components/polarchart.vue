@@ -116,21 +116,22 @@ export default {
         // ① 取频域数据（浏览器 C 层 FFT，主线程无开销）
         this.analyserNode.getByteFrequencyData(this.freqBuffer);
 
-        // ② 对数分组成 11 段 → 均值 → 归一化
+        // ② 对数分组成 11 段 → 取最大值 → 增益放大
         for (let i = 0; i < SECTOR_COUNT; i++) {
-          const { start, end, count } = FREQ_GROUPS[i];
-          let sum = 0;
+          const { start, end } = FREQ_GROUPS[i];
+          let maxVal = 0;
           for (let j = start; j <= end; j++) {
-            sum += this.freqBuffer[j];
+            if (this.freqBuffer[j] > maxVal) maxVal = this.freqBuffer[j];
           }
-          const avg = sum / count / 255; // 0~1
+          // 增益 ×1.5，让低音量也能有明显效果
+          const norm = Math.min(1, (maxVal / 255) * 1.5);
 
-          // ③ EMA 平滑（消抖）
-          this.smoothedFreqs[i] = this.smoothedFreqs[i] * 0.7 + avg * 0.3;
+          // ③ EMA 平滑（0.55 旧 + 0.45 新 → 更快响应）
+          this.smoothedFreqs[i] = this.smoothedFreqs[i] * 0.55 + norm * 0.45;
 
-          // ④ 映射到技能点：基础值 ±18%
+          // ④ 映射到技能点：基础值 ±30%
           const baseVal = this.baseSkillPoints[i];
-          const swing = baseVal * 0.18;
+          const swing = baseVal * 0.30;
           datasetData[i] = baseVal + swing * (this.smoothedFreqs[i] * 2 - 1);
         }
 
@@ -187,7 +188,7 @@ export default {
       const colors = this.generateColors(this.skills.length);
 
       const maxScore = Math.max(...this.skillPoints);
-      const maxScale = maxScore * 1.25;
+      const maxScale = maxScore * 1.10;
 
       if (this.chartInstance) {
         this.chartInstance.destroy();
