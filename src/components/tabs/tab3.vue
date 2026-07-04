@@ -269,13 +269,8 @@ export default {
         this.$emit("update:is-playing", true);
       }
     },
-    // 切换播放/暂停状态
+    // 切换播放/暂停状态（统一通过父组件处理，确保 AudioContext 在 play 之前就绪）
     togglePlay() {
-      if (this.isPlaying) {
-        this.audioPlayer.pause();
-      } else {
-        this.audioPlayer.play();
-      }
       this.$emit("update:is-playing", !this.isPlaying);
     },
     // 播放下一首
@@ -301,11 +296,9 @@ export default {
       this.audioPlayer.currentTime = time;
     },
     onSliderStart(){
-        this.audioPlayer.pause();
         this.$emit("update:is-playing", false);
     },
     onSliderEnd(){
-        this.audioPlayer.play();
         this.$emit("update:is-playing", true);
     },
     // 格式化时间（将秒转换为 mm:ss 格式）

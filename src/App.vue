@@ -44,7 +44,7 @@
                       <span ref="audioauthor" class="musicplayer-text"
                         style="bottom: 1.4rem;"
                       >{{ musicinfo?.[0]?.author }}</span>
-                      <audio v-show="false" ref="audioPlayer" :src="musicinfo?.[0]?.url"
+                      <audio v-show="false" ref="audioPlayer" crossorigin="anonymous" :src="musicinfo?.[0]?.url"
                       @waiting="onWaiting"
                       @canplay="onCanPlay">
                       </audio>

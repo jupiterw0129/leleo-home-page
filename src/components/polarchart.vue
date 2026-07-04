@@ -1,5 +1,5 @@
 <template>
-  <canvas id="polarChart"></canvas>
+  <canvas ref="chartCanvas"></canvas>
 </template>
 
 <script>
@@ -8,7 +8,7 @@ import config from '../config.js';
 
 Chart.register(PolarAreaController, ArcElement, RadialLinearScale, Tooltip, Legend);
 
-// —— 对数分频映射：将 128 个频率 bin 编为 11 组（低音细腻，高音聚合）——
+// —— 对数分频映射：128 bin → 11 组 ——
 const TOTAL_BINS = 128;
 const SECTOR_COUNT = 11;
 const FREQ_GROUPS = (() => {
@@ -21,20 +21,29 @@ const FREQ_GROUPS = (() => {
   return groups;
 })();
 
+// 固定渐变色板：橙红 → 青蓝，与网站色调呼应
+const PALETTE = [
+  'rgba(255, 107, 53, 0.65)',   // 橙
+  'rgba(255, 143, 66, 0.65)',   // 橙金
+  'rgba(245, 180, 80, 0.65)',   // 金
+  'rgba(210, 210, 90, 0.65)',   // 黄绿
+  'rgba(140, 210, 120, 0.65)',  // 绿
+  'rgba(80, 200, 165, 0.65)',   // 青绿
+  'rgba(55, 185, 200, 0.65)',   // 青
+  'rgba(50, 160, 220, 0.65)',   // 天蓝
+  'rgba(60, 130, 225, 0.65)',   // 蓝
+  'rgba(80, 100, 220, 0.65)',   // 深蓝
+  'rgba(110, 80, 210, 0.65)',   // 紫蓝
+];
+
 export default {
   name: 'polarChart',
+
   props: {
-    /** 来自父组件的 AnalyserNode（Web Audio API） */
-    analyserNode: {
-      type: Object,
-      default: null,
-    },
-    /** 当前是否正在播放音乐 */
-    isPlaying: {
-      type: Boolean,
-      default: false,
-    },
+    analyserNode: { type: Object, default: null },
+    isPlaying: { type: Boolean, default: false },
   },
+
   data() {
     return {
       configdata: config,
@@ -43,6 +52,7 @@ export default {
       baseSkillPoints: null,
     };
   },
+
   mounted() {
     if (import.meta.env.VITE_CONFIG) {
       this.configdata = JSON.parse(import.meta.env.VITE_CONFIG);
@@ -51,108 +61,114 @@ export default {
     this.skillPoints = this.configdata.polarChart.skillPoints;
     this.baseSkillPoints = [...this.skillPoints];
 
-    // 非响应式变量（避免 Vue 代理导致性能损耗）
     this.chartInstance = null;
     this.animationFrameId = null;
-    this.chartReady = false;
+    this._baseAnimId = null;
+    this._stopTimer = null;
     this.chartMaxScale = 0;
     this.sectorEnergies = new Array(SECTOR_COUNT).fill(0);
     this.freqBuffer = new Uint8Array(TOTAL_BINS);
 
     this.renderChart();
   },
+
   beforeDestroy() {
+    if (this._stopTimer) { clearTimeout(this._stopTimer); this._stopTimer = null; }
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
+    }
+    if (this._baseAnimId) {
+      cancelAnimationFrame(this._baseAnimId);
+      this._baseAnimId = null;
     }
     if (this.chartInstance) {
       this.chartInstance.destroy();
       this.chartInstance = null;
     }
   },
+
   watch: {
-    /** 监听播放状态：播放→律动 / 暂停→归位 */
     isPlaying(val) {
       if (val) {
+        if (this._stopTimer) { clearTimeout(this._stopTimer); this._stopTimer = null; }
         this.startMusicAnimation();
       } else {
-        this.stopMusicAnimation();
+        this._stopTimer = setTimeout(() => {
+          this.stopMusicAnimation();
+          this._stopTimer = null;
+        }, 250);
+      }
+    },
+    analyserNode(node) {
+      if (node && this.isPlaying && this.chartInstance && !this.animationFrameId) {
+        this.startMusicAnimation();
       }
     },
   },
-  methods: {
-    generateColors(count) {
-      const colors = [];
-      for (let i = 0; i < count; i++) {
-        const r = Math.floor(Math.random() * 255);
-        const g = Math.floor(Math.random() * 255);
-        const b = Math.floor(Math.random() * 255);
-        colors.push(`rgba(${r}, ${g}, ${b}, 0.6)`);
-      }
-      return colors;
-    },
 
+  methods: {
     // ===================== 音乐律动动画 =====================
 
-    /**
-     * 启动：每扇区独立响应其频段 + 相邻平滑 + 压缩平衡
-     *
-     * 策略：
-     *   - 每个扇区独立跟踪自己频段的能量（包络跟随）→ 有层次
-     *   - 相邻扇区加权混合（空间平滑）→ 过渡自然，不畸形
-     *   - 平方根压缩 → 缩窄强弱差距，各频段都有表现机会
-     *   - 严格钳位 → 不越界
-     */
     startMusicAnimation() {
       if (this.animationFrameId) return;
-      if (!this.analyserNode) return;
+      if (!this.analyserNode || !this.chartInstance) return;
+
+      if (this._baseAnimId) {
+        cancelAnimationFrame(this._baseAnimId);
+        this._baseAnimId = null;
+      }
 
       const datasetData = this.chartInstance.data.datasets[0].data;
       const targetFPS = 30;
       const frameInterval = 1000 / targetFPS;
-      let lastRenderTime = performance.now();
+      let lastTime = performance.now();
+
+      // 统一摆动上限：所有扇区有相同的最大脉冲潜力
+      const maxBase = Math.max(...this.baseSkillPoints);
+      const sharedSwing = maxBase * 0.45;
 
       const animate = () => {
         this.animationFrameId = requestAnimationFrame(animate);
 
         const now = performance.now();
-        if (now - lastRenderTime < frameInterval) return;
-        lastRenderTime = now - ((now - lastRenderTime) % frameInterval);
+        if (now - lastTime < frameInterval) return;
+        lastTime = now - ((now - lastTime) % frameInterval);
 
         // ① 频谱数据
         this.analyserNode.getByteFrequencyData(this.freqBuffer);
 
-        // ② 每个扇区：独立包络跟随 + 平方根压缩
-        const rawEnergies = [];
+        // ② 每个扇区：包络跟随（快攻 + 慢衰 → 心跳感）
+        const energies = [];
         for (let i = 0; i < SECTOR_COUNT; i++) {
           const { start, end } = FREQ_GROUPS[i];
           let maxVal = 0;
           for (let j = start; j <= end; j++) {
             if (this.freqBuffer[j] > maxVal) maxVal = this.freqBuffer[j];
           }
-          const norm = Math.sqrt(maxVal / 255); // sqrt 压缩：拉近强弱差距
+          // 轻度压缩，保留动态
+          const norm = Math.pow(maxVal / 255, 0.55);
 
           if (norm > this.sectorEnergies[i]) {
-            this.sectorEnergies[i] = norm;           // 快攻
+            this.sectorEnergies[i] = norm;           // 瞬间冲上去
           } else {
-            this.sectorEnergies[i] += (norm - this.sectorEnergies[i]) * 0.1; // 慢衰
+            this.sectorEnergies[i] += (norm - this.sectorEnergies[i]) * 0.07; // 缓慢回落
           }
-          rawEnergies[i] = this.sectorEnergies[i];
+          energies[i] = this.sectorEnergies[i];
         }
 
-        // ③ 空间平滑 + 应用到扇区
+        // ③ 极弱平滑 + 统一摆动 → 每个扇区独立跳动
         for (let i = 0; i < SECTOR_COUNT; i++) {
-          const prev = rawEnergies[(i - 1 + SECTOR_COUNT) % SECTOR_COUNT];
-          const curr = rawEnergies[i];
-          const next = rawEnergies[(i + 1) % SECTOR_COUNT];
-          const smoothed = prev * 0.20 + curr * 0.60 + next * 0.20;
+          const prev = energies[(i - 1 + SECTOR_COUNT) % SECTOR_COUNT];
+          const curr = energies[i];
+          const next = energies[(i + 1) % SECTOR_COUNT];
+          const smoothed = prev * 0.05 + curr * 0.90 + next * 0.05;
 
+          // 静音时保持技能点差异，有能量时统一爆发
           const baseVal = this.baseSkillPoints[i];
-          const swing = baseVal * 0.22;
-          let newVal = baseVal + swing * smoothed;
+          let newVal = baseVal + sharedSwing * smoothed;
           if (newVal > this.chartMaxScale) newVal = this.chartMaxScale;
-          if (newVal < baseVal * 0.25) newVal = baseVal * 0.25;
+          if (newVal < baseVal * 0.08) newVal = baseVal * 0.08;
 
           datasetData[i] = newVal;
         }
@@ -163,9 +179,6 @@ export default {
       this.animationFrameId = requestAnimationFrame(animate);
     },
 
-    /**
-     * 停止律动 → 指数衰减回到基准值（约 1 秒）
-     */
     stopMusicAnimation() {
       if (this.animationFrameId) {
         cancelAnimationFrame(this.animationFrameId);
@@ -176,7 +189,7 @@ export default {
 
     animateToBase() {
       const datasetData = this.chartInstance.data.datasets[0].data;
-      const returnSpeed = 0.08;
+      const returnSpeed = 0.07;
       const threshold = 0.3;
 
       const step = () => {
@@ -194,29 +207,29 @@ export default {
         this.chartInstance.update('none');
 
         if (settled < datasetData.length) {
-          requestAnimationFrame(step);
+          this._baseAnimId = requestAnimationFrame(step);
         } else {
+          this._baseAnimId = null;
           this.sectorEnergies.fill(0);
         }
       };
 
-      requestAnimationFrame(step);
+      this._baseAnimId = requestAnimationFrame(step);
     },
 
     // ===================== 图表初始化 =====================
 
     renderChart() {
-      const ctx = document.getElementById('polarChart').getContext('2d');
-      const colors = this.generateColors(this.skills.length);
+      const canvas = this.$refs.chartCanvas;
+      const ctx = canvas.getContext('2d');
 
       const maxScore = Math.max(...this.skillPoints);
-      const maxScale = maxScore * 1.30;
-      this.chartMaxScale = maxScale;  // 存储供动画钳位
+      const maxScale = maxScore * 1.50;  // 给律动留足空间
+      this.chartMaxScale = maxScale;
 
       if (this.chartInstance) {
         this.chartInstance.destroy();
       }
-      this.chartReady = false;
 
       this.chartInstance = new Chart(ctx, {
         type: 'polarArea',
@@ -225,63 +238,55 @@ export default {
           datasets: [{
             label: '技能点',
             data: [...this.baseSkillPoints],
-            backgroundColor: colors,
-            borderColor: colors.map(color => color.replace('0.6', '1')),
+            backgroundColor: PALETTE,
+            borderColor: PALETTE.map(c => c.replace('0.65', '0.95')),
             borderWidth: 2,
-            hoverOffset: 15,
-            hoverBackgroundColor: colors.map(color => color.replace('0.6', '0.8')),
+            hoverOffset: 12,
+            hoverBackgroundColor: PALETTE.map(c => c.replace('0.65', '0.85')),
             hoverBorderColor: '#ffffff',
-            hoverBorderWidth: 3,
-            normalized: true,
+            hoverBorderWidth: 2,
           }],
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          hover: { animationDuration: 0 },
-          transitions: { active: { animation: { duration: 0 } } },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              animation: false,
-              backgroundColor: 'rgba(40, 40, 40, 0.7)',
-              titleColor: '#fff',
-              bodyColor: '#fff',
-              borderColor: 'rgba(255, 255, 255, 0.2)',
-              borderWidth: 2,
-              padding: 10,
-              displayColors: true,
-              callbacks: {
-                label: (context) => {
-                  const label = context.label || '';
-                  const realValue = this.baseSkillPoints[context.dataIndex];
-                  return `${label}: ${realValue} 技能点`;
-                },
-                title: (context) => context[0].label,
-              },
-            },
-          },
-          scales: {
-            r: {
-              ticks: { display: false },
-              grid: { color: 'rgba(0, 0, 0, 0.1)', lineWidth: 0.5 },
-              angleLines: { color: 'rgba(0, 0, 0, 0.2)', lineWidth: 1 },
-              suggestedMax: maxScale,
-              max: maxScale,
-              beginAtZero: true,
-            },
-          },
           animation: {
             duration: 1800,
             easing: 'easeOutQuad',
             animateRotate: true,
             animateScale: true,
             onComplete: () => {
-              this.chartReady = true;
-              // 入场动画结束时若音乐已在播放，立刻启动律动
               if (this.isPlaying && this.analyserNode) {
                 this.startMusicAnimation();
               }
+            },
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(30, 35, 45, 0.85)',
+              titleColor: '#fff',
+              bodyColor: '#ddd',
+              borderColor: 'rgba(255, 255, 255, 0.25)',
+              borderWidth: 1,
+              padding: 10,
+              displayColors: true,
+              callbacks: {
+                label: (ctx) => {
+                  const real = this.baseSkillPoints[ctx.dataIndex];
+                  return `${ctx.label}: ${real} 技能点`;
+                },
+              },
+            },
+          },
+          scales: {
+            r: {
+              ticks: { display: false },
+              grid: { color: 'rgba(255, 255, 255, 0.08)', lineWidth: 0.5 },
+              angleLines: { color: 'rgba(255, 255, 255, 0.10)', lineWidth: 0.8 },
+              suggestedMax: maxScale,
+              max: maxScale,
+              beginAtZero: true,
             },
           },
         },

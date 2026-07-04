@@ -3,6 +3,19 @@ import vue from '@vitejs/plugin-vue'
 import compression from 'vite-plugin-compression'
 
 export default defineConfig({
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://api.ceru.shiqianjiang.cn',
+        changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('proxyRes', (proxyRes) => {
+            proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+          });
+        },
+      },
+    },
+  },
   plugins: [
     vue(),
     compression({ algorithm: 'brotli', ext: '.br', threshold: 1024, deleteOriginFile: false }),

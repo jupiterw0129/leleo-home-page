@@ -212,9 +212,6 @@ export default {
         this.$refs.VdPlayer.style.zIndex = -100;
       }
     },
-    audioLoading(val){
-      this.isPlaying = !val;
-    },
     volume(val) {
       if (this.$refs.audioPlayer) {
         this.$refs.audioPlayer.volume = val / 100;
@@ -381,15 +378,12 @@ export default {
         this.audioContext = new AudioCtx();
         this.analyserNode = this.audioContext.createAnalyser();
         this.analyserNode.fftSize = 256;
-        this.analyserNode.smoothingTimeConstant = 0.6;  // 较低平滑 → 更快响应律动
+        this.analyserNode.smoothingTimeConstant = 0.6;
 
-        // 将 <audio> 元素接入分析器 → 输出到扬声器
         this.audioSourceNode = this.audioContext.createMediaElementSource(this.$refs.audioPlayer);
         this.audioSourceNode.connect(this.analyserNode);
         this.analyserNode.connect(this.audioContext.destination);
       }
-
-      // 浏览器自动播放策略：如果 AudioContext 被挂起，恢复它
       if (this.audioContext.state === 'suspended') {
         return this.audioContext.resume();
       }
@@ -448,6 +442,13 @@ export default {
       this.updateAudio();
     },
     updateIsPlaying(isPlaying) {
+      if (isPlaying) {
+        this.ensureAudioContext().then(() => {
+          this.audioPlayer.play();
+        });
+      } else {
+        this.audioPlayer.pause();
+      }
       this.isPlaying = isPlaying;
     },
     updateLyrics(lyrics){
