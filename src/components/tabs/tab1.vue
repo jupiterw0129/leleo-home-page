@@ -1,21 +1,59 @@
 <template>
-    <!-- <span>使用cokie存储保存数据</span> -->
-    <div class="mx-auto rounded" style="background: transparent;">
+    <div class="mx-auto rounded style-console" style="background: transparent;">
         <v-form fast-fail @submit.prevent>
-            <v-text-field
-                v-model="color.themecolor"
-                label="主题颜色"
-                @click="selectcolor='themecolor';colordialog = true"
-                readonly
-                variant="outlined"
-            ></v-text-field>
-            <v-text-field
-                v-model="color.welcometitlecolor"
-                label="标题颜色"
-                @click="selectcolor='welcometitlecolor';colordialog = true"
-                readonly
-                variant="outlined"
-            ></v-text-field>
+            <div class="style-summary">
+                <div class="style-preview">
+                    <div class="preview-title" :style="{ color: color.welcometitlecolor }">Hi, I'm JupiterW</div>
+                    <div class="preview-signature">世界醒，愚者归</div>
+                    <div class="preview-card" :style="{ color: color.themecolor }">
+                        <span>Tags</span>
+                        <b>奇迹师</b>
+                        <b>通识者</b>
+                    </div>
+                </div>
+                <div class="style-stats">
+                    <div>
+                        <span>主题颜色</span>
+                        <strong>{{ color.themecolor }}</strong>
+                    </div>
+                    <div>
+                        <span>标题颜色</span>
+                        <strong>{{ color.welcometitlecolor }}</strong>
+                    </div>
+                    <div>
+                        <span>背景亮度</span>
+                        <strong>{{ brightness }}%</strong>
+                    </div>
+                    <div>
+                        <span>模糊度</span>
+                        <strong>{{ blur }}px</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preset-row">
+                <v-btn variant="tonal" @click="applyPreset('#FFFFFF', '#FFFFFF', 85, 5)">清透</v-btn>
+                <v-btn variant="tonal" @click="applyPreset('#BDEBFF', '#FFFFFF', 78, 8)">冷光</v-btn>
+                <v-btn variant="tonal" @click="applyPreset('#FFE6A7', '#FFFFFF', 72, 10)">暖影</v-btn>
+            </div>
+
+            <div class="control-grid">
+                <v-text-field
+                    v-model="color.themecolor"
+                    label="主题颜色"
+                    @click="selectcolor='themecolor';colordialog = true"
+                    readonly
+                    variant="outlined"
+                ></v-text-field>
+                <v-text-field
+                    v-model="color.welcometitlecolor"
+                    label="标题颜色"
+                    @click="selectcolor='welcometitlecolor';colordialog = true"
+                    readonly
+                    variant="outlined"
+                ></v-text-field>
+            </div>
+
             <v-slider
                 class="ml-5 mr-8"
                 label="背景亮度"
@@ -38,18 +76,18 @@
                 v-model="blur"
                 thumb-label="always"
             ></v-slider>
-            
+
             <div style="display: flex;justify-content: center;align-items: center;">
                 <v-btn :loading="loading1" variant="tonal" class="ma-2" @click="redefault()">恢复</v-btn>
                 <v-btn variant="tonal" class="ma-2" @click="cancel()">取消</v-btn>
                 <v-btn :loading="loading2" variant="tonal" class="ma-2" @click="submitdata()">确认</v-btn>
             </div>
-     
+
             <v-dialog
                 v-model="colordialog"
                 width="auto"
                 >
-                <v-card title="颜色选择器">                   
+                <v-card title="颜色选择器">
                     <div class="d-flex flex-column">
                         <v-color-picker
                             v-model="color[selectcolor]"
@@ -112,7 +150,7 @@ export default {
     if(import.meta.env.VITE_CONFIG){
         this.configdata = JSON.parse(import.meta.env.VITE_CONFIG);
     }
-    
+
     let leleodata = this.getCookie("leleodata");
     if(leleodata){
         this.color = leleodata.color;
@@ -128,29 +166,156 @@ export default {
     setCookie,
     getCookie,
     eraseCookie,
-    submitdata() {      
+    submitdata() {
         this.loading2 = true
         setTimeout(() => {
-            this.loading = false;
-            // 注意数字String格式化
+            this.loading2 = false;
             this.setCookie('leleodata', {color:this.color,brightness:String(this.brightness),blur:String(this.blur),backgroundblur:String(this.backgroundblur)},0.005);
             location.reload();
-        }, 800)   
+        }, 800)
     },
-    redefault(){              
+    redefault(){
         this.loading1 = true
         setTimeout(() => {
-            this.loading = false;
+            this.loading1 = false;
             this.eraseCookie('leleodata');
             location.reload();
-        }, 800) 
-          
+        }, 800)
+
     },
     cancel() {
         this.$emit('cancel');
     },
+    applyPreset(theme, title, brightness, blur) {
+        this.color.themecolor = theme;
+        this.color.welcometitlecolor = title;
+        this.brightness = brightness;
+        this.blur = blur;
+    },
   },
-  
+
 };
 
 </script>
+
+<style scoped>
+.style-console {
+    min-height: 520px;
+}
+
+.style-summary {
+    display: grid;
+    grid-template-columns: minmax(280px, 1fr) minmax(300px, 0.85fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.style-preview,
+.style-stats div {
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.style-preview {
+    min-height: 220px;
+    padding: 1rem;
+    background:
+        linear-gradient(135deg, rgba(16, 22, 30, 0.76), rgba(255, 255, 255, 0.08)),
+        radial-gradient(circle at 78% 20%, rgba(100, 200, 255, 0.25), transparent 34%);
+}
+
+.preview-title {
+    font-size: clamp(1.5rem, 2.5vw, 2.4rem);
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: 0;
+}
+
+.preview-signature {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: min(100%, 520px);
+    min-height: 54px;
+    margin: 1.2rem 0;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06));
+    backdrop-filter: blur(var(--leleo-blur));
+    color: rgba(255, 255, 255, 0.92);
+    font-size: clamp(1.05rem, 2vw, 1.35rem);
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-shadow: 0 0 18px rgba(189, 235, 255, 0.42);
+}
+
+.preview-card {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 58px;
+    padding: 0 0.85rem;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.16);
+    font-weight: 700;
+}
+
+.preview-card b {
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+    font-size: 0.78rem;
+}
+
+.style-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.style-stats div {
+    min-height: 96px;
+    padding: 0.85rem;
+}
+
+.style-stats span {
+    display: block;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.78rem;
+}
+
+.style-stats strong {
+    display: block;
+    margin-top: 0.45rem;
+    color: #fff;
+    font-size: 1.05rem;
+    word-break: break-all;
+}
+
+.preset-row,
+.control-grid {
+    display: flex;
+    gap: 0.7rem;
+}
+
+.preset-row {
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.control-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+@media (max-width: 900px) {
+    .style-summary,
+    .control-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>

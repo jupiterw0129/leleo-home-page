@@ -18,7 +18,7 @@ export default defineConfig({
   },
   plugins: [
     vue(),
-    compression({ algorithm: 'brotli', ext: '.br', threshold: 1024, deleteOriginFile: false }),
+    compression({ algorithm: 'brotliCompress', ext: '.br', threshold: 1024, deleteOriginFile: false }),
     compression({ algorithm: 'gzip', ext: '.gz', threshold: 1024, deleteOriginFile: false }),
   ],
   build: {

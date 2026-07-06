@@ -22,12 +22,12 @@
         @mouseleave="collapseSwitch"
       ></v-switch>
     </div>
-    
+
     <div v-show="!isloading && !isClearScreen" :style="xs||sm?{'overflow-y': 'auto','overflow-x': 'hidden'}:{}">
         <v-row>
             <v-col cols="12" md="4" lg="3" class="leleo-left" align="center">
-              <div :style="xs||sm?{'font-size':'2.3rem'}:{'display':'none'}" class="leleo-left-welcome">{{ configdata.welcometitle }}</div>  
-              <v-avatar class="leleo-left-avatar" :size="xs||sm?120:140" :style="xs||sm?{'margin-top': '0'}:{'margin-top': '2rem'}" @mouseenter="musicplayershow(1)" @mouseleave="musicplayershow(0)">
+              <div :style="xs?{'font-size':'1.85rem'}:(sm?{'font-size':'2.3rem'}:{'display':'none'})" class="leleo-left-welcome">{{ configdata.welcometitle }}</div>
+              <v-avatar class="leleo-left-avatar" :size="xs?104:(sm?120:140)" :style="xs||sm?{'margin-top': '0'}:{'margin-top': '2rem'}" @mouseenter="musicplayershow(1)" @mouseleave="musicplayershow(0)">
                   <v-img :class="{'leleo-spin':isPlaying}"
                   alt="Leleo"
                   :src=configdata.avatar
@@ -88,7 +88,7 @@
                 </v-card>
 
                 <div class="leleo-left-chart">
-                    <polarchart :style="xs||sm?{'height':'210px'}:{'height':'270px'}" :analyser-node="analyserNode" :is-playing="isPlaying"/>
+                    <polarchart :style="xs?{'height':'170px'}:(sm?{'height':'210px'}:{'height':'270px'})" :analyser-node="analyserNode" :is-playing="isPlaying"/>
                 </div>
 
                 <v-container class="leleo-left-socialIconsContainer">
@@ -127,7 +127,7 @@
             </v-col>
 
             <v-col cols="12" md="8" lg="9" style="height: 100vh;" :style="xs||sm ?{}:{'overflow': 'auto'}">
-                <homeright :configdata=configdata :formattedTime=formattedTime 
+                <homeright :configdata=configdata :formattedTime=formattedTime
                 :formattedDate=formattedDate :projectcards=projectcards></homeright>
             </v-col>
         </v-row>
@@ -136,7 +136,7 @@
     <v-dialog
         v-model="dialog1"
         width="1000"
-        heihght="700"
+        height="700"
       >
       <v-card elevation="3" style="backdrop-filter: blur(10px);">
         <v-tabs
@@ -154,7 +154,7 @@
               class="text-none"
             ></v-tab>
           </template>
-          
+
           <template v-slot:item="{ item }">
             <v-tabs-window-item :value="item.value" class="pa-4">
               <div v-if="item.value=='tab-3' && musicinfoLoading" class="loading-spinner" align="center">
@@ -185,7 +185,7 @@
       <v-dialog
         v-model="dialog2"
         width="700"
-        heihght="500"
+        height="500"
       >
       <v-card class="ma-3 pa-2" hover
           variant="tonal"

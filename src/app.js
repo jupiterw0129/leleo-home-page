@@ -188,7 +188,7 @@ export default {
       this.setupAudioListener();  //设置 ended 事件监听器，当歌曲播放结束时自动调用 nextTrack 方法。
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.clockTimer) { clearTimeout(this.clockTimer); this.clockTimer = null; }
     if (this.$refs.audioPlayer) {
       this.$refs.audioPlayer.removeEventListener('ended', this.nextTrack);

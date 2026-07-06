@@ -229,15 +229,15 @@ const config = {
 
 	//项目卡片
 	projectcards: [
-		{ go: "🎬 前往", img: "/img/fool.jpg", title: "诡秘之主", subtitle: "官网", text: "赞美愚者", url: "https://www.lomworld.com/zh", show: false },
-		{ go: "🎬 前往", img: "/img/hero.jpg", title: "抖音", subtitle: "短视频与热点", text: "看看今天有什么新鲜内容。", url: "https://www.douyin.com/jingxuan", show: false },
-		{ go: "📺 前往", img: "/img/wallpaper/static/时代/image-pre.webp", title: "哔哩哔哩", subtitle: "动画 / 音乐 / 知识", text: "适合放松，也适合补充一点灵感。", url: "https://www.bilibili.com/", show: false },
-		{ go: "📰 前往", img: "/img/wallpaper/static/光/image-pre.webp", title: "LittleSkin", subtitle: "无面人", text: "可以假扮任何人，但只能是自己", url: "https://littleskin.cn/user", show: false },
-		{ go: "👍 前往", img: "/img/wallpaper/static/塞维亚菊/image-pre.webp", title: "JPWHub", subtitle: "图床", text: "If you see this line, I've managed to get your attention.", url: "https://jpwhub.cc.cd/", show: false },
-		{ go: "🗃 前往", img: "/img/wallpaper/static/奇迹/image-pre.webp", title: "Google", subtitle: "5,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://www.google.com/", show: false },
-		{ go: "🎨 前往", img: "/img/wallpaper/static/奥黛丽/image-pre.webp", title: "Cloudflare", subtitle: "6,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://dash.cloudflare.com/", show: false },
-		{ go: "💍 前往", img: "/img/wallpaper/static/节制/image-pre.webp", title: "奈飞工厂", subtitle: "7,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://www.netflixgc.com/", show: false },
-		{ go: "🔍 前往", img: "/img/wallpaper/static/观众/image-pre.webp", title: "作者", subtitle: "8,000 miles of wonder", text: "If you see this line, I've managed to get your attention.", url: "https://leleo.top", show: false },
+		{ go: "打开", img: "/img/fool.jpg", title: "诡秘之主", subtitle: "官方世界观", text: "快速进入诡秘之主官方站点，继续追踪设定、角色与最新内容。", url: "https://www.lomworld.com/zh", show: false },
+		{ go: "打开", img: "/img/hero.jpg", title: "抖音", subtitle: "短视频与热点", text: "看看今天的新鲜内容，顺手收集一点灵感和快乐。", url: "https://www.douyin.com/jingxuan", show: false },
+		{ go: "打开", img: "/img/wallpaper/static/时代/image-pre.webp", title: "哔哩哔哩", subtitle: "动画 / 音乐 / 知识", text: "适合放松，也适合补充一点灵感和知识库存。", url: "https://www.bilibili.com/", show: false },
+		{ go: "打开", img: "/img/wallpaper/static/光/image-pre.webp", title: "LittleSkin", subtitle: "皮肤站", text: "管理 Minecraft 角色皮肤，给每次上线换一个更贴近心情的身份。", url: "https://littleskin.cn/user", show: false },
+		{ go: "打开", img: "/img/wallpaper/static/塞维亚菊/image-pre.webp", title: "JPWHub", subtitle: "图床与素材", text: "存放、管理和分发常用图片素材，让主页内容维护轻松一点。", url: "https://jpwhub.cc.cd/", show: false },
+		{ go: "打开", img: "/img/wallpaper/static/奇迹/image-pre.webp", title: "Google", subtitle: "搜索引擎", text: "需要更宽的资料入口时，从这里开始一次认真搜索。", url: "https://www.google.com/", show: false },
+		{ go: "打开", img: "/img/wallpaper/static/奥黛丽/image-pre.webp", title: "Cloudflare", subtitle: "站点与网络", text: "管理域名、Pages、Workers 和安全策略，照看网站背后的基础设施。", url: "https://dash.cloudflare.com/", show: false },
+		{ go: "打开", img: "/img/wallpaper/static/节制/image-pre.webp", title: "奈飞工厂", subtitle: "影视资源", text: "把想看的片单整理起来，闲下来时就有一扇门可以推开。", url: "https://www.netflixgc.com/", show: false },
+		{ go: "打开", img: "/img/wallpaper/static/观众/image-pre.webp", title: "作者主页", subtitle: "Leleo", text: "回到作者站点，看看模板、更新与更多有趣的作品。", url: "https://leleo.top", show: false },
 	],
 
 	statement: ["备案号：XXICP备123456789号", "Copyright © 2025 Leleo"],

@@ -1,6 +1,9 @@
 .v-card{
     backdrop-filter: blur(var(--leleo-blur));
-    border-radius: 5%;
+    background: rgba(16, 22, 30, 0.36) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 8px;
+    box-shadow: 0 14px 44px rgba(0, 0, 0, 0.20);
     color: var(--leleo-vcard-color);
 }
 
@@ -8,18 +11,18 @@
     position: fixed;
     background-color: #282c34;
     z-index: -1;
-    
+
     .floating-switch-container {
         position: fixed;
         right: 0;
         z-index: 99;
       }
-      
+
     .floating-switch {
         transform: translateX(53%); /* 初始状态下隐藏大部分 */
         transition: transform 0.3s ease;
     }
-    
+
     .floating-switch:hover {
         transform: translateX(0); /* 悬停时完全展开 */
     }
@@ -40,19 +43,19 @@
         position: fixed;
         top: 0;
         left: 0;
-        width: 100%; 
-        height: 100%; 
+        width: 100%;
+        height: 100%;
         background-color: #282c34;
         z-index: 9999;
-        display: flex; 
-        justify-content: center; 
-        align-items: center; 
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
-    .fade-enter-active, .fade-leave-active { 
+    .fade-enter-active, .fade-leave-active {
         transition: opacity .8s
       }
-    .fade-enter, .fade-leave-to { 
-        opacity: 0  
+    .fade-enter, .fade-leave-to {
+        opacity: 0
     }
 
     .leleo-left{
@@ -60,13 +63,16 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: space-around;
+        justify-content: center;
+        gap: clamp(0.8rem, 1.8vh, 1.35rem);
+        padding: 1rem 0.75rem;
         &-welcome{
             margin-top: 10px;
             width: 100%;
             color: var(--leleo-welcomtitle-color);
             padding: 0 2rem;
             font-family: "myfont";
+            text-shadow: 0 8px 26px rgba(0, 0, 0, 0.45);
         }
         &-avatar{
             .musicplayer{
@@ -83,6 +89,8 @@
                 font-size: 12px;
                 white-space: nowrap;
                 overflow: hidden;
+                max-width: 82%;
+                text-overflow: ellipsis;
             }
             .leleo-spin {
                 animation: spin 6s linear infinite;
@@ -91,8 +99,8 @@
                 position: absolute;
                  top: 50%;
                 left: 50%;
-                 transform: translate(-50%, -50%); 
-                z-index: 1; 
+                 transform: translate(-50%, -50%);
+                z-index: 1;
             }
             @keyframes spin {
                 0% { transform: rotate(0deg); }
@@ -101,7 +109,7 @@
             .fade-in {
                 animation: fadeIn .6s ease ;
               }
-              
+
             @keyframes fadeIn {
                 from {
                     opacity: 0;
@@ -116,7 +124,7 @@
         }
         &-socialIconsContainer{
             .leleo-social-bticon:hover{
-                transform: scale(1.2);
+                transform: translateY(-2px) scale(1.08);
             }
         }
     }
@@ -124,16 +132,258 @@
         font-family: "digitalfont";
         font-weight: 800;
     }
+    .home-right{
+        min-height: 100vh;
+        padding: clamp(1rem, 2.4vw, 2rem) clamp(0.75rem, 2vw, 1.8rem) 2.5rem;
+    }
+    .hero-heading-wrap{
+        margin-bottom: 0.5rem;
+    }
+    .home-right-main{
+        max-width: 1180px;
+        margin: 0 auto;
+    }
+    .hero-row{
+        min-height: 310px;
+    }
+    .home-search{
+        max-width: 760px;
+        margin: 0.5rem 0 1rem;
+        transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
+    }
+    .home-search:focus-within{
+        border-color: rgba(118, 220, 255, 0.55) !important;
+        box-shadow: 0 18px 46px rgba(18, 167, 224, 0.20);
+        transform: translateY(-1px);
+    }
+    .engine-btn{
+        min-width: 96px;
+        color: var(--leleo-vcard-color);
+        font-weight: 600;
+    }
+    .hero-copy{
+        min-height: 190px;
+        padding: 0.5rem 0;
+        text-shadow: 0 7px 24px rgba(0, 0, 0, 0.42);
+    }
+    .clock-card{
+        width: min(100%, 320px);
+        overflow: hidden;
+    }
+    .quick-panel-grid{
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.85rem;
+        margin: -0.25rem 0 1rem;
+        padding: 0 0.75rem;
+    }
+    .quick-panel{
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        min-height: 88px;
+        padding: 0.85rem;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 8px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.055));
+        color: var(--leleo-vcard-color);
+        box-shadow: 0 12px 34px rgba(0, 0, 0, 0.16);
+    }
+    .quick-panel .v-icon{
+        flex: 0 0 auto;
+        width: 42px;
+        height: 42px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.10);
+        color: rgba(165, 226, 255, 0.95);
+    }
+    .quick-panel span,
+    .quick-panel small{
+        display: block;
+        color: rgba(255, 255, 255, 0.64);
+        line-height: 1.25;
+    }
+    .quick-panel strong{
+        display: block;
+        margin: 0.18rem 0;
+        color: #fff;
+        font-size: 1.08rem;
+        line-height: 1.2;
+    }
+    .focus-lane{
+        display: grid;
+        grid-template-columns: minmax(250px, 1.15fr) repeat(3, minmax(150px, 0.75fr));
+        gap: 0.85rem;
+        margin: 0 0 1rem;
+        padding: 0 0.75rem;
+    }
+    .focus-copy,
+    .focus-card{
+        min-height: 132px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+    }
+    .focus-copy{
+        padding: 1rem;
+        background:
+            radial-gradient(circle at 88% 18%, rgba(80, 190, 255, 0.26), transparent 30%),
+            linear-gradient(135deg, rgba(8, 13, 20, 0.48), rgba(255,255,255,0.08));
+    }
+    .focus-copy span,
+    .focus-card span{
+        color: rgba(255,255,255,0.62);
+        font-size: 0.76rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .focus-copy h3{
+        margin: 0.2rem 0 0.35rem;
+        color: #fff;
+        font-size: clamp(1.35rem, 2vw, 1.9rem);
+        line-height: 1.08;
+    }
+    .focus-copy p{
+        max-width: 420px;
+        margin: 0;
+        color: rgba(255,255,255,0.70);
+        line-height: 1.65;
+    }
+    .focus-card{
+        position: relative;
+        display: flex;
+        align-items: flex-end;
+        padding: 0.85rem;
+        color: #fff;
+        text-decoration: none;
+        transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+    }
+    .focus-card:hover{
+        transform: translateY(-3px);
+        border-color: rgba(255, 255, 255, 0.34);
+        box-shadow: 0 18px 48px rgba(0,0,0,0.22);
+    }
+    .focus-card img{
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.54;
+        transition: opacity .25s ease, transform .35s ease;
+    }
+    .focus-card:hover img{
+        opacity: 0.72;
+        transform: scale(1.04);
+    }
+    .focus-card::after{
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, transparent 20%, rgba(0,0,0,0.68));
+    }
+    .focus-card div,
+    .focus-card .v-icon{
+        position: relative;
+        z-index: 1;
+    }
+    .focus-card div{
+        min-width: 0;
+    }
+    .focus-card strong{
+        display: block;
+        margin-top: 0.12rem;
+        color: #fff;
+        font-size: 1.05rem;
+        line-height: 1.15;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .focus-card .v-icon{
+        margin-left: auto;
+        align-self: flex-start;
+        color: rgba(255,255,255,0.86);
+    }
+    .project-section-head{
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        margin: 0.5rem 0 0.35rem;
+        padding: 0 0.75rem;
+    }
+    .project-chip{
+        color: var(--leleo-vcard-color);
+        background: rgba(255, 255, 255, 0.10) !important;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+    .project-count{
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 0.9rem;
+        letter-spacing: 0;
+    }
+    .project-container{
+        padding-top: 0.35rem;
+    }
+    .project-grid{
+        align-items: stretch;
+    }
+    .project-card{
+        height: 100%;
+        overflow: hidden;
+        transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+    }
+    .project-card:hover{
+        transform: translateY(-4px);
+        border-color: rgba(255, 255, 255, 0.34) !important;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+    }
+    .project-card-cover{
+        opacity: 0.86;
+        transition: opacity .25s ease, transform .35s ease;
+    }
+    .project-card:hover .project-card-cover{
+        opacity: 1;
+        transform: scale(1.03);
+    }
+    .project-card-title{
+        padding: 0.55rem 0.75rem 0.1rem !important;
+        line-height: 1.25;
+        font-weight: 600;
+        letter-spacing: 0;
+        white-space: normal;
+        word-break: keep-all;
+    }
+    .project-card-subtitle{
+        padding: 0 0.75rem 0.2rem !important;
+        opacity: 0.78;
+        white-space: normal;
+        line-height: 1.25;
+    }
+    .project-card-actions{
+        padding: 0 0.45rem 0.25rem !important;
+        min-height: 0;
+    }
+    .project-card-actions .v-btn{
+        min-width: 0;
+        padding: 0 0.55rem;
+    }
+    .project-card-text{
+        color: rgba(255, 255, 255, 0.76);
+        line-height: 1.65;
+        padding: 0.65rem 0.8rem 0.85rem !important;
+    }
 }
-  
+
 /* 添加一个::before伪元素降低背景图片的亮度，而不会影响background元素的其他内容 */
 .vapp-fullscreen-background::before {
     content: "";
-    background-image: var(--leleo-background-image-url); 
+    background-image: var(--leleo-background-image-url);
     transition: background-image 0.8s ease;
     background-size:cover;
     background-position: center;
-    position: absolute;   
+    position: absolute;
     width: 100%;
     height: 100%;
     z-index: -1;
@@ -141,5 +391,20 @@
     filter: brightness(var(--leleo-brightness));
 }
 .vapp-fullscreen-background.radius-before::before{
+    border-radius: 16px;
+}
+
+.vapp-fullscreen-background::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        linear-gradient(115deg, rgba(8, 12, 18, 0.50), rgba(15, 23, 30, 0.24) 45%, rgba(8, 12, 18, 0.54)),
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 120px);
+}
+
+.vapp-fullscreen-background.radius-before::after{
     border-radius: 16px;
 }
