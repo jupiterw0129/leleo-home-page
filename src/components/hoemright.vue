@@ -83,7 +83,7 @@
             <div class="focus-copy">
               <span>Focus Board</span>
               <h3>今天先从哪里开始？</h3>
-              <p>把最常用的入口提到前面，打开主页就能直接进入状态。</p>
+              <p>会根据你的点击次数排序，常用入口会自动浮到前面。</p>
             </div>
             <a
               v-for="item in featuredProjects"
@@ -92,6 +92,7 @@
               :href="item.url"
               target="_blank"
               rel="noopener noreferrer"
+              @click="recordProjectVisit(item)"
             >
               <img :src="item.img" :alt="item.title">
               <div>
@@ -138,6 +139,7 @@
                     target="_blank"
                       prepend-icon="mdi-open-in-new"
                       :text= "item.go"
+                      @click="recordProjectVisit(item)"
                     ></v-btn>
                     <v-spacer></v-spacer>
                     <v-btn
@@ -176,6 +178,7 @@ export default {
 	data() {
 		return {
 			searchQuery: '',
+			visitStats: {},
 			selectedEngine: { title: 'Bing', value: 'bing' },
       		searchEngines :[
 				{ title: 'Bing', value: 'bing' },
@@ -190,6 +193,9 @@ export default {
       const { xs,sm,md } = useDisplay();
       return {xs,sm,md};
     },
+    mounted() {
+      this.visitStats = this.readVisitStats();
+    },
 	computed: {
 		isUrl(){
 			const str = this.searchQuery.trim();
@@ -201,13 +207,13 @@ export default {
 					icon: 'mdi-compass-rose',
 					label: '导航入口',
 					value: `${this.projectcards?.length || 0} 个`,
-					hint: '常用站点一屏抵达',
+					hint: '全部站点一屏抵达',
 				},
 				{
-					icon: 'mdi-clock-fast',
-					label: '当前时间',
-					value: this.formattedTime,
-					hint: this.formattedDate,
+					icon: 'mdi-star-shooting-outline',
+					label: '常用入口',
+					value: `${this.trackedVisitCount} 次`,
+					hint: this.trackedVisitCount ? '已根据点击排序' : '点击后自动记录',
 				},
 				{
 					icon: 'mdi-lightning-bolt-outline',
@@ -217,11 +223,31 @@ export default {
 				},
 			];
 		},
+		trackedVisitCount() {
+			return Object.values(this.visitStats).reduce((total, count) => total + Number(count || 0), 0);
+		},
 		featuredProjects() {
-			return (this.projectcards || []).slice(0, 3);
+			return [...(this.projectcards || [])]
+				.sort((a, b) => this.getProjectVisitCount(b) - this.getProjectVisitCount(a))
+				.slice(0, 3);
 		},
 	},
     methods:{
+      readVisitStats(){
+        try {
+          return JSON.parse(localStorage.getItem('leleo-project-visits') || '{}');
+        } catch (error) {
+          return {};
+        }
+      },
+      getProjectVisitCount(item){
+        return Number(this.visitStats?.[item.url] || 0);
+      },
+      recordProjectVisit(item){
+        const nextStats = { ...this.visitStats, [item.url]: this.getProjectVisitCount(item) + 1 };
+        this.visitStats = nextStats;
+        localStorage.setItem('leleo-project-visits', JSON.stringify(nextStats));
+      },
       projectcardsShow(key){
         for(let i = 0;i < this.projectcards.length;i++){
           if(i != key){
