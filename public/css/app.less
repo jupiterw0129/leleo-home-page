@@ -170,45 +170,118 @@
         width: min(100%, 320px);
         overflow: hidden;
     }
-    .quick-panel-grid{
+    .snake-panel{
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 0.85rem;
+        grid-template-columns: minmax(250px, 0.72fr) minmax(420px, 1.28fr);
+        gap: 0.95rem;
+        align-items: stretch;
         margin: -0.25rem 0 1rem;
         padding: 0 0.75rem;
     }
-    .quick-panel{
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-        min-height: 88px;
-        padding: 0.85rem;
+    .snake-copy,
+    .snake-board{
         border: 1px solid rgba(255, 255, 255, 0.16);
         border-radius: 8px;
         background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.055));
-        color: var(--leleo-vcard-color);
         box-shadow: 0 12px 34px rgba(0, 0, 0, 0.16);
     }
-    .quick-panel .v-icon{
-        flex: 0 0 auto;
-        width: 42px;
-        height: 42px;
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.10);
-        color: rgba(165, 226, 255, 0.95);
+    .snake-copy{
+        min-height: 138px;
+        padding: 1rem;
+        color: var(--leleo-vcard-color);
+        background:
+            radial-gradient(circle at 92% 18%, rgba(124, 225, 255, 0.28), transparent 32%),
+            linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05));
     }
-    .quick-panel span,
-    .quick-panel small{
-        display: block;
-        color: rgba(255, 255, 255, 0.64);
-        line-height: 1.25;
+    .snake-copy span{
+        color: rgba(255,255,255,0.62);
+        font-size: 0.76rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
     }
-    .quick-panel strong{
-        display: block;
-        margin: 0.18rem 0;
+    .snake-copy h3{
+        margin: 0.22rem 0 0.35rem;
         color: #fff;
-        font-size: 1.08rem;
-        line-height: 1.2;
+        font-size: clamp(1.35rem, 2vw, 1.9rem);
+        line-height: 1.08;
+    }
+    .snake-copy p{
+        max-width: 480px;
+        margin: 0;
+        color: rgba(255,255,255,0.72);
+        line-height: 1.65;
+    }
+    .snake-meta{
+        display: flex;
+        align-items: baseline;
+        gap: 0.45rem;
+        margin-top: 0.85rem;
+        color: rgba(255,255,255,0.68);
+    }
+    .snake-meta b{
+        color: #fff;
+        font-size: 1.25rem;
+        line-height: 1;
+    }
+    .snake-meta small{
+        margin-right: 0.65rem;
+    }
+    .snake-board{
+        display: grid;
+        grid-template-columns: repeat(var(--snake-cols), minmax(0, 1fr));
+        gap: 5px;
+        min-height: 138px;
+        padding: 0.9rem;
+        overflow: hidden;
+        background:
+            linear-gradient(135deg, rgba(7, 13, 18, 0.28), rgba(255, 255, 255, 0.08)),
+            repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 46px);
+    }
+    .snake-cell{
+        position: relative;
+        aspect-ratio: 1;
+        min-width: 0;
+        border: 1px solid rgba(255,255,255,0.10);
+        border-radius: 6px;
+        background: rgba(255,255,255,0.065);
+        cursor: crosshair;
+        transition: background .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    }
+    .snake-cell:hover,
+    .snake-cell.target{
+        border-color: rgba(178, 235, 255, 0.72);
+        background: rgba(90, 204, 255, 0.20);
+        box-shadow: 0 0 18px rgba(90, 204, 255, 0.30);
+    }
+    .snake-cell.body{
+        border-color: rgba(177, 245, 218, 0.58);
+        background: linear-gradient(135deg, rgba(159, 255, 207, 0.78), rgba(71, 190, 255, 0.50));
+        box-shadow: 0 0 12px rgba(135, 240, 220, 0.32);
+    }
+    .snake-cell.head{
+        border-color: rgba(255, 255, 255, 0.86);
+        background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(124, 225, 255, 0.82));
+        box-shadow: 0 0 20px rgba(189, 235, 255, 0.65);
+        transform: scale(1.08);
+    }
+    .snake-cell.pulse::after{
+        content: "";
+        position: absolute;
+        inset: -5px;
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.72);
+        animation: snake-pulse .36s ease-out;
+        pointer-events: none;
+    }
+    @keyframes snake-pulse{
+        from{
+            opacity: 0.9;
+            transform: scale(0.72);
+        }
+        to{
+            opacity: 0;
+            transform: scale(1.45);
+        }
     }
     .focus-lane{
         display: grid;

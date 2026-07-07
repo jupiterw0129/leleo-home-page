@@ -67,15 +67,33 @@
               </v-card>
             </v-col>
           </v-row>
-
-          <div class="quick-panel-grid">
-            <div class="quick-panel" v-for="item in quickStats" :key="item.label">
-              <v-icon :icon="item.icon"></v-icon>
-              <div>
-                <span>{{ item.label }}</span>
-                <strong>{{ item.value }}</strong>
-                <small>{{ item.hint }}</small>
+          <div class="snake-panel">
+            <div class="snake-copy">
+              <span>Little Snake</span>
+              <h3>点亮一格，让它去追</h3>
+              <p>平时自己巡游，鼠标经过或点击方块后，小蛇会自动跑过去吃掉它。</p>
+              <div class="snake-meta">
+                <b>{{ snakeScore }}</b>
+                <small>本次吃到</small>
+                <b>{{ trackedVisitCount }}</b>
+                <small>常用记录</small>
               </div>
+            </div>
+            <div
+              class="snake-board"
+              :style="snakeBoardStyle"
+              aria-label="互动贪吃蛇装饰面板"
+            >
+              <button
+                v-for="cell in snakeCells"
+                :key="cell.id"
+                type="button"
+                class="snake-cell"
+                :class="getSnakeCellClass(cell)"
+                :aria-label="`点亮第 ${cell.id + 1} 格`"
+                @pointerenter="setSnakeTarget(cell)"
+                @click="setSnakeTarget(cell)"
+              ></button>
             </div>
           </div>
 
@@ -179,6 +197,12 @@ export default {
 		return {
 			searchQuery: '',
 			visitStats: {},
+			snakeBody: [],
+			snakeTarget: null,
+			snakeWanderTarget: null,
+			snakeScore: 0,
+			snakeTimer: null,
+			snakePulseCell: null,
 			selectedEngine: { title: 'Bing', value: 'bing' },
       		searchEngines :[
 				{ title: 'Bing', value: 'bing' },
@@ -195,33 +219,16 @@ export default {
     },
     mounted() {
       this.visitStats = this.readVisitStats();
+      this.initSnake();
+      this.startSnake();
+    },
+    beforeUnmount() {
+      this.stopSnake();
     },
 	computed: {
 		isUrl(){
 			const str = this.searchQuery.trim();
   			return this.isLikelyUrl(str);
-		},
-		quickStats() {
-			return [
-				{
-					icon: 'mdi-compass-rose',
-					label: '导航入口',
-					value: `${this.projectcards?.length || 0} 个`,
-					hint: '全部站点一屏抵达',
-				},
-				{
-					icon: 'mdi-star-shooting-outline',
-					label: '常用入口',
-					value: `${this.trackedVisitCount} 次`,
-					hint: this.trackedVisitCount ? '已根据点击排序' : '点击后自动记录',
-				},
-				{
-					icon: 'mdi-lightning-bolt-outline',
-					label: '搜索模式',
-					value: this.selectedEngine.title,
-					hint: this.isUrl ? '识别为网址' : '关键词搜索',
-				},
-			];
 		},
 		trackedVisitCount() {
 			return Object.values(this.visitStats).reduce((total, count) => total + Number(count || 0), 0);
@@ -231,8 +238,141 @@ export default {
 				.sort((a, b) => this.getProjectVisitCount(b) - this.getProjectVisitCount(a))
 				.slice(0, 3);
 		},
+		snakeCols() {
+			if (this.xs) return 12;
+			if (this.sm) return 14;
+			if (this.md) return 16;
+			return 18;
+		},
+		snakeRows() {
+			if (this.xs) return 5;
+			if (this.sm) return 5;
+			return 6;
+		},
+		snakeCells() {
+			return Array.from({ length: this.snakeCols * this.snakeRows }, (_, id) => ({
+				id,
+				x: id % this.snakeCols,
+				y: Math.floor(id / this.snakeCols),
+			}));
+		},
+		snakeBoardStyle() {
+			return {
+				'--snake-cols': this.snakeCols,
+			};
+		},
 	},
+    watch: {
+      xs() {
+        this.initSnake();
+      },
+      sm() {
+        this.initSnake();
+      },
+      md() {
+        this.initSnake();
+      },
+    },
     methods:{
+      initSnake(){
+        const startX = Math.max(3, Math.floor(this.snakeCols / 2));
+        const startY = Math.floor(this.snakeRows / 2);
+        this.snakeBody = [
+          { x: startX, y: startY },
+          { x: startX - 1, y: startY },
+          { x: startX - 2, y: startY },
+        ];
+        this.snakeTarget = null;
+        this.snakeWanderTarget = this.getRandomSnakeCell();
+      },
+      startSnake(){
+        this.stopSnake();
+        this.snakeTimer = window.setInterval(() => {
+          this.advanceSnake();
+        }, 260);
+      },
+      stopSnake(){
+        if (this.snakeTimer) {
+          window.clearInterval(this.snakeTimer);
+          this.snakeTimer = null;
+        }
+      },
+      setSnakeTarget(cell){
+        this.snakeTarget = { x: cell.x, y: cell.y };
+      },
+      getSnakeCellClass(cell){
+        return {
+          head: this.isSnakeHead(cell),
+          body: this.isSnakeBody(cell),
+          target: this.isSameSnakeCell(cell, this.snakeTarget),
+          pulse: this.snakePulseCell === cell.id,
+        };
+      },
+      isSnakeHead(cell){
+        return this.snakeBody[0] && this.isSameSnakeCell(cell, this.snakeBody[0]);
+      },
+      isSnakeBody(cell){
+        return this.snakeBody.slice(1).some(part => this.isSameSnakeCell(cell, part));
+      },
+      isSameSnakeCell(a, b){
+        return Boolean(a && b && a.x === b.x && a.y === b.y);
+      },
+      getSnakeCellId(cell){
+        return cell.y * this.snakeCols + cell.x;
+      },
+      getRandomSnakeCell(){
+        const x = Math.floor(Math.random() * this.snakeCols);
+        const y = Math.floor(Math.random() * this.snakeRows);
+        return { x, y };
+      },
+      advanceSnake(){
+        if (!this.snakeBody.length) {
+          this.initSnake();
+          return;
+        }
+
+        const head = this.snakeBody[0];
+        const activeTarget = this.snakeTarget || this.snakeWanderTarget || this.getRandomSnakeCell();
+        const nextHead = this.getNextSnakeHead(head, activeTarget);
+        const nextBody = [nextHead, ...this.snakeBody];
+        const reachedTarget = this.isSameSnakeCell(nextHead, this.snakeTarget);
+        const reachedWander = this.isSameSnakeCell(nextHead, this.snakeWanderTarget);
+
+        if (reachedTarget) {
+          this.snakeScore += 1;
+          this.snakePulseCell = this.getSnakeCellId(nextHead);
+          window.setTimeout(() => {
+            this.snakePulseCell = null;
+          }, 360);
+          this.snakeTarget = null;
+          this.snakeWanderTarget = this.getRandomSnakeCell();
+          this.snakeBody = nextBody.slice(0, 6);
+          return;
+        }
+
+        if (reachedWander) {
+          this.snakeWanderTarget = this.getRandomSnakeCell();
+        }
+
+        this.snakeBody = nextBody.slice(0, 5);
+      },
+      getNextSnakeHead(head, target){
+        const next = { ...head };
+        const deltaX = target.x - head.x;
+        const deltaY = target.y - head.y;
+
+        if (Math.abs(deltaX) >= Math.abs(deltaY) && deltaX !== 0) {
+          next.x += Math.sign(deltaX);
+        } else if (deltaY !== 0) {
+          next.y += Math.sign(deltaY);
+        } else {
+          next.x += 1;
+        }
+
+        next.x = (next.x + this.snakeCols) % this.snakeCols;
+        next.y = (next.y + this.snakeRows) % this.snakeRows;
+        return next;
+      },
       readVisitStats(){
         try {
           return JSON.parse(localStorage.getItem('leleo-project-visits') || '{}');
