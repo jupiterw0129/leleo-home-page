@@ -21,20 +21,36 @@
         }
         .snake-copy{
             min-height: auto;
-            padding: 0.85rem;
+            padding: 0.6rem 0.85rem;
         }
         .snake-copy p{
-            font-size: 0.84rem;
             line-height: 1.5;
         }
-        .snake-meta{
-            margin-top: 0.65rem;
-            gap: 0.35rem;
+        .toggle-track{
+            width: 132px;
+            height: 32px;
+            display: inline-block;
+        }
+        .toggle-icon:nth-child(2){ left: 22px; }
+        .toggle-icon:nth-child(3){ left: 66px; }
+        .toggle-icon:nth-child(4){ left: 110px; }
+        .toggle-thumb{
+            width: 24px;
+            height: 24px;
+            border-radius: 12px;
+            top: 4px;
+            left: 10px;
+        }
+        .toggle-track.mode-paint .toggle-thumb{
+            left: 54px;
+        }
+        .toggle-track.mode-clock .toggle-thumb{
+            left: 98px;
         }
         .snake-board{
-            min-height: 92px;
-            gap: 3px;
-            padding: 0.55rem;
+            min-height: 72px;
+            gap: 4px;
+            padding: 0.5rem;
         }
         .snake-cell{
             border-radius: 4px;

@@ -55,13 +55,9 @@
             <typewriter class="hero-copy ma-3 d-flex align-center justify-center"></typewriter>
             </v-col>
             <v-col cols="12" md="4" align="center">
-              <v-card class="clock-card ma-3" hover
-                >
-                  <template v-slot:title >
-                    <span class="leleo-card-title clock-font">{{formattedTime}}</span>
-                  </template>
-                  <template v-slot:subtitle>
-                    <span style="font-weight: bold;">{{formattedDate}}</span>
+              <v-card class="clock-card ma-3" hover>
+                  <template v-slot:title>
+                    <span class="leleo-card-title clock-font">{{formattedDate}}</span>
                   </template>
                   <turntable :color1="configdata.color.turntablecolor1" :color2="configdata.color.turntablecolor2" />
               </v-card>
@@ -69,20 +65,26 @@
           </v-row>
           <div class="snake-panel">
             <div class="snake-copy">
-              <span>Little Snake</span>
-              <h3>点亮一格，让它去追</h3>
-              <p>平时自己巡游，鼠标经过或点击方块后，小蛇会自动跑过去吃掉它。</p>
-              <div class="snake-meta">
-                <b>{{ snakeScore }}</b>
-                <small>本次吃到</small>
-                <b>{{ trackedVisitCount }}</b>
-                <small>常用记录</small>
+              <span class="snake-label">Interactive Board</span>
+              <h3>{{ modeLabel }}</h3>
+              <div class="snake-actions">
+                <div class="mode-toggle" role="radiogroup" :aria-label="'当前模式：' + modeLabel">
+                  <div class="toggle-track" :class="'mode-' + mode">
+                    <div class="toggle-thumb"></div>
+                    <span class="toggle-icon" @click.stop="mode = 'snake'">🐍</span>
+                    <span class="toggle-icon" @click.stop="mode = 'paint'">✏️</span>
+                    <span class="toggle-icon" @click.stop="mode = 'clock'">🕐</span>
+                  </div>
+                </div>
+                <button class="reset-btn" @click="resetBoard">{{ actionLabel }}</button>
               </div>
             </div>
             <div
               class="snake-board"
               :style="snakeBoardStyle"
-              aria-label="互动贪吃蛇装饰面板"
+              aria-label="互动像素面板"
+              @mousedown.stop
+              @mousemove.stop
             >
               <button
                 v-for="cell in snakeCells"
@@ -90,9 +92,8 @@
                 type="button"
                 class="snake-cell"
                 :class="getSnakeCellClass(cell)"
-                :aria-label="`点亮第 ${cell.id + 1} 格`"
-                @pointerenter="setSnakeTarget(cell)"
-                @click="setSnakeTarget(cell)"
+                :aria-label="cellAriaLabel(cell)"
+                @click="handleCellClick(cell)"
               ></button>
             </div>
           </div>
@@ -188,6 +189,21 @@ import turntable from '../components/turntable.vue';
 import scrolltotop from './scrolltotop.vue';
 import { useDisplay } from 'vuetify'
 
+/* pixel font — 3×5 digits */
+const DIGIT_FONT = {
+  '0': [0b111, 0b101, 0b101, 0b101, 0b111],
+  '1': [0b010, 0b110, 0b010, 0b010, 0b111],
+  '2': [0b111, 0b001, 0b111, 0b100, 0b111],
+  '3': [0b111, 0b001, 0b111, 0b001, 0b111],
+  '4': [0b101, 0b101, 0b111, 0b001, 0b001],
+  '5': [0b111, 0b100, 0b111, 0b001, 0b111],
+  '6': [0b111, 0b100, 0b111, 0b101, 0b111],
+  '7': [0b111, 0b001, 0b001, 0b001, 0b001],
+  '8': [0b111, 0b101, 0b111, 0b101, 0b111],
+  '9': [0b111, 0b101, 0b111, 0b001, 0b111],
+  ':': [0b000, 0b010, 0b000, 0b010, 0b000],
+};
+
 export default {
     components: {
         typewriter,turntable
@@ -200,9 +216,18 @@ export default {
 			snakeBody: [],
 			snakeTarget: null,
 			snakeWanderTarget: null,
-			snakeScore: 0,
 			snakeTimer: null,
 			snakePulseCell: null,
+			snakeLength: 3,
+			mode: 'snake',
+			clockTime: '',
+			clockTimer: null,
+			clockGlitch: false,
+			_glitchTimer: null,
+			paintedCells: (() => {
+				try { return JSON.parse(localStorage.getItem('leleo-painted-cells') || '{}'); }
+				catch (_) { return {}; }
+			})(),
 			selectedEngine: { title: 'Bing', value: 'bing' },
       		searchEngines :[
 				{ title: 'Bing', value: 'bing' },
@@ -224,30 +249,36 @@ export default {
     },
     beforeUnmount() {
       this.stopSnake();
+      this.stopClock();
     },
 	computed: {
 		isUrl(){
 			const str = this.searchQuery.trim();
   			return this.isLikelyUrl(str);
 		},
-		trackedVisitCount() {
-			return Object.values(this.visitStats).reduce((total, count) => total + Number(count || 0), 0);
-		},
 		featuredProjects() {
 			return [...(this.projectcards || [])]
 				.sort((a, b) => this.getProjectVisitCount(b) - this.getProjectVisitCount(a))
 				.slice(0, 3);
 		},
+		modeLabel() {
+			if (this.mode === 'snake') return '贪吃蛇';
+			if (this.mode === 'paint') return '像素画板';
+			return '像素时钟';
+		},
+		actionLabel() {
+			if (this.mode === 'snake') return '重置';
+			if (this.mode === 'paint') return '清空';
+			return this.clockGlitch ? '异常' : '正常';
+		},
 		snakeCols() {
-			if (this.xs) return 12;
-			if (this.sm) return 14;
-			if (this.md) return 16;
-			return 18;
+			if (this.xs) return 17;
+			if (this.sm) return 23;
+			if (this.md) return 27;
+			return 31;
 		},
 		snakeRows() {
-			if (this.xs) return 5;
-			if (this.sm) return 5;
-			return 6;
+			return 5;
 		},
 		snakeCells() {
 			return Array.from({ length: this.snakeCols * this.snakeRows }, (_, id) => ({
@@ -261,20 +292,55 @@ export default {
 				'--snake-cols': this.snakeCols,
 			};
 		},
+		/* clock pixel positions */
+		clockPixels() {
+			if (this.mode !== 'clock') return new Set();
+			const t = this.clockTime;
+			if (!t || t.length < 8) return new Set();
+			const cols = this.snakeCols;
+			const rows = this.snakeRows;
+			const charW = 4;  /* 3 + 1 gap */
+			const totalW = t.length * charW - 1;  /* last char no trailing gap */
+			const startCol = Math.max(0, Math.floor((cols - totalW) / 2));
+			const startRow = Math.max(0, Math.floor((rows - 5) / 2));
+			const set = new Set();
+			for (let ci = 0; ci < t.length; ci++) {
+				const ch = t[ci];
+				const glyph = DIGIT_FONT[ch];
+				if (!glyph) continue;
+				const colBase = startCol + ci * charW;
+				for (let ry = 0; ry < glyph.length; ry++) {
+					const row = startRow + ry;
+					if (row >= rows) break;
+					const bits = glyph[ry];
+					for (let bx = 0; bx < 3; bx++) {
+						if (bits & (1 << (2 - bx))) {
+							const col = colBase + bx;
+							if (col >= 0 && col < cols) {
+								set.add(row * cols + col);
+							}
+						}
+					}
+				}
+			}
+			return set;
+		},
 	},
     watch: {
-      xs() {
-        this.initSnake();
-      },
-      sm() {
-        this.initSnake();
-      },
-      md() {
-        this.initSnake();
+      xs() { this.initSnake(); },
+      sm() { this.initSnake(); },
+      md() { this.initSnake(); },
+      mode(val) {
+        this.stopSnake();
+        this.stopClock();
+        if (val === 'snake') { this.startSnake(); }
+        if (val === 'clock') { this.startClock(); }
       },
     },
     methods:{
+      /* ── Snake ── */
       initSnake(){
+        this.snakeLength = 3;
         const startX = Math.max(3, Math.floor(this.snakeCols / 2));
         const startY = Math.floor(this.snakeRows / 2);
         this.snakeBody = [
@@ -286,21 +352,131 @@ export default {
         this.snakeWanderTarget = this.getRandomSnakeCell();
       },
       startSnake(){
+        if (this.mode !== 'snake') return;
         this.stopSnake();
-        this.snakeTimer = window.setInterval(() => {
-          this.advanceSnake();
-        }, 260);
+        this.snakeTimer = window.setInterval(() => { this.advanceSnake(); }, 260);
       },
       stopSnake(){
-        if (this.snakeTimer) {
-          window.clearInterval(this.snakeTimer);
-          this.snakeTimer = null;
+        if (this.snakeTimer) { window.clearInterval(this.snakeTimer); this.snakeTimer = null; }
+      },
+      setSnakeTarget(cell){ this.snakeTarget = { x: cell.x, y: cell.y }; },
+      advanceSnake(){
+        if (!this.snakeBody.length) { this.initSnake(); return; }
+        const head = this.snakeBody[0];
+        const target = this.snakeTarget || this.snakeWanderTarget || this.getRandomSnakeCell();
+        const nextHead = this.getNextSnakeHead(head, target);
+        const nextBody = [nextHead, ...this.snakeBody];
+        const reached = this.isSameSnakeCell(nextHead, this.snakeTarget);
+        if (reached) {
+          this.snakeLength += 1;
+          if (this.snakeLength > 15) { this.initSnake(); return; }
+          this.snakePulseCell = this.getSnakeCellId(nextHead);
+          window.setTimeout(() => { this.snakePulseCell = null; }, 360);
+          this.snakeTarget = null;
+          this.snakeWanderTarget = this.getRandomSnakeCell();
+          this.snakeBody = nextBody.slice(0, this.snakeLength);
+          return;
+        }
+        if (this.isSameSnakeCell(nextHead, this.snakeWanderTarget)) {
+          this.snakeWanderTarget = this.getRandomSnakeCell();
+        }
+        this.snakeBody = nextBody.slice(0, this.snakeLength);
+      },
+      getNextSnakeHead(head, target){
+        const n = { ...head };
+        const dx = target.x - head.x;
+        const dy = target.y - head.y;
+        if (Math.abs(dx) >= Math.abs(dy) && dx !== 0) n.x += Math.sign(dx);
+        else if (dy !== 0) n.y += Math.sign(dy);
+        else n.x += 1;
+        n.x = (n.x + this.snakeCols) % this.snakeCols;
+        n.y = (n.y + this.snakeRows) % this.snakeRows;
+        return n;
+      },
+      isSnakeHead(cell){ return this.snakeBody[0] && this.isSameSnakeCell(cell, this.snakeBody[0]); },
+      isSnakeBody(cell){ return this.snakeBody.slice(1).some(p => this.isSameSnakeCell(cell, p)); },
+      isSameSnakeCell(a, b){ return !!(a && b && a.x === b.x && a.y === b.y); },
+      getSnakeCellId(cell){ return cell.y * this.snakeCols + cell.x; },
+      getRandomSnakeCell(){
+        return { x: Math.floor(Math.random() * this.snakeCols), y: Math.floor(Math.random() * this.snakeRows) };
+      },
+
+      /* ── Clock ── */
+      startClock(){
+        if (this.mode !== 'clock' || this.clockGlitch) return;
+        if (this.clockTimer) { window.clearTimeout(this.clockTimer); this.clockTimer = null; }
+        const tick = () => {
+          if (this.mode !== 'clock' || this.clockGlitch) return;
+          const now = new Date();
+          const h = String(now.getHours()).padStart(2, '0');
+          const m = String(now.getMinutes()).padStart(2, '0');
+          const s = String(now.getSeconds()).padStart(2, '0');
+          this.clockTime = h + ':' + m + ':' + s;
+          this.clockTimer = window.setTimeout(tick, 1020 - now.getMilliseconds());
+        };
+        tick();
+      },
+      stopClock(){
+        if (this.clockTimer) { window.clearTimeout(this.clockTimer); this.clockTimer = null; }
+        if (this._glitchTimer) { window.clearInterval(this._glitchTimer); this._glitchTimer = null; }
+        this.clockGlitch = false;
+      },
+
+      /* ── Shared ── */
+      resetBoard(){
+        if (this.mode === 'paint') {
+          this.paintedCells = {};
+          localStorage.removeItem('leleo-painted-cells');
+        } else if (this.mode === 'snake') {
+          this.initSnake();
+        } else if (this.mode === 'clock') {
+          this.toggleGlitch();
         }
       },
-      setSnakeTarget(cell){
-        this.snakeTarget = { x: cell.x, y: cell.y };
+      toggleGlitch(){
+        if (this.clockGlitch) {
+          window.clearInterval(this._glitchTimer);
+          this._glitchTimer = null;
+          this.clockGlitch = false;
+          this.startClock();
+        } else {
+          if (this.clockTimer) { window.clearTimeout(this.clockTimer); this.clockTimer = null; }
+          this.clockGlitch = true;
+          const digits = '0123456789';
+          const tick = () => {
+            let s = '';
+            for (let i = 0; i < 8; i++) {
+              s += (i === 2 || i === 5) ? ':' : digits[Math.floor(Math.random() * 10)];
+            }
+            this.clockTime = s;
+          };
+          tick();
+          this._glitchTimer = window.setInterval(tick, 300);
+        }
+      },
+      handleCellClick(cell){
+        if (this.mode === 'paint') {
+          const key = cell.id;
+          let next;
+          if (this.paintedCells[key]) {
+            next = { ...this.paintedCells };
+            delete next[key];
+          } else {
+            next = { ...this.paintedCells, [key]: true };
+          }
+          this.paintedCells = next;
+          localStorage.setItem('leleo-painted-cells', JSON.stringify(next));
+        } else if (this.mode === 'snake') {
+          this.setSnakeTarget(cell);
+        }
       },
       getSnakeCellClass(cell){
+        if (this.mode === 'paint') {
+          return { painted: !!this.paintedCells[cell.id] };
+        }
+        if (this.mode === 'clock') {
+          return { clock: this.clockPixels.has(cell.id) };
+        }
         return {
           head: this.isSnakeHead(cell),
           body: this.isSnakeBody(cell),
@@ -308,135 +484,52 @@ export default {
           pulse: this.snakePulseCell === cell.id,
         };
       },
-      isSnakeHead(cell){
-        return this.snakeBody[0] && this.isSameSnakeCell(cell, this.snakeBody[0]);
+      cellAriaLabel(cell){
+        if (this.mode === 'paint') return this.paintedCells[cell.id] ? '擦除' : '绘制';
+        if (this.mode === 'clock') return '';
+        return '召唤小蛇';
       },
-      isSnakeBody(cell){
-        return this.snakeBody.slice(1).some(part => this.isSameSnakeCell(cell, part));
-      },
-      isSameSnakeCell(a, b){
-        return Boolean(a && b && a.x === b.x && a.y === b.y);
-      },
-      getSnakeCellId(cell){
-        return cell.y * this.snakeCols + cell.x;
-      },
-      getRandomSnakeCell(){
-        const x = Math.floor(Math.random() * this.snakeCols);
-        const y = Math.floor(Math.random() * this.snakeRows);
-        return { x, y };
-      },
-      advanceSnake(){
-        if (!this.snakeBody.length) {
-          this.initSnake();
-          return;
-        }
 
-        const head = this.snakeBody[0];
-        const activeTarget = this.snakeTarget || this.snakeWanderTarget || this.getRandomSnakeCell();
-        const nextHead = this.getNextSnakeHead(head, activeTarget);
-        const nextBody = [nextHead, ...this.snakeBody];
-        const reachedTarget = this.isSameSnakeCell(nextHead, this.snakeTarget);
-        const reachedWander = this.isSameSnakeCell(nextHead, this.snakeWanderTarget);
-
-        if (reachedTarget) {
-          this.snakeScore += 1;
-          this.snakePulseCell = this.getSnakeCellId(nextHead);
-          window.setTimeout(() => {
-            this.snakePulseCell = null;
-          }, 360);
-          this.snakeTarget = null;
-          this.snakeWanderTarget = this.getRandomSnakeCell();
-          this.snakeBody = nextBody.slice(0, 6);
-          return;
-        }
-
-        if (reachedWander) {
-          this.snakeWanderTarget = this.getRandomSnakeCell();
-        }
-
-        this.snakeBody = nextBody.slice(0, 5);
-      },
-      getNextSnakeHead(head, target){
-        const next = { ...head };
-        const deltaX = target.x - head.x;
-        const deltaY = target.y - head.y;
-
-        if (Math.abs(deltaX) >= Math.abs(deltaY) && deltaX !== 0) {
-          next.x += Math.sign(deltaX);
-        } else if (deltaY !== 0) {
-          next.y += Math.sign(deltaY);
-        } else {
-          next.x += 1;
-        }
-
-        next.x = (next.x + this.snakeCols) % this.snakeCols;
-        next.y = (next.y + this.snakeRows) % this.snakeRows;
-        return next;
-      },
+      /* ── Visit / search ── */
       readVisitStats(){
-        try {
-          return JSON.parse(localStorage.getItem('leleo-project-visits') || '{}');
-        } catch (error) {
-          return {};
-        }
+        try { return JSON.parse(localStorage.getItem('leleo-project-visits') || '{}'); }
+        catch (_) { return {}; }
       },
-      getProjectVisitCount(item){
-        return Number(this.visitStats?.[item.url] || 0);
-      },
+      getProjectVisitCount(item){ return Number(this.visitStats?.[item.url] || 0); },
       recordProjectVisit(item){
-        const nextStats = { ...this.visitStats, [item.url]: this.getProjectVisitCount(item) + 1 };
-        this.visitStats = nextStats;
-        localStorage.setItem('leleo-project-visits', JSON.stringify(nextStats));
+        const s = { ...this.visitStats, [item.url]: this.getProjectVisitCount(item) + 1 };
+        this.visitStats = s;
+        localStorage.setItem('leleo-project-visits', JSON.stringify(s));
       },
       projectcardsShow(key){
-        for(let i = 0;i < this.projectcards.length;i++){
-          if(i != key){
-            this.projectcards[i].show = false;
-          }
+        for(let i = 0; i < this.projectcards.length; i++){
+          if(i !== key) this.projectcards[i].show = false;
         }
       },
-	  performSearch() {
-		const query = this.searchQuery.trim();
-		if (!query) return;
-
-		if (this.isUrl) {
-			let url = query;
-			// 自动补全协议（如果缺少）
-			if (!/^[a-z]+:\/\//i.test(url)) {
-				url = 'http://' + url; // 默认用http
-			}
-
-			window.open(url, '_blank');
-		} else {
-			const engineUrls = {
-				google: `https://www.google.com/search?q=${encodeURIComponent(query)}`,
-				bing: `https://www.bing.com/search?q=${encodeURIComponent(query)}`,
-				baidu: `https://www.baidu.com/s?wd=${encodeURIComponent(query)}`,
-				yandex: `https://yandex.com/search/?text=${encodeURIComponent(query)}`,
-				duckduckgo: `https://duckduckgo.com/?q=${encodeURIComponent(query)}`
-			};
-			window.open(engineUrls[this.selectedEngine.value], '_blank');
-		}
-	  },
-	  isLikelyUrl(input) {
-		// 移除首尾空格
-		const str = input.trim();
-
-		// 情况1：明确包含协议头（http/https/ftp等）
-		if (/^(https?|ftp):\/\//i.test(str)) return true;
-
-		// 情况2：符合域名格式（支持国际化域名）
-		const domainPattern = /^([a-z0-9-]+\.)+[a-z]{2,}(\/.*)?$/i;
-
-		// 情况3：localhost或IP地址
-		const localPattern = /^(localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(:\d+)?(\/.*)?$/i;
-
-
-		return (
-			domainPattern.test(str) ||
-			localPattern.test(str)
-		);
-		}
+      performSearch() {
+        const q = this.searchQuery.trim();
+        if (!q) return;
+        if (this.isUrl) {
+          let url = q;
+          if (!/^[a-z]+:\/\//i.test(url)) url = 'http://' + url;
+          window.open(url, '_blank');
+        } else {
+          const engines = {
+            google: `https://www.google.com/search?q=${encodeURIComponent(q)}`,
+            bing: `https://www.bing.com/search?q=${encodeURIComponent(q)}`,
+            baidu: `https://www.baidu.com/s?wd=${encodeURIComponent(q)}`,
+            yandex: `https://yandex.com/search/?text=${encodeURIComponent(q)}`,
+            duckduckgo: `https://duckduckgo.com/?q=${encodeURIComponent(q)}`
+          };
+          window.open(engines[this.selectedEngine.value], '_blank');
+        }
+      },
+      isLikelyUrl(input) {
+        const s = input.trim();
+        if (/^(https?|ftp):\/\//i.test(s)) return true;
+        return /^([a-z0-9-]+\.)+[a-z]{2,}(\/.*)?$/i.test(s) ||
+               /^(localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(:\d+)?(\/.*)?$/i.test(s);
+      },
     }
 };
 </script>

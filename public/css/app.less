@@ -172,7 +172,7 @@
     }
     .snake-panel{
         display: grid;
-        grid-template-columns: minmax(250px, 0.72fr) minmax(420px, 1.28fr);
+        grid-template-columns: minmax(170px, 0.65fr) minmax(280px, 1.35fr);
         gap: 0.95rem;
         align-items: stretch;
         margin: -0.25rem 0 1rem;
@@ -181,26 +181,29 @@
     .snake-copy,
     .snake-board{
         border: 1px solid rgba(255, 255, 255, 0.16);
-        border-radius: 8px;
+        border-radius: 10px;
         background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.055));
         box-shadow: 0 12px 34px rgba(0, 0, 0, 0.16);
     }
     .snake-copy{
-        min-height: 138px;
-        padding: 1rem;
+        min-height: 58px;
+        padding: 0.6rem 1rem;
         color: var(--leleo-vcard-color);
         background:
             radial-gradient(circle at 92% 18%, rgba(124, 225, 255, 0.28), transparent 32%),
             linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05));
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
-    .snake-copy span{
+    .snake-label{
         color: rgba(255,255,255,0.62);
         font-size: 0.76rem;
         text-transform: uppercase;
-        letter-spacing: 0.06em;
+        letter-spacing: 0.05em;
     }
     .snake-copy h3{
-        margin: 0.22rem 0 0.35rem;
+        margin: 0.2rem 0 0.25rem;
         color: #fff;
         font-size: clamp(1.35rem, 2vw, 1.9rem);
         line-height: 1.08;
@@ -208,80 +211,184 @@
     .snake-copy p{
         max-width: 480px;
         margin: 0;
-        color: rgba(255,255,255,0.72);
+        color: rgba(255,255,255,0.70);
         line-height: 1.65;
     }
-    .snake-meta{
+
+    /* ── Action row ── */
+    .snake-actions{
         display: flex;
-        align-items: baseline;
-        gap: 0.45rem;
-        margin-top: 0.85rem;
-        color: rgba(255,255,255,0.68);
+        align-items: center;
+        gap: 0.65rem;
+        margin-top: 0.5rem;
     }
-    .snake-meta b{
+    .reset-btn{
+        padding: 0.38rem 0.85rem;
+        border: 1px solid rgba(255,255,255,0.18);
+        border-radius: 18px;
+        background: rgba(255,255,255,0.06);
+        color: rgba(255,255,255,0.7);
+        font-size: 0.82rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+    }
+    .reset-btn:hover{
+        background: rgba(255,255,255,0.14);
+        border-color: rgba(255,255,255,0.3);
         color: #fff;
-        font-size: 1.25rem;
+    }
+    /* ── Mode toggle ── */
+    .mode-toggle{
+        cursor: pointer;
+        user-select: none;
+        flex-shrink: 0;
+    }
+    .toggle-track{
+        position: relative;
+        display: inline-block;
+        width: 144px;
+        height: 38px;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.07);
+        border: 1px solid rgba(255,255,255,0.14);
+        transition: background 0.35s ease, border-color 0.35s ease;
+        overflow: visible;
+    }
+    .toggle-track.mode-snake{
+        background: rgba(255,255,255,0.07);
+        border-color: rgba(255,255,255,0.14);
+    }
+    .toggle-track.mode-paint{
+        background: rgba(255, 170, 70, 0.16);
+        border-color: rgba(255, 170, 70, 0.38);
+    }
+    .toggle-track.mode-clock{
+        background: rgba(255, 90, 90, 0.16);
+        border-color: rgba(255, 90, 90, 0.38);
+    }
+    .toggle-thumb{
+        position: absolute;
+        top: 5px;
+        width: 28px;
+        height: 28px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, rgba(124, 225, 255, 0.95), rgba(72, 190, 240, 0.85));
+        box-shadow: 0 2px 12px rgba(80, 200, 250, 0.45);
+        left: 10px;
+        transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1), background 0.35s ease, box-shadow 0.35s ease;
+        z-index: 0;
+    }
+    .toggle-track.mode-paint .toggle-thumb{
+        left: 58px;
+        background: linear-gradient(135deg, rgba(255, 175, 70, 0.95), rgba(255, 130, 40, 0.85));
+        box-shadow: 0 2px 12px rgba(255, 150, 50, 0.45);
+    }
+    .toggle-track.mode-clock .toggle-thumb{
+        left: 106px;
+        background: linear-gradient(135deg, rgba(255, 120, 120, 0.95), rgba(220, 60, 60, 0.85));
+        box-shadow: 0 2px 12px rgba(255, 80, 80, 0.45);
+    }
+    .toggle-icon{
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2;
+        font-size: 16px;
         line-height: 1;
+        transition: opacity 0.28s ease, transform 0.28s ease;
+        cursor: pointer;
     }
-    .snake-meta small{
-        margin-right: 0.65rem;
-    }
+    .toggle-icon:nth-child(2){ left: 24px; }
+    .toggle-icon:nth-child(3){ left: 72px; }
+    .toggle-icon:nth-child(4){ left: 120px; }
+    .toggle-track.mode-snake .toggle-icon:nth-child(2){ opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    .toggle-track.mode-snake .toggle-icon:nth-child(3),
+    .toggle-track.mode-snake .toggle-icon:nth-child(4){ opacity: 0.35; transform: translate(-50%, -50%) scale(0.82); }
+    .toggle-track.mode-paint .toggle-icon:nth-child(3){ opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    .toggle-track.mode-paint .toggle-icon:nth-child(2),
+    .toggle-track.mode-paint .toggle-icon:nth-child(4){ opacity: 0.35; transform: translate(-50%, -50%) scale(0.82); }
+    .toggle-track.mode-clock .toggle-icon:nth-child(4){ opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    .toggle-track.mode-clock .toggle-icon:nth-child(2),
+    .toggle-track.mode-clock .toggle-icon:nth-child(3){ opacity: 0.35; transform: translate(-50%, -50%) scale(0.82); }
+
     .snake-board{
         display: grid;
         grid-template-columns: repeat(var(--snake-cols), minmax(0, 1fr));
         gap: 5px;
-        min-height: 138px;
-        padding: 0.9rem;
+        min-height: 58px;
+        padding: 0.7rem 0.85rem;
         overflow: hidden;
         background:
             linear-gradient(135deg, rgba(7, 13, 18, 0.28), rgba(255, 255, 255, 0.08)),
-            repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 46px);
+            repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 48px);
     }
     .snake-cell{
         position: relative;
         aspect-ratio: 1;
         min-width: 0;
-        border: 1px solid rgba(255,255,255,0.10);
-        border-radius: 6px;
-        background: rgba(255,255,255,0.065);
+        border: 1px solid rgba(255,255,255,0.09);
+        border-radius: 4px;
+        background: rgba(255,255,255,0.055);
         cursor: crosshair;
-        transition: background .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
     }
-    .snake-cell:hover,
+    .snake-cell:hover{
+        border-color: rgba(178, 235, 255, 0.65);
+        background: rgba(90, 204, 255, 0.14);
+        box-shadow: 0 0 10px rgba(90, 204, 255, 0.2);
+    }
     .snake-cell.target{
-        border-color: rgba(178, 235, 255, 0.72);
-        background: rgba(90, 204, 255, 0.20);
-        box-shadow: 0 0 18px rgba(90, 204, 255, 0.30);
+        border-color: rgba(178, 235, 255, 0.78);
+        background: rgba(90, 204, 255, 0.22);
+        box-shadow: 0 0 18px rgba(90, 204, 255, 0.32);
     }
     .snake-cell.body{
-        border-color: rgba(177, 245, 218, 0.58);
-        background: linear-gradient(135deg, rgba(159, 255, 207, 0.78), rgba(71, 190, 255, 0.50));
-        box-shadow: 0 0 12px rgba(135, 240, 220, 0.32);
+        border-color: rgba(140, 235, 210, 0.58);
+        background: linear-gradient(135deg, rgba(140, 245, 200, 0.78), rgba(72, 190, 255, 0.50));
+        box-shadow: 0 0 12px rgba(120, 230, 210, 0.32);
     }
     .snake-cell.head{
         border-color: rgba(255, 255, 255, 0.86);
-        background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(124, 225, 255, 0.82));
-        box-shadow: 0 0 20px rgba(189, 235, 255, 0.65);
-        transform: scale(1.08);
+        background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(124, 225, 255, 0.82));
+        box-shadow: 0 0 20px rgba(180, 235, 255, 0.68);
+        transform: scale(1.06);
     }
     .snake-cell.pulse::after{
         content: "";
         position: absolute;
         inset: -5px;
         border-radius: 8px;
-        border: 1px solid rgba(255,255,255,0.72);
+        border: 1px solid rgba(255,255,255,0.7);
         animation: snake-pulse .36s ease-out;
         pointer-events: none;
     }
     @keyframes snake-pulse{
-        from{
-            opacity: 0.9;
-            transform: scale(0.72);
-        }
-        to{
-            opacity: 0;
-            transform: scale(1.45);
-        }
+        from{ opacity: 0.9; transform: scale(0.72); }
+        to{ opacity: 0; transform: scale(1.45); }
+    }
+
+    /* ── Clock-mode cell ── */
+    .snake-cell.clock{
+        border-color: rgba(255, 120, 120, 0.72);
+        background: linear-gradient(135deg, rgba(255, 140, 140, 0.88), rgba(220, 60, 60, 0.55));
+        box-shadow: 0 0 12px rgba(255, 80, 80, 0.36);
+        transition: none;
+    }
+    /* ── Paint-mode cell ── */
+    .snake-cell.painted{
+        border-color: rgba(255, 180, 80, 0.72);
+        background: linear-gradient(135deg, rgba(255, 200, 110, 0.88), rgba(255, 140, 50, 0.55));
+        box-shadow: 0 0 14px rgba(255, 155, 55, 0.36);
+        animation: paint-pop .2s ease-out;
+    }
+    .snake-cell.painted:hover{
+        border-color: rgba(255, 195, 110, 0.88);
+        background: linear-gradient(135deg, rgba(255, 180, 90, 0.7), rgba(255, 120, 35, 0.42));
+        box-shadow: 0 0 16px rgba(255, 145, 45, 0.4);
+    }
+    @keyframes paint-pop{
+        from{ transform: scale(0.55); opacity: 0.45; }
+        to{ transform: scale(1); opacity: 1; }
     }
     .focus-lane{
         display: grid;
