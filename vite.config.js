@@ -27,6 +27,7 @@ export default defineConfig({
     cssMinify: true,
     cssCodeSplit: true,
     rollupOptions: {
+      input: 'home.html',
       output: {
         manualChunks(id) {
           if (id.includes('node_modules/vue')) return 'vue'

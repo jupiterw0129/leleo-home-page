@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>JupiterW · 灵界之门</title>
+<style>
+  :root {
+    --accent:#5cc8ff; --accent-glow:rgba(92,200,255,0.30);
+    --danger:#ff6b7a; --card-bg:rgba(16,22,30,0.55);
+    --card-border:rgba(255,255,255,0.10); --text-primary:rgba(255,255,255,0.92);
+    --text-secondary:rgba(255,255,255,0.56); --input-bg:rgba(255,255,255,0.05);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+
+  body {
+    font-family:'Georgia','Noto Serif SC',serif; background:#0d1117;
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    overflow:hidden; color:var(--text-primary); -webkit-font-smoothing:antialiased;
+    cursor:crosshair;
+  }
+
+  #starfield{position:fixed;inset:0;z-index:0;pointer-events:none}
+  #constCanvas{position:fixed;inset:0;z-index:50;pointer-events:none}
+
+  /* ── Click orb (appears where you click) ── */
+  .click-orb {
+    position:fixed; z-index:5; pointer-events:none;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(180,220,255,0.7),rgba(92,160,220,0.3) 30%,rgba(40,80,160,0.08) 60%,transparent 100%);
+    animation:orb-pop 1.4s ease-out both;
+  }
+  @keyframes orb-pop {
+    0%{width:0;height:0;opacity:0;transform:translate(-50%,-50%)scale(0)}
+    30%{width:120px;height:120px;opacity:0.9;transform:translate(-50%,-50%)scale(1)}
+    100%{width:280px;height:280px;opacity:0;transform:translate(-50%,-50%)scale(1.6)}
+  }
+
+  /* ── Ambient orbs — decorative ── */
+  .ambient-orb {
+    position:fixed;border-radius:50%;filter:blur(120px);
+    opacity:0.08;z-index:0;pointer-events:none;
+  }
+  .ambient-orb.orb-1{width:600px;height:600px;background:radial-gradient(circle,#3a7bd5,transparent);top:-250px;left:-200px;animation:drift1 18s infinite}
+  .ambient-orb.orb-2{width:500px;height:500px;background:radial-gradient(circle,#5cc8ff,transparent);bottom:-200px;right:-150px;animation:drift2 22s infinite}
+  .ambient-orb.orb-3{width:350px;height:350px;background:radial-gradient(circle,#a78bfa,transparent);top:40%;left:55%;animation:drift3 20s infinite}
+  @keyframes drift1{0%,100%{translate(0,0)scale(1)}33%{translate(80px,40px)scale(1.15)}66%{translate(-30px,-50px)scale(.9)}}
+  @keyframes drift2{0%,100%{translate(0,0)scale(1)}33%{translate(-60px,-30px)scale(1.1)}66%{translate(40px,50px)scale(.85)}}
+  @keyframes drift3{0%,100%{translate(0,0)scale(1);opacity:.08}50%{translate(-50px,30px)scale(1.25);opacity:.14}}
+
+  /* ── Constellation stars (drifting, twinkling, no numbers) ── */
+  .cstar {
+    --glow:150,195,255;
+    position:fixed;left:0;top:0;z-index:55;cursor:crosshair;pointer-events:auto;
+    will-change:transform;
+  }
+  .cstar::after{content:'';position:absolute;top:-8px;right:-8px;bottom:-8px;left:-8px;border-radius:50%}
+  .cstar .glow {
+    width:26px;height:26px;border-radius:50%;
+    background:radial-gradient(circle at 50% 50%,
+      rgba(255,255,255,0.95) 0%,
+      rgba(var(--glow),1) 20%,
+      rgba(var(--glow),0.5) 50%,
+      rgba(var(--glow),0.12) 78%,
+      transparent 100%);
+    box-shadow:
+      0 0 5px rgba(255,255,255,0.9),
+      0 0 16px rgba(var(--glow),0.75),
+      0 0 40px rgba(var(--glow),0.35);
+    transition:all .3s ease; position:relative;
+  }
+  .cstar:hover .glow{transform:scale(1.5);box-shadow:0 0 8px rgba(255,255,255,1),0 0 22px rgba(var(--glow),0.7),0 0 48px rgba(var(--glow),0.4)}
+  .cstar.correct .glow{animation:none;opacity:1;transform:scale(1.3);box-shadow:0 0 6px rgba(255,255,255,0.9),0 0 18px rgba(120,200,255,0.55),0 0 34px rgba(92,200,255,0.3);pointer-events:none}
+  .cstar.wrong .glow{animation:shake .4s ease;box-shadow:0 0 25px rgba(255,107,122,0.8)!important}
+  @keyframes shake{0%,100%{translate(0)}20%{translate(-5px)}40%{translate(5px)}60%{translate(-3px)}80%{translate(3px)}}
+  /* diffraction spikes on bright stars */
+  .cstar.bright .glow::before,
+  .cstar.bright .glow::after{
+    content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;
+  }
+  .cstar.bright .glow::before{width:280%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.6) 50%,transparent)}
+  .cstar.bright .glow::after{width:1px;height:280%;background:linear-gradient(0deg,transparent,rgba(255,255,255,0.5) 50%,transparent)}
+
+  /* ── Chain mode: hide input + sigil + title ── */
+  body.chain-active .login-card,
+  body.chain-active .typer-row,
+  body.chain-active .brand-mark{display:none}
+
+  /* ── Gather (归位) atmosphere: ominous vignette + violet tint ── */
+  body.gathering::before{
+    content:'';position:fixed;inset:0;z-index:40;pointer-events:none;
+    background:radial-gradient(ellipse at 50% 50%,rgba(0,0,0,0) 30%,rgba(0,0,0,0.72) 100%);
+    animation:gather-vignette 2.6s ease-in both;
+  }
+  body.gathering::after{
+    content:'';position:fixed;inset:0;z-index:41;pointer-events:none;
+    background:radial-gradient(ellipse at 50% 60%,rgba(90,20,120,0) 42%,rgba(70,15,60,0.5) 100%);
+    animation:gather-vignette 2.6s ease-in both;
+  }
+  @keyframes gather-vignette{from{opacity:0}to{opacity:1}}
+  .ripple{position:fixed;z-index:70;border-radius:50%;pointer-events:none;
+    border:1.5px solid rgba(150,210,255,0.45);
+    box-shadow:0 0 30px rgba(120,180,255,0.35),inset 0 0 30px rgba(120,180,255,0.2);
+    transform:translate(-50%,-50%);
+    animation:ripple 1.8s cubic-bezier(.16,1,.3,1) both}
+  @keyframes ripple{0%{width:0;height:0;opacity:0.8}100%{width:min(70vw,70vh);height:min(70vw,70vh);opacity:0}}
+
+  /* ── Spark burst ── */
+  .spark{position:fixed;z-index:60;pointer-events:none;width:4px;height:4px;border-radius:50%;background:var(--accent);animation:spark-fly .7s ease-out both}
+  @keyframes spark-fly{from{opacity:1;transform:translate(0,0)scale(1)}to{opacity:0;transform:translate(var(--sx),var(--sy))scale(0)}}
+
+  /* ── 归位 flash ── */
+  .align-flash{position:fixed;inset:0;z-index:60;pointer-events:none;background:radial-gradient(circle,rgba(92,200,255,0.30),transparent 70%);animation:align-pulse 1.8s ease-out both}
+  @keyframes align-pulse{0%{opacity:0;transform:scale(0.1)}30%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(2.2)}}
+
+  /* ── Main ── */
+  .main-stage{position:relative;z-index:10;width:min(440px,92vw);display:flex;flex-direction:column;gap:1.6rem;padding:2rem 0 3rem;animation:stage-rise .9s cubic-bezier(.16,1,.3,1)both;pointer-events:none;transition:opacity .5s ease}
+  .main-stage>*{pointer-events:auto}
+  .main-stage.hidden{opacity:0;pointer-events:none!important}
+  @keyframes stage-rise{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:translateY(0)}}
+  .brand-mark{display:flex;align-items:center;gap:.6rem;opacity:0;animation:fade-in .7s .15s ease both;user-select:none}
+  .brand-sigil{width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 40% 35%,rgba(92,200,255,.55),rgba(30,64,120,.35));border:1.5px solid rgba(92,200,255,.35);display:flex;align-items:center;justify-content:center;font-size:1.35rem;cursor:pointer;position:relative;box-shadow:0 0 30px rgba(92,200,255,.18);transition:all .25s ease}
+  .brand-sigil:hover{box-shadow:0 0 40px rgba(92,200,255,.35);transform:scale(1.05)}
+  .brand-sigil.flash{box-shadow:0 0 60px rgba(92,200,255,.8)!important;border-color:rgba(92,200,255,.9)!important}
+  .brand-name{font-size:1.05rem;font-weight:600;letter-spacing:.06em;color:var(--text-secondary)}
+  .brand-name strong{color:#fff;font-weight:700}
+  .typer-row{height:3.8rem;display:flex;align-items:flex-start;opacity:0;animation:fade-in .7s .35s ease both}
+  .typer-text{font-size:1.5rem;font-weight:600;letter-spacing:.04em;color:#fff;line-height:1.3;text-shadow:0 4px 20px rgba(0,0,0,.5)}
+  .typer-cursor{display:inline-block;width:2px;height:1.15em;background:var(--accent);margin-left:2px;vertical-align:text-bottom;flex-shrink:0;animation:cursor-blink .8s step-end infinite}
+  @keyframes cursor-blink{0%,100%{opacity:1}50%{opacity:0}}
+  @keyframes fade-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ── Card & inputs ── */
+  .login-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;backdrop-filter:blur(24px)saturate(130%);-webkit-backdrop-filter:blur(24px)saturate(130%);box-shadow:0 8px 48px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.04);padding:2rem 1.8rem 1.8rem;display:flex;flex-direction:column;gap:1.25rem;opacity:0;animation:fade-in .7s .5s ease both;transition:border-color .4s ease,box-shadow .4s ease,transform .4s ease}
+  .login-card.shake{animation:card-shake .5s ease, fade-in .7s .5s ease both;border-color:rgba(255,107,122,.45)!important;box-shadow:0 8px 48px rgba(0,0,0,.4),0 0 50px rgba(255,107,122,0.25),inset 0 1px 0 rgba(255,255,255,.04)!important}
+  @keyframes card-shake{0%,100%{transform:translateX(0)}15%{translateX(-6px)}30%{translateX(6px)}45%{translateX(-4px)}60%{translateX(4px)}75%{translateX(-2px)}90%{translateX(2px)}}
+  .input-group{display:flex;flex-direction:column;gap:.4rem}
+  .input-label{font-size:.8rem;letter-spacing:.05em;text-transform:uppercase;color:var(--text-secondary)}
+  .input-wrap{position:relative;display:flex;align-items:center}
+  .input-wrap input{width:100%;padding:.85rem 2.8rem .85rem 1rem;background:var(--input-bg);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#fff;font-size:1rem;font-family:inherit;letter-spacing:.02em;transition:all .3s ease;outline:none}
+  .input-wrap input::placeholder{color:rgba(255,255,255,.24)}
+  .input-wrap input:focus{border-color:rgba(92,200,255,.4);background:rgba(92,200,255,.12);box-shadow:0 0 24px rgba(92,200,255,.08)}
+  .input-icon{position:absolute;right:.9rem;font-size:1.15rem;color:var(--text-secondary);pointer-events:none}
+  .pw-toggle{position:absolute;right:2.6rem;font-size:.85rem;color:var(--text-secondary);cursor:pointer;background:none;border:none;padding:4px;transition:color .25s ease,transform .2s ease;z-index:2}
+  .pw-toggle:hover{color:var(--accent);transform:scale(1.12)}
+  .error-msg{background:rgba(255,107,122,.1);border:1px solid rgba(255,107,122,.22);border-radius:8px;padding:.7rem 1rem;font-size:.84rem;color:var(--danger);display:none;align-items:center;gap:.5rem}
+  .error-msg.visible{display:flex;animation:error-in .3s ease}
+  @keyframes error-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+  .aux-row{display:flex;align-items:center;justify-content:space-between;font-size:.82rem;color:var(--text-secondary)}
+  .aux-link{color:var(--text-secondary);text-decoration:none;border-bottom:1px solid transparent;transition:color .25s ease}
+  .aux-link:hover{color:var(--accent);border-bottom-color:var(--accent)}
+  .btn-submit{width:100%;padding:.9rem;border:none;border-radius:10px;background:linear-gradient(135deg,rgba(92,200,255,.18),rgba(72,150,220,.1));border:1px solid rgba(92,200,255,.22);color:#fff;font-size:1rem;font-weight:600;font-family:inherit;letter-spacing:.06em;cursor:pointer;position:relative;overflow:hidden;transition:all .35s ease}
+  .btn-submit::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,var(--accent),#3a7bd5);opacity:0;transition:opacity .35s ease}
+  .btn-submit:hover::before{opacity:1}
+  .btn-submit:hover{border-color:rgba(92,200,255,.55);box-shadow:0 0 40px var(--accent-glow),0 8px 28px rgba(0,0,0,.35);transform:translateY(-1px)}
+  .btn-submit:active{transform:translateY(0)scale(.985)}
+  .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%)translateY(120px);background:rgba(16,22,30,.9);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:.85rem 1.5rem;color:#fff;font-size:.9rem;backdrop-filter:blur(16px);z-index:100;max-width:90vw;text-align:center;transition:transform .4s cubic-bezier(.16,1,.3,1);box-shadow:0 12px 40px rgba(0,0,0,.5)}
+  .toast.show{transform:translateX(-50%)translateY(0)}
+  .toast.error{border-color:rgba(255,107,122,.4);box-shadow:0 12px 40px rgba(255,107,122,.15)}
+  .toast.success{border-color:rgba(74,222,128,.35);box-shadow:0 12px 40px rgba(74,222,128,.12)}
+  .success-overlay{position:fixed;inset:0;z-index:200;background:rgba(13,17,23,.85);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;flex-direction:column;gap:1.2rem}
+  .success-overlay.show{display:flex}
+  .success-sigil{font-size:4rem;animation:success-pop .6s cubic-bezier(.16,1,.3,1)both}
+  .success-text{font-size:1.6rem;color:#fff;font-weight:700;text-shadow:0 0 40px var(--accent-glow);animation:success-pop .6s .15s cubic-bezier(.16,1,.3,1)both}
+  .success-sub{font-size:.95rem;color:var(--text-secondary);animation:success-pop .6s .3s cubic-bezier(.16,1,.3,1)both}
+  @keyframes success-pop{from{opacity:0;transform:scale(.8)translateY(20px)}to{opacity:1;transform:scale(1)translateY(0)}}
+  @media(max-width:480px){.login-card{padding:1.5rem 1.2rem 1.3rem;gap:1rem}.typer-row{height:3.2rem}.typer-text{font-size:1.2rem}}
+</style>
+</head>
+<body>
+
+<div class="ambient-orb orb-1"></div><div class="ambient-orb orb-2"></div><div class="ambient-orb orb-3"></div>
+<canvas id="starfield"></canvas>
+<canvas id="constCanvas"></canvas>
+
+<!-- 9 constellation stars (DOM, always present) -->
+<div id="cstarZone" style="position:fixed;inset:0;z-index:55;pointer-events:none"></div>
+
+<!-- 归位 trail canvas -->
+<canvas id="trailCanvas" style="position:fixed;inset:0;z-index:45;pointer-events:none"></canvas>
+
+<div class="main-stage" id="mainStage">
+  <div class="brand-mark">
+    <div class="brand-sigil" id="sigil">
+      🎭
+    </div>
+    <div class="brand-name"><strong>JupiterW</strong> · 灵界</div>
+  </div>
+  <div class="typer-row"><span class="typer-text" id="typer"></span><span class="typer-cursor"></span></div>
+  <div class="login-card" id="loginCard">
+    <div class="error-msg" id="errorMsg"><span>⚠</span><span id="errorText"></span></div>
+    <div class="input-group"><span class="input-label">灵界坐标 / 邮箱</span><div class="input-wrap"><input type="text" id="username" placeholder="seer@fool.church" autocomplete="off" spellcheck="false" /><span class="input-icon">✦</span></div></div>
+    <div class="input-group"><span class="input-label">密语 / 密码</span><div class="input-wrap"><input type="password" id="password" placeholder="········" autocomplete="off" /><button class="pw-toggle" id="pwToggle">👁</button><span class="input-icon">🔑</span></div></div>
+    <div class="aux-row"><label><input type="checkbox" id="remember" /><span>记住此坐标</span></label><a class="aux-link" href="#" onclick="event.preventDefault();showToast('向「愚者」祈祷中…','')">忘记密语？</a></div>
+    <button class="btn-submit" id="btnSubmit" onclick="decoyLogin()"><span class="btn-label">踏入灵界</span></button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="success-overlay" id="successOverlay"><div class="success-sigil">🎭</div><div class="success-text">灵界之门已开启</div><div class="success-sub" id="successSub"></div></div>
+
+<script>
+  /* ══════════════════════════════════════════
+     CANVAS + SIZING
+     ══════════════════════════════════════════ */
+  const sfCanvas=document.getElementById('starfield'),sfCtx=sfCanvas.getContext('2d');
+  const constCanvas=document.getElementById('constCanvas'),constCtx=constCanvas.getContext('2d');
+  const trailCanvas=document.getElementById('trailCanvas'),trailCtx=trailCanvas.getContext('2d');
+  const cstarZone=document.getElementById('cstarZone');
+  const cometCanvas=document.createElement('canvas');
+  cometCanvas.style.cssText='position:fixed;inset:0;z-index:44;pointer-events:none';
+  document.body.appendChild(cometCanvas);
+  const cometCtx=cometCanvas.getContext('2d');
+  let W,H;
+
+  function resizeAll(){W=window.innerWidth;H=window.innerHeight;sfCanvas.width=W;sfCanvas.height=H;constCanvas.width=W;constCanvas.height=H;trailCanvas.width=W;trailCanvas.height=H;cometCanvas.width=W;cometCanvas.height=H}
+  window.addEventListener('resize',resizeAll);resizeAll();
+
+  /* ══════════════════════════════════════════
+     BACKGROUND STARFIELD
+     ══════════════════════════════════════════ */
+  class BgStar{constructor(){this.reset(true)}reset(i){this.x=Math.random()*W;this.y=Math.random()*H;this.r=.5+Math.random()*1.8;this.vx=(Math.random()-.5)*.2;this.vy=(Math.random()-.5)*.2;this.op=.25+Math.random()*.7;this.sp=.004+Math.random()*.018;this.ph=Math.random()*Math.PI*2;if(i)this.y=Math.random()*H}update(){this.x+=this.vx;this.y+=this.vy;if(this.x<-20||this.x>W+20||this.y<-20||this.y>H+20)this.reset();this.ph+=this.sp}draw(c){const a=this.op*(.55+.45*Math.sin(this.ph));c.beginPath();c.arc(this.x,this.y,this.r,0,Math.PI*2);c.fillStyle=`rgba(180,220,255,${a})`;c.fill();if(this.r>1.3){c.beginPath();c.arc(this.x,this.y,this.r*3,0,Math.PI*2);c.fillStyle=`rgba(140,200,255,${a*.10})`;c.fill()}}}
+  const bgStars=[];for(let i=0;i<110;i++)bgStars.push(new BgStar());
+  function drawBg(){sfCtx.clearRect(0,0,W,H);for(let i=0;i<bgStars.length;i++){for(let j=i+1;j<bgStars.length;j++){const d=Math.hypot(bgStars[i].x-bgStars[j].x,bgStars[i].y-bgStars[j].y);if(d<85){sfCtx.beginPath();sfCtx.moveTo(bgStars[i].x,bgStars[i].y);sfCtx.lineTo(bgStars[j].x,bgStars[j].y);sfCtx.strokeStyle=`rgba(140,200,255,${.035*(1-d/85)})`;sfCtx.lineWidth=.5;sfCtx.stroke()}}}bgStars.forEach(s=>{s.update();s.draw(sfCtx)})}
+
+  /* ══════════════════════════════════════════
+     CLICK ORB —光球特效 at click position
+     ══════════════════════════════════════════ */
+  document.addEventListener('click',(e)=>{
+    if(e.target.closest('.cstar')||e.target.closest('#sigil')||e.target.closest('.login-card'))return;
+    const orb=document.createElement('div');orb.className='click-orb';
+    orb.style.left=e.clientX+'px';orb.style.top=e.clientY+'px';
+    // Slight random variation
+    orb.style.animationDuration=(1.2+Math.random()*.6)+'s';
+    document.body.appendChild(orb);
+    setTimeout(()=>orb.remove(),2000);
+  });
+
+  /* ══════════════════════════════════════════
+     TYPEWRITER (stage-aware: each stage prints its own text)
+     ══════════════════════════════════════════ */
+  const typerEl=document.getElementById('typer');
+  let ci=0,typedText='';
+  function stagePhrase(){
+    if(auth.kb&&auth.st)return '欢迎回到源堡，非凡者。';          // 仅正确登录后
+    if(auth.kb)return '密语已验。群星仍在游荡，归位它们。';
+    if(auth.st)return '群星已归位。还有一句密语，未说出口。';
+    return '这位先生，请出示您的灵界凭证。';
+  }
+  function ttick(){
+    if(document.body.classList.contains('chain-active')){setTimeout(ttick,500);return}  // 按需：隐藏时暂停
+    const target=stagePhrase();
+    if(target!==typedText){typedText=target;ci=0;}              // 阶段变化 → 重新打字
+    if(ci<typedText.length){ci++;typerEl.textContent=typedText.slice(0,ci);setTimeout(ttick,55+Math.random()*28)}
+    else{setTimeout(ttick,500)}                                 // 打完停留，光标闪烁
+  }
+  setTimeout(ttick,600);
+
+  /* ══════════════════════════════════════════
+     AUTH
+     ══════════════════════════════════════════ */
+  const auth={kb:false,st:false};
+  function pass(m){if(auth[m])return;auth[m]=true;if(auth.kb&&auth.st){loginSuccess();return}showToast(`✦ ${m==='kb'?'键盘密语':'群星归位'} 验证通过… 还需 1 层认证`,'success')}
+
+  // METHOD 1: Keyboard
+  const SEQ='fool';let kbuf='',kt=0;
+  document.addEventListener('keydown',(e)=>{const t=document.activeElement?.tagName?.toLowerCase();if(t==='input'||t==='textarea')return;if(e.key.length!==1)return;kbuf+=e.key.toLowerCase();clearTimeout(kt);kt=setTimeout(()=>{kbuf=''},2000);if(kbuf.length>20)kbuf=kbuf.slice(-10);if(kbuf.endsWith(SEQ)){kbuf='';clearTimeout(kt);pass('kb')}});
+
+  /* ══════════════════════════════════════════
+     METHOD 2: 9 CONSTELLATION STARS
+     Drift slowly (wrap around, no bounce). Click sigil → they fly
+     into a random ordered pattern. No numbers — order follows
+     1→9 as left→right / top→down / centre→out. Password 1·3·4·9.
+     ══════════════════════════════════════════ */
+  const CODE=[0,2,3,8];   // stars 1, 3, 4, 9 (0-indexed)
+  let chainMode=false,progress=0,patternLocked=false,revealAlpha=0;
+  let cstars=[];        // {idx,el,glow,r,x,y,hx,hy,type,twBase,twA,twW,twP,state,fx,fy,tx,ty,gStart,gDur,going}
+  let patternPts=[];    // current pattern positions (1→9 order)
+
+  // ── Real constellation patterns (normalized coords, 9 stars each) ──
+  const CONSTELLATIONS=[
+    // 猎户座 Orion — hourglass + belt
+    [[-0.55,-0.45],[0.50,-0.50],[-0.22,0.00],[0.00,0.05],[0.22,0.00],[-0.55,0.60],[0.60,0.55],[0.00,-0.85],[0.05,0.38]],
+    // 北斗七星 Big Dipper — dipper
+    [[0.45,0.55],[0.22,0.30],[0.00,0.08],[-0.15,-0.15],[-0.10,-0.55],[-0.45,-0.32],[-0.52,0.12],[-0.85,0.30],[0.75,0.20]],
+    // 仙后座 Cassiopeia — W
+    [[-0.80,-0.45],[-0.40,0.35],[0.00,-0.30],[0.40,0.35],[0.80,-0.45],[-0.60,0.60],[0.60,0.60],[-0.20,-0.70],[0.20,-0.70]],
+    // 天鹅座 Cygnus — Northern Cross
+    [[0.00,-0.85],[0.00,-0.35],[0.00,0.10],[0.00,0.60],[-0.60,-0.30],[-0.30,-0.05],[0.30,-0.05],[0.60,-0.30],[0.00,0.85]],
+    // 天蝎座 Scorpius — curved hook
+    [[0.40,-0.60],[0.65,-0.40],[0.70,-0.10],[0.60,0.15],[0.40,0.35],[0.15,0.48],[-0.10,0.58],[-0.35,0.70],[-0.60,0.85]],
+  ];
+
+  // ── Pick a constellation, centre it, spread it, order 1→9 (left→right, top→down) ──
+  function makePattern(){
+    const c=CONSTELLATIONS[Math.floor(Math.random()*CONSTELLATIONS.length)];
+    const rot=(Math.random()-0.5)*0.8;                      // slight random rotation
+    const scale=Math.min(W,H)*(0.38+Math.random()*0.06);    // spread across screen
+    let cx=0,cy=0;c.forEach(p=>{cx+=p[0];cy+=p[1]});cx/=9;cy/=9;  // centroid
+    const out=c.map(p=>{
+      const dx=p[0]-cx,dy=p[1]-cy;
+      const rx=dx*Math.cos(rot)-dy*Math.sin(rot);
+      const ry=dx*Math.sin(rot)+dy*Math.cos(rot);
+      return {x:W/2+rx*scale,y:H/2+ry*scale};
+    });
+    out.sort((a,b)=>((a.x-b.x)||(a.y-b.y)));               // 1→9 = left→right, top→down
+    return out;
+  }
+
+  function createStars(){
+    cstarZone.innerHTML='';
+    cstars=[];
+    // realistic mix: 2 blue + 2 blue-white + 2 white, then one each of yellow/orange/red
+    const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+    const palette=shuf(['120,165,255','120,165,255','170,200,255','170,200,255','248,248,250','248,248,250','255,215,130','255,175,80','255,140,65']);
+    for(let i=0;i<9;i++){
+      const el=document.createElement('div');
+      el.className='cstar';
+      el.innerHTML='<div class="glow"></div>';
+      el.addEventListener('click',(ev)=>{ev.stopPropagation();handleStarClick(i,el)});
+      cstarZone.appendChild(el);
+      el.style.left='0px';el.style.top='0px';
+      // star type: 0 faint / 1 medium / 2 bright (diffraction spikes)
+      const roll=Math.random();
+      const type=roll<0.3?0:(roll<0.8?1:2);
+      const size=type===0?(20+Math.random()*6):(type===1?(26+Math.random()*8):(34+Math.random()*10));
+      const r=size/2;
+      if(type===2)el.classList.add('bright');
+      const g=el.querySelector('.glow');
+      g.style.width=size+'px';g.style.height=size+'px';
+      el.style.setProperty('--glow',palette[i]);
+      // fixed random position (random each page load)
+      const x=40+Math.random()*(W-80),y=40+Math.random()*(H-80);
+      // realistic twinkle: sum of incommensurate sines (aperiodic, organic)
+      const twBase=0.75+Math.random()*0.2;
+      const twA=[0.05+Math.random()*0.1,0.03+Math.random()*0.06,0.015+Math.random()*0.035];
+      const twW=[3+Math.random()*5,0.8+Math.random()*2,0.15+Math.random()*0.4];
+      const twP=[Math.random()*Math.PI*2,Math.random()*Math.PI*2,Math.random()*Math.PI*2];
+      el.style.transform=`translate(${x-r}px,${y-r}px)`;
+      cstars.push({idx:i,el,glow:g,r,x,y,hx:x,hy:y,type,twBase,twA,twW,twP,state:'drift',fx:x,fy:y,tx:x,ty:y,gStart:0,gDur:0,going:null});
+    }
+    cstarZone.style.pointerEvents='none';
+  }
+
+  function easeInOutQuint(t){return t<0.5?16*t*t*t*t*t:1-Math.pow(-2*t+2,5)/2}
+
+  function doRipple(){
+    const cx=patternPts.reduce((a,p)=>a+p.x,0)/patternPts.length;
+    const cy=patternPts.reduce((a,p)=>a+p.y,0)/patternPts.length;
+    const el=document.createElement('div');
+    el.className='ripple';
+    el.style.left=cx+'px';el.style.top=cy+'px';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),1900);
+  }
+
+  // ── Twinkle in place + gather-to-target + reveal ──
+  function updateStars(){
+    const now=performance.now(),t=now/1000;
+    for(const s of cstars){
+      if(s.state==='drift'){
+        let o=s.twBase;
+        for(let k=0;k<3;k++)o+=s.twA[k]*Math.sin(s.twW[k]*t+s.twP[k]);
+        s.glow.style.opacity=Math.max(0.3,Math.min(1,o));
+      }else{
+        s.glow.style.opacity=1;
+        if(s.state==='gather'){
+          if(now>=s.gStart){
+            let tt=(now-s.gStart)/s.gDur;
+            if(tt>=1){tt=1;s.x=s.tx;s.y=s.ty;s.state=s.going==='home'?'drift':'settled';s.going=null}
+            else{const e=easeInOutQuint(tt);s.x=s.fx+(s.tx-s.fx)*e;s.y=s.fy+(s.ty-s.fy)*e}
+          }
+        }
+      }
+      s.el.style.transform=`translate(${s.x-s.r}px,${s.y-s.r}px)`;
+    }
+    if(chainMode&&!patternLocked&&cstars.length&&cstars.every(s=>s.state==='settled')){
+      patternLocked=true;
+      doRipple();
+    }
+    if(patternLocked&&revealAlpha<1)revealAlpha=Math.min(1,revealAlpha+0.022);
+  }
+
+  // ── Draw connecting lines (only after settle, fade in) ──
+  function drawChainLines(){
+    constCtx.clearRect(0,0,W,H);
+    if(!chainMode||!patternPts.length||!patternLocked)return;
+    const pts=patternPts,ra=revealAlpha;
+    for(let i=0;i<pts.length-1;i++){
+      const a=pts[i],b=pts[i+1];
+      const grad=constCtx.createLinearGradient(a.x,a.y,b.x,b.y);
+      const alpha=((i<pts.length-2)?0.35:0.55)*ra;
+      grad.addColorStop(0,`rgba(140,210,255,${alpha})`);
+      grad.addColorStop(1,`rgba(100,180,240,${alpha})`);
+      constCtx.beginPath();constCtx.moveTo(a.x,a.y);constCtx.lineTo(b.x,b.y);
+      constCtx.strokeStyle=grad;constCtx.lineWidth=1.2;constCtx.stroke();
+      constCtx.beginPath();constCtx.arc(a.x,a.y,2.5,0,Math.PI*2);
+      constCtx.fillStyle=`rgba(160,220,255,${0.5*ra})`;constCtx.fill();
+    }
+    const last=pts[pts.length-1];
+    constCtx.beginPath();constCtx.arc(last.x,last.y,2.5,0,Math.PI*2);
+    constCtx.fillStyle=`rgba(160,220,255,${0.5*ra})`;constCtx.fill();
+  }
+
+  // ── Hide input module + move sigil out of the way (keep it clickable) ──
+  function setInputHidden(hide){document.body.classList.toggle('chain-active',hide)}
+
+  function enterChain(){
+    chainMode=true;progress=0;
+    patternLocked=false;revealAlpha=0;
+    setInputHidden(true);
+    document.body.classList.add('gathering');
+    patternPts=makePattern();
+    const base=performance.now()+250;                       // anticipation beat
+    cstars.forEach((s,i)=>{
+      s.fx=s.x;s.fy=s.y;
+      s.tx=patternPts[i].x;s.ty=patternPts[i].y;
+      s.gStart=base+i*90;                                   // staggered
+      s.gDur=1500+Math.random()*350;                        // 1.5–1.85s per star
+      s.going='pattern';
+      s.state='gather';
+      s.el.classList.remove('correct','wrong');
+    });
+  }
+
+  function exitChain(){
+    chainMode=false;progress=0;
+    patternLocked=false;revealAlpha=0;
+    setInputHidden(false);
+    document.body.classList.remove('gathering');
+    constCtx.clearRect(0,0,W,H);
+    patternPts=[];
+    cstars.forEach(s=>{
+      s.fx=s.x;s.fy=s.y;                     // from current (settled) position
+      s.tx=s.hx;s.ty=s.hy;                   // back to fixed idle position
+      s.gStart=performance.now();
+      s.gDur=1000+Math.random()*400;
+      s.going='home';
+      s.state='gather';
+      s.el.classList.remove('correct','wrong');
+    });
+  }
+
+  // ── Sigil click: toggle chain mode ──
+  document.getElementById('sigil').addEventListener('click',(e)=>{
+    e.stopPropagation();hideError();
+    const sigil=document.getElementById('sigil');
+    sigil.classList.add('flash');setTimeout(()=>sigil.classList.remove('flash'),300);
+    if(chainMode)exitChain();else enterChain();
+  });
+
+  function handleStarClick(idx,el){
+    if(!chainMode)return;
+    if(cstars[idx].state!=='settled')return;
+    hideError();
+    if(idx===CODE[progress]){
+      el.classList.add('correct');
+      burst(el);
+      progress++;
+      if(progress>=CODE.length){setTimeout(()=>convergence(),400)}
+    }else{
+      el.classList.add('wrong');setTimeout(()=>el.classList.remove('wrong'),400);
+      progress=0;
+      cstars.forEach(s=>s.el.classList.remove('correct'));
+    }
+  }
+
+  function burst(el){const r=el.getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+r.height/2;for(let i=0;i<12;i++){const p=document.createElement('div');p.className='spark';p.style.left=cx+'px';p.style.top=cy+'px';const a=(i/12)*Math.PI*2,dist=25+Math.random()*55;p.style.setProperty('--sx',Math.cos(a)*dist+'px');p.style.setProperty('--sy',Math.sin(a)*dist+'px');document.body.appendChild(p);setTimeout(()=>p.remove(),750)}}
+
+  /* ══════════════════════════════════════════
+     CONVERGENCE — 群星归位
+     ══════════════════════════════════════════ */
+  let trails=[],converging=false;
+
+  function addTrail(x,y,tx,ty,c='rgba(180,220,255,'){trails.push({x,y,tx,ty,c,life:1})}
+  function drawTrails(){trailCtx.clearRect(0,0,W,H);for(let i=trails.length-1;i>=0;i--){const t=trails[i];t.life-=.022;if(t.life<=0){trails.splice(i,1);continue}t.x+=(t.tx-t.x)*.07;t.y+=(t.ty-t.y)*.07;trailCtx.beginPath();trailCtx.arc(t.x,t.y,1.5,0,Math.PI*2);trailCtx.fillStyle=t.c+(t.life*.45)+')';trailCtx.fill()}}
+
+  function convergence(){
+    converging=true;
+    const cx=W/2,cy=H/2;
+    cstars.forEach(s=>{addTrail(s.x,s.y,cx,cy,'rgba(92,200,255,');for(let i=0;i<4;i++)addTrail(s.x+(Math.random()-.5)*30,s.y+(Math.random()-.5)*30,cx+(Math.random()-.5)*60,cy+(Math.random()-.5)*60,'rgba(140,200,255,')});
+    for(let i=0;i<20;i++){const bs=bgStars[Math.floor(Math.random()*bgStars.length)];addTrail(bs.x,bs.y,cx,cy)}
+
+    const flash=document.createElement('div');flash.className='align-flash';document.body.appendChild(flash);
+    setTimeout(()=>flash.remove(),1900);
+
+    setTimeout(()=>{converging=false;trails=[];exitChain()},1000);
+    pass('st');
+  }
+
+  /* ══════════════════════════════════════════
+     DECOY FORM
+     ══════════════════════════════════════════ */
+  const dmsgs=["这张表格只是一道影子。真正的门，在其他地方。","密码正确，但门不在这里。","表格是给凡人用的。","提交被拒绝。灵界不需要邮箱地址。","你太专注于眼前的东西了。看看周围。","密语正确。但方式错了。","门不在此处。触碰星光。","「愚者」说不。试试不用这个按钮。"];let dix=0;
+  function decoyLogin(){hideError();const u=document.getElementById('username').value.trim(),p=document.getElementById('password').value;if(u.toLowerCase()==='fool'&&p==='1234'){showError("密码正确… 但门不在这里。答案不在表格中。");return}showError(dmsgs[dix++%dmsgs.length])}
+
+  function loginSuccess(){hideError();const ov=document.getElementById('successOverlay');document.getElementById('successSub').textContent='你通过 键盘密语 + 群星归位 证明了身份';ov.classList.add('show');showToast('🎭 群星归位。欢迎归来，非凡者。','success');setTimeout(()=>{window.location.href='/home.html'},1600)}
+
+  /* ══════════════════════════════════════════
+     HELPERS
+     ══════════════════════════════════════════ */
+  function showError(m){const e=document.getElementById('errorMsg');document.getElementById('errorText').textContent=m;e.classList.add('visible');document.getElementById('loginCard').classList.add('shake');setTimeout(()=>document.getElementById('loginCard').classList.remove('shake'),500)}
+  function hideError(){document.getElementById('errorMsg').classList.remove('visible');document.getElementById('loginCard').classList.remove('shake')}
+  let tt;function showToast(m,t=''){const el=document.getElementById('toast');clearTimeout(tt);el.textContent=m;el.className='toast '+t+' show';tt=setTimeout(()=>el.classList.remove('show'),3500)}
+  document.getElementById('pwToggle').addEventListener('click',()=>{const pw=document.getElementById('password');const v=pw.type==='text';pw.type=v?'password':'text';document.getElementById('pwToggle').textContent=v?'👁':'🙈'});
+  document.getElementById('password').addEventListener('keydown',e=>{if(e.key==='Enter')decoyLogin()});
+  document.getElementById('username').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('password').focus()});
+
+  /* ══════════════════════════════════════════
+     COMETS — occasional streaks with tails
+     ══════════════════════════════════════════ */
+  let comets=[],nextComet=2500;
+  function spawnComet(){
+    const edge=Math.floor(Math.random()*4),sp=2+Math.random()*3;
+    let x,y,vx,vy;
+    if(edge===0){x=Math.random()*W;y=-30;vx=(Math.random()-0.5)*1.5;vy=sp}
+    else if(edge===1){x=W+30;y=Math.random()*H;vx=-sp;vy=(Math.random()-0.5)*1.5}
+    else if(edge===2){x=Math.random()*W;y=H+30;vx=(Math.random()-0.5)*1.5;vy=-sp}
+    else{x=-30;y=Math.random()*H;vx=sp;vy=(Math.random()-0.5)*1.5}
+    comets.push({x,y,vx,vy,life:1});
+  }
+  function updateComets(now){
+    if(now>nextComet){spawnComet();nextComet=now+5000+Math.random()*7000}
+    for(let i=comets.length-1;i>=0;i--){
+      const c=comets[i];
+      c.x+=c.vx;c.y+=c.vy;c.life-=0.005;
+      if(c.life<=0||c.x<-120||c.x>W+120||c.y<-120||c.y>H+120)comets.splice(i,1);
+    }
+  }
+  function drawComets(){
+    cometCtx.clearRect(0,0,W,H);
+    for(const c of comets){
+      const sp=Math.hypot(c.vx,c.vy),tail=140;
+      const tx=c.x-c.vx/sp*tail,ty=c.y-c.vy/sp*tail;
+      const g=cometCtx.createLinearGradient(c.x,c.y,tx,ty);
+      g.addColorStop(0,`rgba(255,255,255,${c.life})`);
+      g.addColorStop(0.35,`rgba(190,225,255,${0.6*c.life})`);
+      g.addColorStop(1,`rgba(140,190,250,0)`);
+      cometCtx.beginPath();cometCtx.moveTo(c.x,c.y);cometCtx.lineTo(tx,ty);
+      cometCtx.strokeStyle=g;cometCtx.lineWidth=3.5;cometCtx.stroke();
+      // head glow
+      cometCtx.beginPath();cometCtx.arc(c.x,c.y,9,0,Math.PI*2);
+      cometCtx.fillStyle=`rgba(160,210,255,${0.4*c.life})`;cometCtx.fill();
+      // head core
+      cometCtx.beginPath();cometCtx.arc(c.x,c.y,3.5,0,Math.PI*2);
+      cometCtx.fillStyle=`rgba(255,255,255,${c.life})`;cometCtx.fill();
+    }
+  }
+
+  /* ══════════════════════════════════════════
+     MAIN LOOP
+     ══════════════════════════════════════════ */
+  function loop(){const now=performance.now();drawBg();updateStars();if(chainMode)drawChainLines();drawTrails();updateComets(now);drawComets();requestAnimationFrame(loop)}
+
+  // Init stars
+  createStars();
+  loop();
+</script>
+</body>
+</html>
