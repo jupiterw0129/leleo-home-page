@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import { loadOml2d } from 'oh-my-live2d'
 import { startShimeji, stopShimeji, isShimejiRunning } from './shimeji.js'
+import { animate } from 'animejs'
 
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
@@ -106,8 +106,10 @@ const app = createApp(App)
 app.config.warnHandler = () => {}
 app.use(vuetify).mount('#app')
 
-// Live2D 看板娘 - 仅桌面端，清除可能残留的错误状态
+// Live2D 看板娘 - 懒加载（不阻塞首屏），仅桌面端
+setTimeout(async () => {
 if (window.innerWidth > 768) {
+const { loadOml2d } = await import('oh-my-live2d')
 localStorage.removeItem('OML2D_STATUS')
 localStorage.removeItem('OML2D_MODEL_CLOTHES_INDEX')
 
@@ -131,7 +133,7 @@ const oml2d = loadOml2d({
     },
     {
       path: '/live2d/MCZhou/L2DMCVT.model3.json',
-      motionPreloadStrategy: 'ALL',
+      motionPreloadStrategy: 'IDLE',
     },
   ],
   statusBar: {
@@ -181,16 +183,14 @@ oml2d.onLoad((status) => {
 const easeTo = (core, param, to, duration = 120, onDone) => {
   const idx = core.getParameterIndex(param)
   if (idx < 0) return
-  const from = core.getParameterValueByIndex(idx)
-  const start = performance.now()
-  const step = () => {
-    const t = Math.min((performance.now() - start) / duration, 1)
-    const v = from + (to - from) * (1 - Math.pow(1 - t, 3))
-    core.setParameterValueByIndex(idx, v)
-    if (t < 1) requestAnimationFrame(step)
-    else if (onDone) onDone()
-  }
-  requestAnimationFrame(step)
+  const target = { value: core.getParameterValueByIndex(idx) }
+  animate(target, {
+    value: to,
+    duration,
+    ease: 'out(3)', // cubic ease-out, 等价于 1-(1-t)^3
+    onUpdate: () => core.setParameterValueByIndex(idx, target.value),
+    onComplete: () => { if (onDone) onDone() },
+  })
 }
 
 const bindDrag = (stage) => {
@@ -338,6 +338,7 @@ document.addEventListener('keydown', (e) => {
   }
 })
 }
+}, 800)
 
 // 阿蒙 Shimeji - 如果用户之前选了阿蒙，启动时加载
 if (window.innerWidth > 768 && localStorage.getItem('leleo-pet') === '3' && localStorage.getItem('leleo-pet-off') !== '1') {
