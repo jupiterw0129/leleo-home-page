@@ -480,7 +480,7 @@
   const dmsgs=["这张表格只是一道影子。真正的门，在其他地方。","密码正确，但门不在这里。","表格是给凡人用的。","提交被拒绝。灵界不需要邮箱地址。","你太专注于眼前的东西了。看看周围。","密语正确。但方式错了。","门不在此处。触碰星光。","「愚者」说不。试试不用这个按钮。"];let dix=0;
   function decoyLogin(){const card=document.getElementById('loginCard');card.classList.add('shake');setTimeout(()=>card.classList.remove('shake'),500)}
 
-  function loginSuccess(){hideError();const ov=document.getElementById('successOverlay');document.getElementById('successSub').textContent='你已通过双重验证，踏入灵界';ov.classList.add('show');showToast('🎭 欢迎归来，非凡者。','success');setTimeout(()=>{document.cookie='leleo-auth=1; path=/; max-age=2592000';window.location.href='/home.html'},1600)}
+  function loginSuccess(){hideError();const ov=document.getElementById('successOverlay');document.getElementById('successSub').textContent='你已通过双重验证，踏入灵界';ov.classList.add('show');showToast('🎭 欢迎归来，非凡者。','success');setTimeout(async()=>{try{const r=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({answer:'fool1349'})});const d=await r.json();if(d.token)document.cookie='leleo-token='+d.token+'; path=/; max-age=2592000';else document.cookie='leleo-auth=1; path=/'}catch(e){document.cookie='leleo-auth=1; path=/'}window.location.href='/home.html'},1600)}
 
   /* ══════════════════════════════════════════
      HELPERS
