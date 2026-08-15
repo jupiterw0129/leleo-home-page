@@ -23,19 +23,6 @@
   #starfield{position:fixed;inset:0;z-index:0;pointer-events:none}
   #constCanvas{position:fixed;inset:0;z-index:50;pointer-events:none}
 
-  /* ── Click orb (appears where you click) ── */
-  .click-orb {
-    position:fixed; z-index:5; pointer-events:none;
-    border-radius:50%;
-    background:radial-gradient(circle,rgba(180,220,255,0.7),rgba(92,160,220,0.3) 30%,rgba(40,80,160,0.08) 60%,transparent 100%);
-    animation:orb-pop 1.4s ease-out both;
-  }
-  @keyframes orb-pop {
-    0%{width:0;height:0;opacity:0;transform:translate(-50%,-50%)scale(0)}
-    30%{width:120px;height:120px;opacity:0.9;transform:translate(-50%,-50%)scale(1)}
-    100%{width:280px;height:280px;opacity:0;transform:translate(-50%,-50%)scale(1.6)}
-  }
-
   /* ── Ambient orbs — decorative ── */
   .ambient-orb {
     position:fixed;border-radius:50%;filter:blur(120px);
@@ -223,32 +210,22 @@
   function drawBg(){sfCtx.clearRect(0,0,W,H);for(let i=0;i<bgStars.length;i++){for(let j=i+1;j<bgStars.length;j++){const d=Math.hypot(bgStars[i].x-bgStars[j].x,bgStars[i].y-bgStars[j].y);if(d<85){sfCtx.beginPath();sfCtx.moveTo(bgStars[i].x,bgStars[i].y);sfCtx.lineTo(bgStars[j].x,bgStars[j].y);sfCtx.strokeStyle=`rgba(140,200,255,${.035*(1-d/85)})`;sfCtx.lineWidth=.5;sfCtx.stroke()}}}bgStars.forEach(s=>{s.update();s.draw(sfCtx)})}
 
   /* ══════════════════════════════════════════
-     CLICK ORB —光球特效 at click position
-     ══════════════════════════════════════════ */
-  document.addEventListener('click',(e)=>{
-    if(e.target.closest('.cstar')||e.target.closest('#sigil')||e.target.closest('.login-card'))return;
-    const orb=document.createElement('div');orb.className='click-orb';
-    orb.style.left=e.clientX+'px';orb.style.top=e.clientY+'px';
-    // Slight random variation
-    orb.style.animationDuration=(1.2+Math.random()*.6)+'s';
-    document.body.appendChild(orb);
-    setTimeout(()=>orb.remove(),2000);
-  });
-
-  /* ══════════════════════════════════════════
      TYPEWRITER (stage-aware: each stage prints its own text)
      ══════════════════════════════════════════ */
   const typerEl=document.getElementById('typer');
   let ci=0,typedText='';
+  let errorMsg=null,errorTimer=null;
+  function typewriterError(msg){errorMsg=msg;clearTimeout(errorTimer);errorTimer=setTimeout(()=>{errorMsg=null},2500)}
   function stagePhrase(){
-    if(auth.kb&&auth.st)return '欢迎回到源堡，非凡者。';          // 仅正确登录后
+    const complete=isMobile?auth.st:(auth.kb&&auth.st);
+    if(complete)return '欢迎回到源堡，非凡者。';
     if(auth.kb)return '密语已验。群星仍在游荡，归位它们。';
     if(auth.st)return '群星已归位。还有一句密语，未说出口。';
     return '这位先生，请出示您的灵界凭证。';
   }
   function ttick(){
     if(document.body.classList.contains('chain-active')){setTimeout(ttick,500);return}  // 按需：隐藏时暂停
-    const target=stagePhrase();
+    const target=errorMsg||stagePhrase();
     if(target!==typedText){typedText=target;ci=0;}              // 阶段变化 → 重新打字
     if(ci<typedText.length){ci++;typerEl.textContent=typedText.slice(0,ci);setTimeout(ttick,55+Math.random()*28)}
     else{setTimeout(ttick,500)}                                 // 打完停留，光标闪烁
@@ -258,12 +235,13 @@
   /* ══════════════════════════════════════════
      AUTH
      ══════════════════════════════════════════ */
+  const isMobile=window.innerWidth<=768;
   const auth={kb:false,st:false};
-  function pass(m){if(auth[m])return;auth[m]=true;if(auth.kb&&auth.st){loginSuccess();return}showToast(`✦ ${m==='kb'?'键盘密语':'群星归位'} 验证通过… 还需 1 层认证`,'success')}
+  function pass(m){if(auth[m])return;auth[m]=true;if((isMobile&&auth.st)||(!isMobile&&auth.kb&&auth.st)){loginSuccess()}}
 
   // METHOD 1: Keyboard
   const SEQ='fool';let kbuf='',kt=0;
-  document.addEventListener('keydown',(e)=>{const t=document.activeElement?.tagName?.toLowerCase();if(t==='input'||t==='textarea')return;if(e.key.length!==1)return;kbuf+=e.key.toLowerCase();clearTimeout(kt);kt=setTimeout(()=>{kbuf=''},2000);if(kbuf.length>20)kbuf=kbuf.slice(-10);if(kbuf.endsWith(SEQ)){kbuf='';clearTimeout(kt);pass('kb')}});
+  document.addEventListener('keydown',(e)=>{const t=document.activeElement?.tagName?.toLowerCase();if(t==='input'||t==='textarea')return;if(e.key.length!==1)return;kbuf+=e.key.toLowerCase();clearTimeout(kt);kt=setTimeout(()=>{kbuf=''},2000);if(kbuf.length>20)kbuf=kbuf.slice(-10);if(kbuf.endsWith(SEQ)){kbuf='';clearTimeout(kt);pass('kb');return}if(kbuf.length>=4){kbuf='';clearTimeout(kt);typewriterError('密语错误，请再试。')}});
 
   /* ══════════════════════════════════════════
      METHOD 2: 9 CONSTELLATION STARS
@@ -322,7 +300,8 @@
       // star type: 0 faint / 1 medium / 2 bright (diffraction spikes)
       const roll=Math.random();
       const type=roll<0.3?0:(roll<0.8?1:2);
-      const size=type===0?(20+Math.random()*6):(type===1?(26+Math.random()*8):(34+Math.random()*10));
+      const sizeScale=Math.min(1,Math.max(0.7,W/800));
+      const size=(type===0?(20+Math.random()*6):(type===1?(26+Math.random()*8):(34+Math.random()*10)))*sizeScale;
       const r=size/2;
       if(type===2)el.classList.add('bright');
       const g=el.querySelector('.glow');
@@ -443,6 +422,7 @@
   // ── Sigil click: toggle chain mode ──
   document.getElementById('sigil').addEventListener('click',(e)=>{
     e.stopPropagation();hideError();
+    if(auth.st)return;   // 已归位，忽略再次点击
     const sigil=document.getElementById('sigil');
     sigil.classList.add('flash');setTimeout(()=>sigil.classList.remove('flash'),300);
     if(chainMode)exitChain();else enterChain();
@@ -461,6 +441,7 @@
       el.classList.add('wrong');setTimeout(()=>el.classList.remove('wrong'),400);
       progress=0;
       cstars.forEach(s=>s.el.classList.remove('correct'));
+      setTimeout(()=>{exitChain();typewriterError('群星归位失败，请重试。')},500);
     }
   }
 
@@ -483,7 +464,13 @@
     const flash=document.createElement('div');flash.className='align-flash';document.body.appendChild(flash);
     setTimeout(()=>flash.remove(),1900);
 
-    setTimeout(()=>{converging=false;trails=[];exitChain()},1000);
+    setTimeout(()=>{
+      converging=false;trails=[];
+      // 保持归位：显示输入，但星星留在星座位置（不飞回）
+      chainMode=false;
+      setInputHidden(false);
+      document.body.classList.remove('gathering');
+    },1000);
     pass('st');
   }
 
@@ -491,9 +478,9 @@
      DECOY FORM
      ══════════════════════════════════════════ */
   const dmsgs=["这张表格只是一道影子。真正的门，在其他地方。","密码正确，但门不在这里。","表格是给凡人用的。","提交被拒绝。灵界不需要邮箱地址。","你太专注于眼前的东西了。看看周围。","密语正确。但方式错了。","门不在此处。触碰星光。","「愚者」说不。试试不用这个按钮。"];let dix=0;
-  function decoyLogin(){hideError();const u=document.getElementById('username').value.trim(),p=document.getElementById('password').value;if(u.toLowerCase()==='fool'&&p==='1234'){showError("密码正确… 但门不在这里。答案不在表格中。");return}showError(dmsgs[dix++%dmsgs.length])}
+  function decoyLogin(){const card=document.getElementById('loginCard');card.classList.add('shake');setTimeout(()=>card.classList.remove('shake'),500)}
 
-  function loginSuccess(){hideError();const ov=document.getElementById('successOverlay');document.getElementById('successSub').textContent='你通过 键盘密语 + 群星归位 证明了身份';ov.classList.add('show');showToast('🎭 群星归位。欢迎归来，非凡者。','success');setTimeout(()=>{window.location.href='/home.html'},1600)}
+  function loginSuccess(){hideError();const ov=document.getElementById('successOverlay');document.getElementById('successSub').textContent='你已通过双重验证，踏入灵界';ov.classList.add('show');showToast('🎭 欢迎归来，非凡者。','success');setTimeout(()=>{document.cookie='leleo-auth=1; path=/; max-age=2592000';window.location.href='/home.html'},1600)}
 
   /* ══════════════════════════════════════════
      HELPERS
