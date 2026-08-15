@@ -1,3 +1,4 @@
+// 依赖 Cloudflare 环境变量 AUTH_SECRET（在控制台 Settings → Environment variables 设置）
 async function hmacHex(secret, msg) {
   const key = await crypto.subtle.importKey(
     'raw', new TextEncoder().encode(secret),
