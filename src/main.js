@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import App from './App.vue'
+import { loadOml2d } from 'oh-my-live2d'
 import { startShimeji, stopShimeji, isShimejiRunning } from './shimeji.js'
 import { animate } from 'animejs'
 
@@ -106,10 +107,8 @@ const app = createApp(App)
 app.config.warnHandler = () => {}
 app.use(vuetify).mount('#app')
 
-// Live2D 看板娘 - 懒加载（不阻塞首屏），仅桌面端
-setTimeout(async () => {
+// Live2D 看板娘 - 仅桌面端，清除可能残留的错误状态
 if (window.innerWidth > 768) {
-const { loadOml2d } = await import('oh-my-live2d')
 localStorage.removeItem('OML2D_STATUS')
 localStorage.removeItem('OML2D_MODEL_CLOTHES_INDEX')
 
@@ -338,7 +337,6 @@ document.addEventListener('keydown', (e) => {
   }
 })
 }
-}, 800)
 
 // 阿蒙 Shimeji - 如果用户之前选了阿蒙，启动时加载
 if (window.innerWidth > 768 && localStorage.getItem('leleo-pet') === '3' && localStorage.getItem('leleo-pet-off') !== '1') {
