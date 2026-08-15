@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <script>
-      // 未登录守卫：无有效 cookie 则跳回登录页（真正的验签在服务端中间件）
-      if (!document.cookie.includes('leleo-token') && !document.cookie.includes('leleo-auth=1')) location.replace('/');
+      // 未登录守卫：无有效 token 则跳回登录页（真正的验签在服务端中间件）
+      if (!document.cookie.includes('leleo-token')) location.replace('/');
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#282c34">

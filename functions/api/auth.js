@@ -9,14 +9,28 @@ async function hmacHex(secret, msg) {
 
 export async function onRequest(context) {
   const secret = context.env.AUTH_SECRET;
-  if (!secret) return new Response('未配置 AUTH_SECRET', { status: 500 });
+  const password = (context.env.AUTH_PASSWORD || '').trim();
+  if (!secret || !password) {
+    return new Response('未配置 AUTH_SECRET / AUTH_PASSWORD', { status: 500 });
+  }
 
-  let answer = '';
-  try { answer = (await context.request.json()).answer || ''; } catch (e) {}
+  let body = {};
+  try { body = await context.request.json(); } catch (e) {}
+  const keys = (body.keys || '').toString().toLowerCase();
+  const stars = (body.stars || '').toString();
+  const mobile = !!body.mobile;
 
-  // 谜题答案校验（门槛，真正的安全来自下面的 HMAC 签名）
-  if (answer !== 'fool1349') {
-    return new Response(JSON.stringify({ error: '密语错误' }), {
+  // 密码格式：前4位小写字母（键盘）+ 后4位数字1-9（群星）。
+  // 真实密码只存在 Cloudflare 环境变量 AUTH_PASSWORD 里，绝不写进代码。
+  const keyPart = password.slice(0, 4).toLowerCase();
+  const starPart = password.slice(4);
+
+  const ok = mobile
+    ? (stars === starPart)
+    : (keys === keyPart && stars === starPart);
+
+  if (!ok) {
+    return new Response(JSON.stringify({ error: '凭证错误' }), {
       status: 401,
       headers: { 'Content-Type': 'application/json' },
     });
