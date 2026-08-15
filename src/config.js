@@ -52,23 +52,23 @@ const getRandomBackground = (pics, videos = [], videoRate = 0, storageKey = "bg-
 
 // PC 静态壁纸
 const pcPicWallpapers = [
-	{ "title": "时代", "preview": "/img/wallpaper/static/时代/image-pre.webp", "url": "/img/wallpaper/static/时代/image.png" },
-	{ "title": "光", "preview": "/img/wallpaper/static/光/image-pre.webp", "url": "/img/wallpaper/static/光/image.png" },
-	{ "title": "塞维亚菊", "preview": "/img/wallpaper/static/塞维亚菊/image-pre.webp", "url": "/img/wallpaper/static/塞维亚菊/image.png" },
-	{ "title": "奇迹", "preview": "/img/wallpaper/static/奇迹/image-pre.webp", "url": "/img/wallpaper/static/奇迹/image.png" },
-	{ "title": "奥黛丽", "preview": "/img/wallpaper/static/奥黛丽/image-pre.webp", "url": "/img/wallpaper/static/奥黛丽/image.png" },
-	{ "title": "节制", "preview": "/img/wallpaper/static/节制/image-pre.webp", "url": "/img/wallpaper/static/节制/image.png" },
-	{ "title": "观众", "preview": "/img/wallpaper/static/观众/image-pre.webp", "url": "/img/wallpaper/static/观众/image.png" },
+	{ "title": "时代", "preview": "/img/wallpaper/static/时代/image-pre.webp", "url": "/img/wallpaper/static/时代/image.webp" },
+	{ "title": "光", "preview": "/img/wallpaper/static/光/image-pre.webp", "url": "/img/wallpaper/static/光/image.webp" },
+	{ "title": "塞维亚菊", "preview": "/img/wallpaper/static/塞维亚菊/image-pre.webp", "url": "/img/wallpaper/static/塞维亚菊/image.webp" },
+	{ "title": "奇迹", "preview": "/img/wallpaper/static/奇迹/image-pre.webp", "url": "/img/wallpaper/static/奇迹/image.webp" },
+	{ "title": "奥黛丽", "preview": "/img/wallpaper/static/奥黛丽/image-pre.webp", "url": "/img/wallpaper/static/奥黛丽/image.webp" },
+	{ "title": "节制", "preview": "/img/wallpaper/static/节制/image-pre.webp", "url": "/img/wallpaper/static/节制/image.webp" },
+	{ "title": "观众", "preview": "/img/wallpaper/static/观众/image-pre.webp", "url": "/img/wallpaper/static/观众/image.webp" },
 ]
 
 // 移动端静态壁纸
 const mobilePicWallpapers = [
-	{ "title": "0001", "preview": "/img/wallpaper/static-mobile/0001/image-pre.webp", "url": "/img/wallpaper/static-mobile/0001/image.png" },
-	{ "title": "0002", "preview": "/img/wallpaper/static-mobile/0002/image-pre.webp", "url": "/img/wallpaper/static-mobile/0002/image.png" },
-	{ "title": "0003", "preview": "/img/wallpaper/static-mobile/0003/image-pre.webp", "url": "/img/wallpaper/static-mobile/0003/image.png" },
-	{ "title": "0004", "preview": "/img/wallpaper/static-mobile/0004/image-pre.webp", "url": "/img/wallpaper/static-mobile/0004/image.png" },
-	{ "title": "0005", "preview": "/img/wallpaper/static-mobile/0005/image-pre.webp", "url": "/img/wallpaper/static-mobile/0005/image.png" },
-	{ "title": "0006", "preview": "/img/wallpaper/static-mobile/0006/image-pre.webp", "url": "/img/wallpaper/static-mobile/0006/image.png" },
+	{ "title": "0001", "preview": "/img/wallpaper/static-mobile/0001/image-pre.webp", "url": "/img/wallpaper/static-mobile/0001/image.webp" },
+	{ "title": "0002", "preview": "/img/wallpaper/static-mobile/0002/image-pre.webp", "url": "/img/wallpaper/static-mobile/0002/image.webp" },
+	{ "title": "0003", "preview": "/img/wallpaper/static-mobile/0003/image-pre.webp", "url": "/img/wallpaper/static-mobile/0003/image.webp" },
+	{ "title": "0004", "preview": "/img/wallpaper/static-mobile/0004/image-pre.webp", "url": "/img/wallpaper/static-mobile/0004/image.webp" },
+	{ "title": "0005", "preview": "/img/wallpaper/static-mobile/0005/image-pre.webp", "url": "/img/wallpaper/static-mobile/0005/image.webp" },
+	{ "title": "0006", "preview": "/img/wallpaper/static-mobile/0006/image-pre.webp", "url": "/img/wallpaper/static-mobile/0006/image.webp" },
 ]
 
 // PC 动态壁纸
