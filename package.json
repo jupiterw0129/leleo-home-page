@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
+    "animejs": "^4.5.0",
     "chart.js": "^4.4.7",
     "less": "^4.2.0",
     "oh-my-live2d": "^0.19.3",
