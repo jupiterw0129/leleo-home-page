@@ -507,7 +507,7 @@
     document.getElementById('successSub').textContent='你已通过双重验证，踏入灵界';
     ov.classList.add('show');
     showToast('🎭 欢迎归来，非凡者。','success');
-    document.cookie='leleo-token='+token+'; path=/; max-age=2592000';
+    document.cookie='leleo-token='+token+'; path=/; max-age=2592000; Secure; SameSite=Strict';
     setTimeout(()=>{window.location.href='/home.html'},1600);
   }
 

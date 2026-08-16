@@ -3,8 +3,26 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Strict-Transport-Security: max-age=31536000; includeSubDomains
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.i-meto.com https://api.ceru.shiqianjiang.cn https://unpkg.com https://cloudflareinsights.com blob:; media-src 'self' blob:; worker-src 'self' blob:; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' https://api.i-meto.com https://api.ceru.shiqianjiang.cn https://cloudflareinsights.com blob:; media-src 'self' blob:; worker-src 'self' blob:; frame-ancestors 'none'
   Permissions-Policy: camera=(), microphone=(), geolocation=()
 
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
+
+/img/*
+  Cache-Control: public, max-age=2592000
+
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/live2d/*
+  Cache-Control: public, max-age=2592000
+
+/shimeji/*
+  Cache-Control: public, max-age=2592000
+
+/ba-spark/*
+  Cache-Control: public, max-age=2592000
+
+/BlueArchiveCursor/*
+  Cache-Control: public, max-age=2592000
