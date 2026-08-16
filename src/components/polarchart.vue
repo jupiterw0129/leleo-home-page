@@ -42,7 +42,6 @@ export default {
   props: {
     analyserNode: { type: Object, default: null },
     isPlaying: { type: Boolean, default: false },
-    visible: { type: Boolean, default: false },
   },
 
   data() {
@@ -70,7 +69,7 @@ export default {
     this.sectorEnergies = new Array(SECTOR_COUNT).fill(0);
     this.freqBuffer = new Uint8Array(TOTAL_BINS);
 
-    if (this.visible) this.renderChart();
+    this.renderChart();
   },
 
   beforeDestroy() {
@@ -90,11 +89,6 @@ export default {
   },
 
   watch: {
-    visible(val) {
-      if (val && !this.chartInstance) {
-        this.renderChart();
-      }
-    },
     isPlaying(val) {
       if (val) {
         if (this._stopTimer) { clearTimeout(this._stopTimer); this._stopTimer = null; }
@@ -260,7 +254,7 @@ export default {
             duration: 1800,
             easing: 'easeOutQuad',
             animateRotate: true,
-            animateScale: false,
+            animateScale: true,
             onComplete: () => {
               if (this.isPlaying && this.analyserNode) {
                 this.startMusicAnimation();
