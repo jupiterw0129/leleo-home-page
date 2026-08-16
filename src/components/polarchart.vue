@@ -1,5 +1,5 @@
 <template>
-  <canvas ref="chartCanvas"></canvas>
+  <canvas ref="chartCanvas" :class="{ 'is-visible': visible }"></canvas>
 </template>
 
 <script>
@@ -42,6 +42,7 @@ export default {
   props: {
     analyserNode: { type: Object, default: null },
     isPlaying: { type: Boolean, default: false },
+    visible: { type: Boolean, default: false },
   },
 
   data() {
@@ -250,17 +251,7 @@ export default {
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          animation: {
-            duration: 1800,
-            easing: 'easeOutQuad',
-            animateRotate: true,
-            animateScale: true,
-            onComplete: () => {
-              if (this.isPlaying && this.analyserNode) {
-                this.startMusicAnimation();
-              }
-            },
-          },
+          animation: false, // 入场动画改用 CSS 触发，图表可见时才播放
           plugins: {
             legend: { display: false },
             tooltip: {

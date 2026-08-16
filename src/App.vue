@@ -87,7 +87,7 @@
                 </v-card>
 
                 <div class="leleo-left-chart">
-                    <polarchart :style="xs?{'height':'170px'}:(sm?{'height':'210px'}:{'height':'270px'})" :analyser-node="analyserNode" :is-playing="isPlaying"/>
+                    <polarchart :style="xs?{'height':'170px'}:(sm?{'height':'210px'}:{'height':'270px'})" :analyser-node="analyserNode" :is-playing="isPlaying" :visible="!isloading"/>
                 </div>
 
                 <v-container class="leleo-left-socialIconsContainer">
