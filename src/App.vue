@@ -21,7 +21,6 @@
         @mouseover="expandSwitch"
         @mouseleave="collapseSwitch"
       ></v-switch>
-      <span class="floating-switch-hint" aria-hidden="true">{{ isClearScreen ? '显示' : '清屏' }}</span>
     </div>
 
     <transition name="clear-fade">
