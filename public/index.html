@@ -218,7 +218,7 @@
   function typewriterError(msg){errorMsg=msg;clearTimeout(errorTimer);errorTimer=setTimeout(()=>{errorMsg=null},2500)}
   function stagePhrase(){
     const complete=isMobile?auth.st:(auth.kb&&auth.st);
-    if(complete)return '欢迎回到源堡，非凡者。';
+    if(complete)return '灵界之门正在确认你的凭证…';
     if(auth.kb)return '密语已记。群星仍在游荡，归位它们。';
     if(auth.st)return '群星已归位。还有一句密语，未说出口。';
     return '这位先生，请出示您的灵界凭证。';
@@ -447,6 +447,7 @@
     if(!chainMode)return;
     if(cstars[idx].state!=='settled')return;
     if(auth.st)return;
+    if(sseq.length>=4)return;
     if(sseq.includes(idx))return;
     hideError();
     sseq.push(idx);
