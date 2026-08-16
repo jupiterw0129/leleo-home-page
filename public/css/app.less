@@ -16,16 +16,34 @@
         position: fixed;
         right: 0;
         z-index: 99;
+        display: flex;
+        align-items: center;
+        gap: 6px;
       }
 
     .floating-switch {
-        transform: translateX(53%); /* 初始状态下隐藏大部分 */
+        transform: translateX(38%);
         transition: transform 0.3s ease;
     }
 
     .floating-switch:hover {
-        transform: translateX(0); /* 悬停时完全展开 */
+        transform: translateX(0);
     }
+
+    .floating-switch-hint {
+        font-size: 0.7rem;
+        color: rgba(255,255,255,0.5);
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        transform: translateX(6px);
+        transition: opacity 0.28s ease, transform 0.28s ease;
+    }
+    .floating-switch-container:hover .floating-switch-hint {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
     /* 调整视频元素的样式，使其全屏作为背景 */
     .video-bg {
         position: fixed;
@@ -51,11 +69,19 @@
         justify-content: center;
         align-items: center;
     }
-    .fade-enter-active, .fade-leave-active {
-        transition: opacity .8s
-      }
-    .fade-enter, .fade-leave-to {
-        opacity: 0
+    .fade-enter-active  { transition: opacity .8s }
+    .fade-leave-active  { transition: opacity .4s ease, transform .4s ease }
+    .fade-enter, .fade-leave-to { opacity: 0 }
+    .fade-leave-to      { transform: scale(0.96) }
+
+    .clear-fade-enter-active { transition: opacity .4s ease, transform .4s ease }
+    .clear-fade-leave-active { transition: opacity .25s ease, transform .25s ease }
+    .clear-fade-enter-from { opacity: 0; transform: scale(0.97) }
+    .clear-fade-leave-to   { opacity: 0; transform: scale(0.97) }
+
+    /* Tab 切换平滑过渡 */
+    .v-tabs-window-item {
+      transition: opacity .22s ease, transform .22s ease;
     }
 
     .leleo-left{
@@ -92,9 +118,6 @@
                 max-width: 82%;
                 text-overflow: ellipsis;
             }
-            .leleo-spin {
-                animation: spin 6s linear infinite;
-            }
             .loading-spinner {
                 position: absolute;
                  top: 50%;
@@ -102,27 +125,14 @@
                  transform: translate(-50%, -50%);
                 z-index: 1;
             }
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
-            .fade-in {
-                animation: fadeIn .6s ease ;
-              }
-
-            @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                }
-                to {
-                    opacity: 1;
-                }
-            }
         }
         &-chart{
             width: 100%;
         }
         &-socialIconsContainer{
+            .leleo-social-bticon{
+                transition: transform .25s ease;
+            }
             .leleo-social-bticon:hover{
                 transform: translateY(-2px) scale(1.08);
             }
@@ -182,6 +192,7 @@
     .snake-board{
         border: 1px solid rgba(255, 255, 255, 0.16);
         border-radius: 10px;
+        backdrop-filter: blur(var(--leleo-blur));
         background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.055));
         box-shadow: 0 12px 34px rgba(0, 0, 0, 0.16);
     }
@@ -189,6 +200,7 @@
         min-height: 58px;
         padding: 0.6rem 1rem;
         color: var(--leleo-vcard-color);
+        backdrop-filter: blur(var(--leleo-blur));
         background:
             radial-gradient(circle at 92% 18%, rgba(124, 225, 255, 0.28), transparent 32%),
             linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05));
@@ -331,6 +343,7 @@
         border-radius: 4px;
         background: rgba(255,255,255,0.055);
         cursor: crosshair;
+        transition: border-color .18s ease, background .18s ease, box-shadow .18s ease, transform .18s ease;
     }
     .snake-cell:hover{
         border-color: rgba(178, 235, 255, 0.65);
@@ -402,11 +415,13 @@
         min-height: 132px;
         border: 1px solid rgba(255, 255, 255, 0.16);
         border-radius: 8px;
+        backdrop-filter: blur(var(--leleo-blur));
         background: rgba(255, 255, 255, 0.08);
         overflow: hidden;
     }
     .focus-copy{
         padding: 1rem;
+        backdrop-filter: blur(var(--leleo-blur));
         background:
             radial-gradient(circle at 88% 18%, rgba(80, 190, 255, 0.26), transparent 30%),
             linear-gradient(135deg, rgba(8, 13, 20, 0.48), rgba(255,255,255,0.08));
@@ -437,12 +452,10 @@
         padding: 0.85rem;
         color: #fff;
         text-decoration: none;
-        transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+        transition: border-color .25s ease;
     }
     .focus-card:hover{
-        transform: translateY(-3px);
         border-color: rgba(255, 255, 255, 0.34);
-        box-shadow: 0 18px 48px rgba(0,0,0,0.22);
     }
     .focus-card img{
         position: absolute;
@@ -451,11 +464,10 @@
         height: 100%;
         object-fit: cover;
         opacity: 0.54;
-        transition: opacity .25s ease, transform .35s ease;
+        transition: opacity .35s ease;
     }
     .focus-card:hover img{
         opacity: 0.72;
-        transform: scale(1.04);
     }
     .focus-card::after{
         content: "";
@@ -512,20 +524,30 @@
     .project-card{
         height: 100%;
         overflow: hidden;
-        transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+        transition: border-color .25s ease;
     }
     .project-card:hover{
-        transform: translateY(-4px);
         border-color: rgba(255, 255, 255, 0.34) !important;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
     }
     .project-card-cover{
         opacity: 0.86;
-        transition: opacity .25s ease, transform .35s ease;
+        transition: opacity .35s ease;
     }
     .project-card:hover .project-card-cover{
         opacity: 1;
-        transform: scale(1.03);
+    }
+    .project-card-cover :deep(img) {
+        transition: opacity .45s ease;
+    }
+    .project-card-cover :deep(img[src]) {
+        animation: img-fade-in .45s ease both;
+    }
+    .focus-card img {
+        animation: img-fade-in .5s ease both;
+    }
+    @keyframes img-fade-in {
+        from { opacity: 0; }
+        to { opacity: 0.54; }
     }
     .project-card-title{
         padding: 0.55rem 0.75rem 0.1rem !important;
@@ -560,15 +582,14 @@
 .vapp-fullscreen-background::before {
     content: "";
     background-image: var(--leleo-background-image-url);
-    transition: background-image 0.8s ease;
     background-size:cover;
     background-position: center;
     position: absolute;
     width: 100%;
     height: 100%;
     z-index: -1;
-    /* 调整亮度值  */
     filter: brightness(var(--leleo-brightness));
+    transition: opacity 0.6s ease;
 }
 .vapp-fullscreen-background.radius-before::before{
     border-radius: 16px;

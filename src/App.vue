@@ -21,20 +21,20 @@
         @mouseover="expandSwitch"
         @mouseleave="collapseSwitch"
       ></v-switch>
+      <span class="floating-switch-hint" aria-hidden="true">{{ isClearScreen ? '显示' : '清屏' }}</span>
     </div>
 
+    <transition name="clear-fade">
     <div v-show="!isloading && !isClearScreen" :style="xs||sm?{'overflow-y': 'auto','overflow-x': 'hidden'}:{}">
         <v-row>
             <v-col cols="12" md="4" lg="3" class="leleo-left" align="center">
               <div :style="xs?{'font-size':'1.85rem'}:(sm?{'font-size':'2.3rem'}:{'display':'none'})" class="leleo-left-welcome">{{ configdata.welcometitle }}</div>
               <v-avatar class="leleo-left-avatar" :size="xs?104:(sm?120:140)" :style="xs||sm?{'margin-top': '0'}:{'margin-top': '2rem'}" @mouseenter="musicplayershow(1)" @mouseleave="musicplayershow(0)">
-                  <v-img :class="{'leleo-spin':isPlaying}"
+                  <v-img ref="avatarImg"
                   alt="Leleo"
                   :src=configdata.avatar
                   ></v-img>
-                  <!-- 由于当ismusicplayer显示后，fadein无效果，所以需要设置一个过渡动画 -->
-                  <transition name="fade">
-                  <v-card v-show="ismusicplayer" class="musicplayer" :class="{'fade-in':ismusicplayer}" variant="tonal">
+                  <v-card v-show="ismusicplayer" class="musicplayer" variant="tonal">
                       <div v-if="audioLoading" class="loading-spinner">
                           <v-progress-circular indeterminate></v-progress-circular>
                       </div>
@@ -75,7 +75,6 @@
                         </div>
                       </div>
                   </v-card>
-                  </transition>
                 </v-avatar>
 
                 <v-card class="ma-5 pa-2 leleo-left-card" variant="tonal" :max-width="xs?270:300" style="text-align: center;">
@@ -98,7 +97,7 @@
                         class="ma-1 leleo-social-bticon"
                         icon
                         :aria-label="item.icon.replace(`mdi-`, ``)"
-                        :href="item.link" target="_blank"
+                        :href="item.link" target="_blank" rel="noopener noreferrer"
                         >
                     <v-icon :icon=item.icon :size="xs?20:25" class="social-bticon-icon"></v-icon></v-btn>
                     </v-col>
@@ -132,13 +131,14 @@
             </v-col>
         </v-row>
     </div>
+    </transition>
 
     <v-dialog
         v-model="dialog1"
         width="1000"
         height="700"
       >
-      <v-card elevation="3" style="backdrop-filter: blur(10px);">
+      <v-card ref="dialogCard1" elevation="3" style="backdrop-filter: blur(10px);">
         <v-tabs
           v-model="tab"
           :items="tabs"
@@ -187,7 +187,7 @@
         width="700"
         height="500"
       >
-      <v-card class="ma-3 pa-2" hover
+      <v-card ref="dialogCard2" class="ma-3 pa-2" hover
           variant="tonal"
           rounded="lg"
           style="text-align: center;backdrop-filter: blur(10px);"

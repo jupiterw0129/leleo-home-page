@@ -161,11 +161,46 @@ export default {
         this.brightness = this.configdata.brightness;
         this.blur = this.configdata.blur;
     }
+
+    this.$nextTick(() => { this._initSignatureBounce() })
+  },
+  beforeUnmount() {
+    if (this._sigRaf) { cancelAnimationFrame(this._sigRaf); this._sigRaf = null }
   },
   methods: {
     setCookie,
     getCookie,
     eraseCookie,
+    _initSignatureBounce() {
+      const el = document.querySelector('.preview-signature')
+      if (!el) return
+      const text = el.textContent.trim()
+      el.textContent = ''
+      const chars = []
+      for (let i = 0; i < text.length; i++) {
+        const span = document.createElement('span')
+        span.textContent = text[i]
+        span.style.display = 'inline-block'
+        span.style.setProperty('--i', i)
+        span.style.setProperty('--n', text.length)
+        el.appendChild(span)
+        chars.push(span)
+      }
+      // 连续正弦波浪：每个字符按不同相位上下浮动
+      let time = 0
+      const tick = () => {
+        time += 0.016
+        chars.forEach((span, i) => {
+          const phase = (i - chars.length / 2) * 0.35
+          const y = Math.sin(time * 2.8 + phase) * 9
+          const glow = Math.abs(Math.sin(time * 2.8 + phase))
+          span.style.transform = `translateY(${y}px)`
+          span.style.textShadow = `0 0 ${8 + glow * 14}px rgba(189,235,255,${0.3 + glow * 0.5})`
+        })
+        this._sigRaf = requestAnimationFrame(tick)
+      }
+      this._sigRaf = requestAnimationFrame(tick)
+    },
     submitdata() {
         this.loading2 = true
         setTimeout(() => {

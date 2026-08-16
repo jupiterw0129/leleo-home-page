@@ -15,29 +15,29 @@
 }
 
 :root {
-    /*
-    --leleo-background-image-url
-    --leleo-welcomtitle-color ;
-    --leleo-vcard-color
-    --leleo-brightness
-    --leleo-blur 
-    --leleo-blur
-    */
+    --leleo-background-image-url: none;
+    --leleo-welcomtitle-color: #FFFFFF;
+    --leleo-vcard-color: #FFFFFF;
+    --leleo-brightness: 85%;
+    --leleo-blur: 5px;
 }
 
-/* 设置滚动条样式 */
+/* 设置滚动条样式 — 细条半透明，hover 加亮 */
 ::-webkit-scrollbar {
-    width: 0px;
+    width: 6px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: var(--main_text_color, #000000);
+    background-color: rgba(255, 255, 255, 0.18);
     border-radius: 8px;
-    height: 20%;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.35);
 }
 
 ::-webkit-scrollbar-track {
-    background-color: var(--main_bg_color, linear-gradient(50deg, #a2d0ff, #ffffff));
+    background: transparent;
 }
 
 body {

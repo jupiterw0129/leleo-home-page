@@ -1,13 +1,13 @@
 <template>
       <div class="home-right">
         <div class="hero-heading-wrap">
-          <div :style="xs||sm?{'display':'none'}:{'font-size':'4rem'}" class="leleo-left-welcome">{{ configdata.welcometitle }}</div>
+	          <div :style="xs||sm?{'display':'none'}:{'font-size':'4rem'}" class="leleo-left-welcome">{{ configdata.welcometitle }}</div>
         </div>
         <div class="home-right-main">
           <v-row align="center" class="hero-row">
             <v-col cols="12" md="8">
 				<v-text-field class="v-card home-search"
-					:style="xs||sm?{'display':'none'}:{}"
+					:style="xs?{'max-width':'88vw','margin':'0.4rem auto','font-size':'0.88rem'}:sm?{'max-width':'540px'}:{}"
 					v-model="searchQuery"
 					placeholder="搜索关键词或输入网址"
 					variant="outlined"
@@ -113,7 +113,7 @@
               rel="noopener noreferrer"
               @click="recordProjectVisit(item)"
             >
-              <img :src="item.img" :alt="item.title">
+              <img :src="item.img" :alt="item.title" loading="lazy">
               <div>
                 <span>{{ item.subtitle }}</span>
                 <strong>{{ item.title }}</strong>
@@ -155,7 +155,7 @@
 
                   <v-card-actions class="project-card-actions" :style="xs||sm||md?{'height':'2.45rem'}:{'height':'2.75rem'}">
                     <v-btn :href="item.url"
-                    target="_blank"
+                    target="_blank" rel="noopener noreferrer"
                       prepend-icon="mdi-open-in-new"
                       :text= "item.go"
                       @click="recordProjectVisit(item)"
@@ -188,6 +188,7 @@ import typewriter from '../components/typewriter.vue';
 import turntable from '../components/turntable.vue';
 import scrolltotop from './scrolltotop.vue';
 import { useDisplay } from 'vuetify'
+/* spring hover 使用 lerp 实现，不依赖 anime.js spring API */
 
 /* pixel font — 3×5 digits */
 const DIGIT_FONT = {
@@ -246,10 +247,12 @@ export default {
       this.visitStats = this.readVisitStats();
       this.initSnake();
       this.startSnake();
+      this.$nextTick(() => { this._initCardEffects() })
     },
     beforeUnmount() {
       this.stopSnake();
       this.stopClock();
+      this._cleanupCardEffects();
     },
 	computed: {
 		isUrl(){
@@ -338,6 +341,69 @@ export default {
       },
     },
     methods:{
+      /* ── Card Effects (anime.js) ── */
+      _initCardEffects() {
+        this._springCleanups = []
+        // 项目卡片
+        const projectCards = this.$el.querySelectorAll('.project-card')
+        projectCards.forEach(card => {
+          this._springCleanups.push(this._bindCardSpring(card))
+        })
+        // 焦点卡片（最常访问 top 3）
+        const focusCards = this.$el.querySelectorAll('.focus-card')
+        focusCards.forEach(card => {
+          this._springCleanups.push(this._bindCardSpring(card, { scale: 0.03, lift: 4, stiffness: 200 }))
+        })
+      },
+      _cleanupCardEffects() {
+        if (this._springCleanups) {
+          this._springCleanups.forEach(fn => { try { fn() } catch (_) {} })
+          this._springCleanups = null
+        }
+      },
+      _bindCardSpring(el, opts = {}) {
+        const {
+          scale: sMax = 0.035,
+          lift = 6,
+        } = opts
+        el.style.transition = 'border-color .25s ease'
+        let target = 0, current = 0, raf
+
+        const tick = () => {
+          // smooth lerp toward target
+          current += (target - current) * 0.22
+          const p = current
+          const sx = 1 + p * sMax
+          const sy = -p * lift
+          const shY = 4 + p * 16
+          const shBlur = 16 + p * 44
+          const shAlpha = 0.1 + p * 0.18
+          el.style.transform = `scale(${sx}) translateY(${sy}px)`
+          el.style.boxShadow = `0 ${shY}px ${shBlur}px rgba(0,0,0,${shAlpha})`
+
+          if (Math.abs(target - current) > 0.0005) {
+            raf = requestAnimationFrame(tick)
+          } else if (target === 0 && current < 0.001) {
+            current = 0
+            el.style.transform = ''
+            el.style.boxShadow = ''
+            el.style.willChange = ''
+          }
+        }
+
+        const enter = () => { target = 1; el.style.willChange = 'transform, box-shadow'; cancelAnimationFrame(raf); tick() }
+        const leave = () => { target = 0; cancelAnimationFrame(raf); tick() }
+        el.addEventListener('mouseenter', enter)
+        el.addEventListener('mouseleave', leave)
+        return () => {
+          cancelAnimationFrame(raf)
+          el.removeEventListener('mouseenter', enter)
+          el.removeEventListener('mouseleave', leave)
+          el.style.transform = ''
+          el.style.boxShadow = ''
+          el.style.willChange = ''
+        }
+      },
       /* ── Snake ── */
       initSnake(){
         this.snakeLength = 3;
@@ -509,10 +575,16 @@ export default {
       performSearch() {
         const q = this.searchQuery.trim();
         if (!q) return;
+        // 限制搜索长度防止滥用
+        if (q.length > 2048) return;
+        // 拦截危险协议
+        if (/^(javascript|data|vbscript):/i.test(q)) return;
         if (this.isUrl) {
           let url = q;
-          if (!/^[a-z]+:\/\//i.test(url)) url = 'http://' + url;
-          window.open(url, '_blank');
+          if (!/^[a-z]+:\/\//i.test(url)) url = 'https://' + url;
+          // 二次校验：只允许 http/https
+          if (!/^https?:\/\//i.test(url)) return;
+          window.open(url, '_blank', 'noopener,noreferrer');
         } else {
           const engines = {
             google: `https://www.google.com/search?q=${encodeURIComponent(q)}`,
@@ -521,12 +593,17 @@ export default {
             yandex: `https://yandex.com/search/?text=${encodeURIComponent(q)}`,
             duckduckgo: `https://duckduckgo.com/?q=${encodeURIComponent(q)}`
           };
-          window.open(engines[this.selectedEngine.value], '_blank');
+          window.open(engines[this.selectedEngine.value], '_blank', 'noopener,noreferrer');
         }
       },
       isLikelyUrl(input) {
         const s = input.trim();
-        if (/^(https?|ftp):\/\//i.test(s)) return true;
+        if (!s || s.length > 2048) return false;
+        // 拦截危险协议
+        if (/^(javascript|data|vbscript):/i.test(s)) return false;
+        // 完整的 https? URL
+        if (/^https?:\/\//i.test(s)) return true;
+        // 类似域名的字符串
         return /^([a-z0-9-]+\.)+[a-z]{2,}(\/.*)?$/i.test(s) ||
                /^(localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(:\d+)?(\/.*)?$/i.test(s);
       },

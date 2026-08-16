@@ -7,6 +7,7 @@ import config from './config.js';
 import { getCookie } from './utils/cookieUtils.js';
 import { setMeta,getFormattedTime,getFormattedDate,dataConsole } from './utils/common.js';
 import { useDisplay } from 'vuetify'
+import { animate } from 'animejs'
 
 const extractShareId = (input) => {
   if (!input) return '';
@@ -29,7 +30,7 @@ export default {
   },
   data() {
     return {
-      isloading:false,
+      isloading:true,
       isClearScreen: false,
       // 跨域同步：优先 URL hash → localStorage → 默认值
       ceruShareId: (() => {
@@ -199,6 +200,7 @@ export default {
       this.analyserNode = null;
       this.audioSourceNode = null;
     }
+    this._cleanupAvatarSpin();
   },
 
   watch:{
@@ -211,6 +213,24 @@ export default {
       }else{
         this.$refs.VdPlayer.style.zIndex = -100;
       }
+    },
+    dialog1(val) {
+      if (!val) return
+      this.$nextTick(() => {
+        const card = this.$refs.dialogCard1?.$el
+        if (card) {
+          animate(card, { scale: [0.92, 1], opacity: [0, 1], duration: 350, ease: 'out(3)' })
+        }
+      })
+    },
+    dialog2(val) {
+      if (!val) return
+      this.$nextTick(() => {
+        const card = this.$refs.dialogCard2?.$el
+        if (card) {
+          animate(card, { scale: [0.92, 1], opacity: [0, 1], duration: 350, ease: 'out(3)' })
+        }
+      })
     },
     volume(val) {
       if (this.$refs.audioPlayer) {
@@ -316,7 +336,7 @@ export default {
       this.dialog1 = false;
     },
     jump(url){
-      window.open(url, '_blank').focus();
+      window.open(url, '_blank', 'noopener,noreferrer').focus();
     },
     
     async getMusicInfo(){
@@ -361,7 +381,95 @@ export default {
       }
     },
     musicplayershow(val) {
-        this.ismusicplayer = val;
+        if (val) {
+          this.ismusicplayer = true
+          this.$nextTick(() => {
+            const el = this.$el?.querySelector('.musicplayer')
+            if (el) {
+              animate(el, {
+                scale: [0.7, 1],
+                opacity: [0, 1],
+                duration: 420,
+                ease: 'out(3)',
+              })
+            }
+          })
+        } else {
+          const el = this.$el?.querySelector('.musicplayer')
+          if (el) {
+            animate(el, {
+              scale: [1, 0.8],
+              opacity: [1, 0],
+              duration: 200,
+              ease: 'in(2)',
+              onComplete: () => { this.ismusicplayer = false }
+            })
+          } else {
+            this.ismusicplayer = false
+          }
+        }
+    },
+
+    /* ── 头像平滑旋转 ── */
+    _startAvatarSpin() {
+      this._avatarTargetSpeed = 60
+      this._avatarCurrentSpeed = this._avatarCurrentSpeed || 0
+      this._avatarAngle = this._avatarAngle || 0
+      this._avatarSnapping = false
+      // GPU 合成提示
+      const avEl = this.$el?.querySelector('.leleo-left-avatar .v-img')
+      if (avEl) avEl.style.willChange = 'transform'
+      if (this._avatarRaf) return
+      let lastTime = performance.now()
+      const tick = (now) => {
+        const dt = Math.min((now - lastTime) / 1000, 0.1)
+        lastTime = now
+
+        if (this._avatarSnapping) {
+          // 回正：平滑转到最近的 upright 角度
+          const d = this._avatarSnapTarget - this._avatarAngle
+          if (Math.abs(d) < 0.3) {
+            this._avatarAngle = this._avatarSnapTarget
+            this._avatarSnapping = false
+            this._avatarCurrentSpeed = 0
+            this._avatarRaf = null
+            const el = this.$el?.querySelector('.leleo-left-avatar .v-img')
+            if (el) { el.style.transform = ''; el.style.willChange = '' }
+            return
+          }
+          this._avatarAngle += d * Math.min(dt * 5, 0.8)
+        } else {
+          // 旋转：平滑趋近目标速度
+          const d = this._avatarTargetSpeed - this._avatarCurrentSpeed
+          this._avatarCurrentSpeed += d * Math.min(dt * 3.5, 1)
+          this._avatarAngle += this._avatarCurrentSpeed * dt
+          // 目标为 0 且速度极低 → 进入回正
+          if (this._avatarTargetSpeed === 0 && Math.abs(this._avatarCurrentSpeed) < 1) {
+            this._avatarSnapTarget = Math.round(this._avatarAngle / 360) * 360
+            this._avatarSnapping = true
+          }
+        }
+
+        const el = this.$el?.querySelector('.leleo-left-avatar .v-img')
+        if (el) el.style.transform = `rotate(${this._avatarAngle}deg)`
+        this._avatarRaf = requestAnimationFrame(tick)
+      }
+      this._avatarRaf = requestAnimationFrame(tick)
+    },
+    _stopAvatarSpin() {
+      this._avatarTargetSpeed = 0
+      // rAF 继续跑，减速到 0 后自动停
+    },
+    _cleanupAvatarSpin() {
+      this._avatarTargetSpeed = 0
+      this._avatarCurrentSpeed = 0
+      this._avatarSnapping = false
+      if (this._avatarRaf) {
+        cancelAnimationFrame(this._avatarRaf)
+        this._avatarRaf = null
+      }
+      const el = this.$el?.querySelector('.leleo-left-avatar .v-img')
+      if (el) { el.style.transform = ''; el.style.willChange = '' }
     },
 
     setupAudioListener() {
@@ -394,11 +502,13 @@ export default {
       if (!this.isPlaying) {
         this.ensureAudioContext().then(() => {
           this.audioPlayer.play();
+          this._startAvatarSpin();
         });
         this.isVdMuted = true;
       } else {
         this.audioPlayer.pause();
         this.isVdMuted = false;
+        this._stopAvatarSpin();
       }
       this.isPlaying = !this.musicinfoLoading && !this.isPlaying;
     },
@@ -420,6 +530,7 @@ export default {
       this.isPlaying = true;
       this.ensureAudioContext().then(() => {
         this.audioPlayer.play();
+        this._startAvatarSpin();
       });
       this.clearPrefetch();
     },
@@ -445,9 +556,11 @@ export default {
       if (isPlaying) {
         this.ensureAudioContext().then(() => {
           this.audioPlayer.play();
+          this._startAvatarSpin();
         });
       } else {
         this.audioPlayer.pause();
+        this._stopAvatarSpin();
       }
       this.isPlaying = isPlaying;
     },
