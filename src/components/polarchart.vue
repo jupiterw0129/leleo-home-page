@@ -1,5 +1,5 @@
 <template>
-  <canvas ref="chartCanvas" :class="{ 'is-visible': visible }"></canvas>
+  <canvas ref="chartCanvas"></canvas>
 </template>
 
 <script>
@@ -70,7 +70,7 @@ export default {
     this.sectorEnergies = new Array(SECTOR_COUNT).fill(0);
     this.freqBuffer = new Uint8Array(TOTAL_BINS);
 
-    this.renderChart();
+    if (this.visible) this.renderChart();
   },
 
   beforeDestroy() {
@@ -90,6 +90,11 @@ export default {
   },
 
   watch: {
+    visible(val) {
+      if (val && !this.chartInstance) {
+        this.renderChart();
+      }
+    },
     isPlaying(val) {
       if (val) {
         if (this._stopTimer) { clearTimeout(this._stopTimer); this._stopTimer = null; }
@@ -251,7 +256,17 @@ export default {
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          animation: false, // 入场动画改用 CSS 触发，图表可见时才播放
+          animation: {
+            duration: 1800,
+            easing: 'easeOutQuad',
+            animateRotate: true,
+            animateScale: true,
+            onComplete: () => {
+              if (this.isPlaying && this.analyserNode) {
+                this.startMusicAnimation();
+              }
+            },
+          },
           plugins: {
             legend: { display: false },
             tooltip: {
