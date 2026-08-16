@@ -260,7 +260,7 @@ export default {
             duration: 1800,
             easing: 'easeOutQuad',
             animateRotate: true,
-            animateScale: true,
+            animateScale: false,
             onComplete: () => {
               if (this.isPlaying && this.analyserNode) {
                 this.startMusicAnimation();
