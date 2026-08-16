@@ -229,8 +229,8 @@ const config = {
 
 	//项目卡片
 	projectcards: [
-		{ go: "打开", img: "/img/fool.jpg", title: "诡秘之主", subtitle: "官方世界观", text: "快速进入诡秘之主官方站点，继续追踪设定、角色与最新内容。", url: "https://www.lomworld.com/zh", show: false },
-		{ go: "打开", img: "/img/hero.jpg", title: "抖音", subtitle: "短视频与热点", text: "看看今天的新鲜内容，顺手收集一点灵感和快乐。", url: "https://www.douyin.com/jingxuan", show: false },
+		{ go: "打开", img: "/img/fool.webp", title: "诡秘之主", subtitle: "官方世界观", text: "快速进入诡秘之主官方站点，继续追踪设定、角色与最新内容。", url: "https://www.lomworld.com/zh", show: false },
+		{ go: "打开", img: "/img/hero.webp", title: "抖音", subtitle: "短视频与热点", text: "看看今天的新鲜内容，顺手收集一点灵感和快乐。", url: "https://www.douyin.com/jingxuan", show: false },
 		{ go: "打开", img: "/img/wallpaper/static/时代/image-pre.webp", title: "哔哩哔哩", subtitle: "动画 / 音乐 / 知识", text: "适合放松，也适合补充一点灵感和知识库存。", url: "https://www.bilibili.com/", show: false },
 		{ go: "打开", img: "/img/wallpaper/static/光/image-pre.webp", title: "LittleSkin", subtitle: "皮肤站", text: "管理 Minecraft 角色皮肤，给每次上线换一个更贴近心情的身份。", url: "https://littleskin.cn/user", show: false },
 		{ go: "打开", img: "/img/wallpaper/static/塞维亚菊/image-pre.webp", title: "JPWHub", subtitle: "图床与素材", text: "存放、管理和分发常用图片素材，让主页内容维护轻松一点。", url: "https://jpwhub.cc.cd/", show: false },
