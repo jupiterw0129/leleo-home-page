@@ -19,10 +19,11 @@ const tab1 = defineAsyncComponent(() => import('./components/tabs/tab1.vue'))
 const tab2 = defineAsyncComponent(() => import('./components/tabs/tab2.vue'))
 const tab3 = defineAsyncComponent(() => import('./components/tabs/tab3.vue'))
 const tab4 = defineAsyncComponent(() => import('./components/tabs/tab4.vue'))
+const tab5 = defineAsyncComponent(() => import('./components/tabs/tab5.vue'))
 
 export default {
   components: {
-    tab1,tab2,tab3,tab4,loader,homeright,typewriter,polarchart
+    tab1,tab2,tab3,tab4,tab5,loader,homeright,typewriter,polarchart
   },
   setup() {
     const { xs,sm,md } = useDisplay();
@@ -93,6 +94,12 @@ export default {
           text: '个性化',
           value: 'tab-4',
           component: "tab4",
+        },
+        {
+          icon: 'mdi-music-box-multiple',
+          text: 'Folia',
+          value: 'tab-5',
+          component: "tab5",
         },
       ],
 
