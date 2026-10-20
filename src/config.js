@@ -219,6 +219,11 @@ const config = {
 		shareId: 'r7wdb3sRwD',
 	},
 
+	// 沉浸式音乐空间
+	folia: {
+		url: 'https://music.jupiterw.com',
+	},
+
 	//壁纸数据
 	wallpaper: {
 		pic: pcPicWallpapers,
@@ -233,7 +238,7 @@ const config = {
 		{ go: "打开", img: "/img/hero.webp", title: "抖音", subtitle: "短视频与热点", text: "看看今天的新鲜内容，顺手收集一点灵感和快乐。", url: "https://www.douyin.com/jingxuan", show: false },
 		{ go: "打开", img: "/img/wallpaper/static/时代/image-pre.webp", title: "哔哩哔哩", subtitle: "动画 / 音乐 / 知识", text: "适合放松，也适合补充一点灵感和知识库存。", url: "https://www.bilibili.com/", show: false },
 		{ go: "打开", img: "/img/wallpaper/static/光/image-pre.webp", title: "LittleSkin", subtitle: "皮肤站", text: "管理 Minecraft 角色皮肤，给每次上线换一个更贴近心情的身份。", url: "https://littleskin.cn/user", show: false },
-		{ go: "打开", img: "/img/wallpaper/static/塞维亚菊/image-pre.webp", title: "JPWHub", subtitle: "图床与素材", text: "存放、管理和分发常用图片素材，让主页内容维护轻松一点。", url: "https://jpwhub.cc.cd/", show: false },
+		{ go: "打开", img: "/img/wallpaper/static/塞维亚菊/image-pre.webp", title: "图床", subtitle: "图片与素材", text: "存放、管理和分发常用图片素材，让主页内容维护轻松一点。", url: "https://img.jupiterw.com/", show: false },
 		{ go: "打开", img: "/img/wallpaper/static/奇迹/image-pre.webp", title: "Google", subtitle: "搜索引擎", text: "需要更宽的资料入口时，从这里开始一次认真搜索。", url: "https://www.google.com/", show: false },
 		{ go: "打开", img: "/img/wallpaper/static/奥黛丽/image-pre.webp", title: "Cloudflare", subtitle: "站点与网络", text: "管理域名、Pages、Workers 和安全策略，照看网站背后的基础设施。", url: "https://dash.cloudflare.com/", show: false },
 		{ go: "打开", img: "/img/wallpaper/static/节制/image-pre.webp", title: "奈飞工厂", subtitle: "影视资源", text: "把想看的片单整理起来，闲下来时就有一扇门可以推开。", url: "https://www.netflixgc.com/", show: false },

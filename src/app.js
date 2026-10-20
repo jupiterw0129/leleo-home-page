@@ -3,6 +3,7 @@ import homeright from '../src/components/hoemright.vue';
 import typewriter from './components/typewriter.vue';
 import loader from './components/loader.vue';
 import polarchart from './components/polarchart.vue';
+import MusicEntrance from './components/MusicEntrance.vue';
 import config from './config.js';
 import { getCookie } from './utils/cookieUtils.js';
 import { setMeta,getFormattedTime,getFormattedDate,dataConsole } from './utils/common.js';
@@ -23,7 +24,7 @@ const tab5 = defineAsyncComponent(() => import('./components/tabs/tab5.vue'))
 
 export default {
   components: {
-    tab1,tab2,tab3,tab4,tab5,loader,homeright,typewriter,polarchart
+    tab1,tab2,tab3,tab4,tab5,loader,homeright,typewriter,polarchart,MusicEntrance
   },
   setup() {
     const { xs,sm,md } = useDisplay();
@@ -273,6 +274,14 @@ export default {
   
   methods: {
     getCookie,setMeta,getFormattedTime,getFormattedDate,dataConsole,
+
+    openMusicSpace() {
+      this.$refs.audioPlayer?.pause();
+      this.isPlaying = false;
+      this._stopAvatarSpin();
+      this.tab = 'tab-5';
+      this.dialog1 = true;
+    },
 
     setMainProperty(imageurl){
       const root = document.documentElement;

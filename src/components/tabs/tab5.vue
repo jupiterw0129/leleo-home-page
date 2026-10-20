@@ -61,9 +61,12 @@
 <script>
 export default {
   name: 'tab5',
+  props: {
+    defaultUrl: { type: String, default: '' },
+  },
   data() {
     return {
-      foliaUrl: localStorage.getItem('folia-url') || '',
+      foliaUrl: localStorage.getItem('folia-url') || this.defaultUrl,
       inputUrl: '',
     }
   },

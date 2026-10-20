@@ -76,6 +76,8 @@
                   </v-card>
                 </v-avatar>
 
+                <MusicEntrance @open="openMusicSpace" />
+
                 <v-card class="ma-5 pa-2 leleo-left-card" variant="tonal" :max-width="xs?270:300" style="text-align: center;">
                     <template v-slot:title>
                     <span>Tags</span>
@@ -168,6 +170,7 @@
               :fromLyrics="item.value=='tab-3'?lyrics:null"
               :audioLoading="item.value=='tab-3'?audioLoading:null"
               :shareId="item.value=='tab-3'?ceruShareId:''"
+              :default-url="item.value=='tab-5' ? configdata.folia?.url : ''"
               :volume="item.value=='tab-3'?volume:null"
               @update:current-index="updateCurrentIndex"
               @update:is-playing="updateIsPlaying"
