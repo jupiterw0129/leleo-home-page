@@ -281,7 +281,9 @@ export default {
       this._stopAvatarSpin();
       const foliaUrl = this.configdata.folia?.url || config.folia?.url;
       if (foliaUrl) {
-        window.location.assign(foliaUrl);
+        const target = new URL(foliaUrl);
+        target.searchParams.set('from', 'leleo-home');
+        window.location.assign(target.toString());
       }
     },
 
