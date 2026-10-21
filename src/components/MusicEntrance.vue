@@ -2,8 +2,7 @@
   <button
     type="button"
     class="music-entrance"
-    aria-label="进入音乐空间，打开 Folia 播放器"
-    aria-haspopup="dialog"
+    aria-label="进入音乐空间，打开 Folia 播放器页面"
     @click="$emit('open')"
   >
     <span class="music-entrance-record" aria-hidden="true">

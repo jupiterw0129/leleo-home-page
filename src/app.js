@@ -279,8 +279,10 @@ export default {
       this.$refs.audioPlayer?.pause();
       this.isPlaying = false;
       this._stopAvatarSpin();
-      this.tab = 'tab-5';
-      this.dialog1 = true;
+      const foliaUrl = this.configdata.folia?.url || config.folia?.url;
+      if (foliaUrl) {
+        window.location.assign(foliaUrl);
+      }
     },
 
     setMainProperty(imageurl){
